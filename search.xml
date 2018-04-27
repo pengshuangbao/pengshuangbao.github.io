@@ -58,7 +58,7 @@
   <entry>
     <title><![CDATA[我的第一篇Hexo博客]]></title>
     <url>%2F2018-04-18-name.html</url>
-    <content type="text"></content>
+    <content type="text"><![CDATA[致读者你好，欢迎你来到慕数博客，我是彭双宝。在这里你将看到我关于大数据技术和框架的一些理解和体会，并且以后所有博客将在这里发布，由于本人技术水平和认知能力有限，文中难免有认识不足和理解错误的地方，欢迎大家留言指正，我将感激不尽！]]></content>
       <categories>
         <category>搭建博客</category>
       </categories>
