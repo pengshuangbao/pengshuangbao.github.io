@@ -3,7 +3,7 @@
   <entry>
     <title><![CDATA[慕数网（www.lovedata.net）正式上线！]]></title>
     <url>%2F2018-04-26-release.html</url>
-    <content type="text"><![CDATA[慕数网正式上线在经过将近一周的开发和测试之后，慕数网 www.lovedata.net 正式上线！ 本博客以原创文章、实战教程为主，专注于大数据领域相关技术，包括但不限于Hadoop、Spark、Flink、Kafka、Zookeeper、Hive、Kylin、Noe4j、Flume、Hadoop等。 慕数网采用公众号(lovedatatech)与博客网站相结合的方式进行博客发布，您可以在公众号以及慕数博客网站上查看本博客最新、最热的技术文章，而且会不定期推送一些大数据技术相关的文章，欢迎大家关注。]]></content>
+    <content type="text"><![CDATA[慕数网正式上线在经过将近一周的开发和测试之后，慕数网 www.lovedata.net 正式上线！ 本博客以原创文章、实战教程为主，专注于大数据领域相关技术，包括但不限于Hadoop、Spark、Flink、Kafka、Zookeeper、Hive、Kylin、Noe4j、Flume、Phoenix等。 慕数网采用公众号(lovedatatech)与博客网站相结合的方式进行博客发布，您可以在公众号以及慕数博客网站上查看本博客最新、最热的技术文章，而且会不定期推送一些大数据技术相关的文章，欢迎大家关注。]]></content>
       <categories>
         <category>博客</category>
       </categories>

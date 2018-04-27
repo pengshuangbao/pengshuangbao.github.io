@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://www.lovedata.net/"/>
-  <updated>2018-04-27T02:04:12.022Z</updated>
+  <updated>2018-04-27T03:05:47.094Z</updated>
   <id>http://www.lovedata.net/</id>
   
   <author>
@@ -21,9 +21,9 @@
     <link href="http://www.lovedata.net/2018-04-26-release.html"/>
     <id>http://www.lovedata.net/2018-04-26-release.html</id>
     <published>2018-04-26T07:14:47.000Z</published>
-    <updated>2018-04-27T02:04:12.022Z</updated>
+    <updated>2018-04-27T03:05:47.094Z</updated>
     
-    <content type="html"><![CDATA[<h1 id="慕数网正式上线"><a href="#慕数网正式上线" class="headerlink" title="慕数网正式上线"></a>慕数网正式上线</h1><p>在经过将近一周的开发和测试之后，慕数网 <a href="http://www.lovedata.net">www.lovedata.net</a> 正式上线！ 本博客以原创文章、实战教程为主，专注于大数据领域相关技术，包括但不限于Hadoop、Spark、Flink、Kafka、Zookeeper、Hive、Kylin、Noe4j、Flume、Hadoop等。 </p><p>慕数网采用公众号(lovedatatech)与博客网站相结合的方式进行博客发布，您可以在公众号以及慕数博客网站上查看本博客最新、最热的技术文章，而且会不定期推送一些大数据技术相关的文章，欢迎大家关注。</p>]]></content>
+    <content type="html"><![CDATA[<h1 id="慕数网正式上线"><a href="#慕数网正式上线" class="headerlink" title="慕数网正式上线"></a>慕数网正式上线</h1><p>在经过将近一周的开发和测试之后，慕数网 <a href="http://www.lovedata.net">www.lovedata.net</a> 正式上线！ 本博客以原创文章、实战教程为主，专注于大数据领域相关技术，包括但不限于Hadoop、Spark、Flink、Kafka、Zookeeper、Hive、Kylin、Noe4j、Flume、Phoenix等。 </p><p>慕数网采用公众号(lovedatatech)与博客网站相结合的方式进行博客发布，您可以在公众号以及慕数博客网站上查看本博客最新、最热的技术文章，而且会不定期推送一些大数据技术相关的文章，欢迎大家关注。</p>]]></content>
     
     <summary type="html">
     
