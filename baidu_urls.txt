@@ -1,4 +1,5 @@
 http://www.lovedata.net/2018-04-26-release.html
+http://www.lovedata.net/2018-04-24-使用Jar命令直接替换jar包中的class.html
 http://www.lovedata.net/2018-04-18-Kylin基础概念-维度与度量.html
 http://www.lovedata.net/2018-04-18-Kylin构建流程分析-加载HFile到Hbase中(Load HFile to HBase Table).html
 http://www.lovedata.net/2018-04-18-ScheduledThreadPoolExecutor中的scheduleAtFixedRate和scheduleWithFixedDelay的区别.html
