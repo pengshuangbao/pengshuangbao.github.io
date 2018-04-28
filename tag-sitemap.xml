@@ -2,36 +2,36 @@
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
     <url>
-        <loc>http://www.lovedata.net/tags/kylin/</loc>
-        <lastmod>2018-04-26T13:54:52.841Z</lastmod>
+        <loc>http://www.lovedata.net/tags/java%E5%A4%9A%E7%BA%BF%E7%A8%8B/</loc>
+        <lastmod>2018-04-28T11:26:58.787Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
-        <loc>http://www.lovedata.net/tags/java%E5%A4%9A%E7%BA%BF%E7%A8%8B/</loc>
-        <lastmod>2018-04-26T13:54:52.841Z</lastmod>
+        <loc>http://www.lovedata.net/tags/kylin/</loc>
+        <lastmod>2018-04-28T11:26:58.789Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
         <loc>http://www.lovedata.net/tags/%E5%8D%9A%E5%AE%A2/</loc>
-        <lastmod>2018-04-27T02:23:41.766Z</lastmod>
+        <lastmod>2018-04-28T11:26:58.791Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
         <loc>http://www.lovedata.net/tags/%E5%8F%91%E5%B8%83/</loc>
-        <lastmod>2018-04-27T03:05:47.094Z</lastmod>
+        <lastmod>2018-04-28T11:26:58.793Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
         <loc>http://www.lovedata.net/tags/java-%E7%BB%8F%E9%AA%8C%E5%88%86%E4%BA%AB/</loc>
-        <lastmod>2018-04-28T03:30:40.694Z</lastmod>
+        <lastmod>2018-04-28T11:26:58.794Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
