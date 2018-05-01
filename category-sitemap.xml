@@ -7,13 +7,6 @@
     </url>
 
     <url>
-        <loc>http://blog.lovedata.net/categories/Java/</loc>
-        <lastmod>2018-04-28T11:26:58.787Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.2</priority>
-    </url>
-
-    <url>
         <loc>http://blog.lovedata.net/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/</loc>
         <lastmod>2018-04-28T11:26:58.789Z</lastmod>
         <changefreq>weekly</changefreq>
@@ -28,15 +21,22 @@
     </url>
 
     <url>
+        <loc>http://blog.lovedata.net/categories/Java/</loc>
+        <lastmod>2018-05-01T01:30:20.945Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
         <loc>http://blog.lovedata.net/categories/%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2/</loc>
-        <lastmod>2018-04-29T03:25:37.124Z</lastmod>
+        <lastmod>2018-05-01T01:30:20.945Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
         <loc>http://blog.lovedata.net/categories/%E7%BB%8F%E9%AA%8C%E5%88%86%E4%BA%AB/</loc>
-        <lastmod>2018-04-29T13:56:07.377Z</lastmod>
+        <lastmod>2018-05-01T01:30:21.091Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
