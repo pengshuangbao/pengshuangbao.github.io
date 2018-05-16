@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://blog.lovedata.net/"/>
-  <updated>2018-05-16T02:58:28.742Z</updated>
+  <updated>2018-05-16T08:17:39.811Z</updated>
   <id>http://blog.lovedata.net/</id>
   
   <author>
@@ -15,6 +15,31 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title></title>
+    <link href="http://blog.lovedata.net/0.html"/>
+    <id>http://blog.lovedata.net/0.html</id>
+    <published>2018-05-16T08:14:43.000Z</published>
+    <updated>2018-05-16T08:17:39.811Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="IDEA中怎么设置黑色或白色背景？"><a href="#IDEA中怎么设置黑色或白色背景？" class="headerlink" title="IDEA中怎么设置黑色或白色背景？"></a>IDEA中怎么设置黑色或白色背景？</h3><p>开启软件Intellij IDEA，在编辑框上面找到最前端的File。</p><p> <a href="https://img-blog.csdn.net/20170110200022205" target="_blank" rel="noopener"><img src="https://img-blog.csdn.net/20170110200023052" alt="exp_loading" title="exp_loading"></a> </p><p>点击File，找到Setting，点击进入。</p><p> <a href="https://img-blog.csdn.net/20170110200026693" target="_blank" rel="noopener"><img src="https://img-blog.csdn.net/20170110200030365" alt="1ad5ad6eddc451da6ce2df9cb3fd5266d01632b5.jpg" title="1ad5ad6eddc451da6ce2df9cb3fd5266d01632b5.jpg"></a> </p><p>然后在Editor—&gt;Colors&Fonts;会有两种背景，一个是白的一个是黑色的，选择一个，然后点击保存成自己设的名字。</p><p> <a href="https://img-blog.csdn.net/20170110200037537" target="_blank" rel="noopener"><img src="https://img-blog.csdn.net/20170110200040220" alt="b8389b504fc2d5621e2f039ae21190ef76c66ca6.jpg" title="b8389b504fc2d5621e2f039ae21190ef76c66ca6.jpg"></a> </p><p>我这里设置了两个黑白各设一个。</p><p> <a href="https://img-blog.csdn.net/20170110200046627" target="_blank" rel="noopener"><img src="https://img-blog.csdn.net/20170110200050174" alt="b2de9c82d158ccbfd2af664d1cd8bc3eb13541b2.jpg" title="b2de9c82d158ccbfd2af664d1cd8bc3eb13541b2.jpg"></a> </p><p>然后背景想当于保存好了，然后设置字体，来到下面的Colors&amp;Fonts—&gt;Fonts进行字体的设置。选中自己设的名字进行修改字体形式和大小。</p><p> <a href="https://img-blog.csdn.net/20170110200059522" target="_blank" rel="noopener"><img src="https://img-blog.csdn.net/20170110200104569" alt="4a36acaf2edda3ccf1976b5704e93901213f9252.jpg" title="4a36acaf2edda3ccf1976b5704e93901213f9252.jpg"></a> </p><p>黑色背景下字体修改如图。</p><p> <a href="https://img-blog.csdn.net/20170110200117100" target="_blank" rel="noopener"><img src="https://img-blog.csdn.net/20170110200121444" alt="3ac79f3df8dcd10062f02b56778b4710b9122f5d.jpg" title="3ac79f3df8dcd10062f02b56778b4710b9122f5d.jpg"></a> </p><p>点击Appearance进入选中四种中的一种背景，一般中间的两种Intellij是白色，Darcula是黑色，选中一种点击最下面的Apply应用。点击OK。</p><p> <a href="https://img-blog.csdn.net/20170110200129585" target="_blank" rel="noopener"><img src="https://img-blog.csdn.net/20170110200133788" alt="0df431adcbef7609c2674ae82bdda3cc7cd99e5d.jpg" title="0df431adcbef7609c2674ae82bdda3cc7cd99e5d.jpg"></a> </p><p>然后再到Fonts里选择黑色的字体然后Apply，OK。就可以了。</p><p>字体和框架的设置不是一体的，所以要分开。</p><p> <a href="https://img-blog.csdn.net/20170110200143205" target="_blank" rel="noopener"><img src="https://img-blog.csdn.net/20170110200152174" alt="810a19d8bc3eb135877777cca31ea8d3fd1f4411.jpg" title="810a19d8bc3eb135877777cca31ea8d3fd1f4411.jpg"></a> </p><h6 id="IDEA中怎么设置黑色或白色背景？-1"><a href="#IDEA中怎么设置黑色或白色背景？-1" class="headerlink" title="IDEA中怎么设置黑色或白色背景？"></a>IDEA中怎么设置黑色或白色背景？</h6><p><a href="http://jingyan.baidu.com/album/#" target="_blank" rel="noopener">[重新阅读]</a></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h3 id=&quot;IDEA中怎么设置黑色或白色背景？&quot;&gt;&lt;a href=&quot;#IDEA中怎么设置黑色或白色背景？&quot; class=&quot;headerlink&quot; title=&quot;IDEA中怎么设置黑色或白色背景？&quot;&gt;&lt;/a&gt;IDEA中怎么设置黑色或白色背景？&lt;/h3&gt;&lt;p&gt;开启软件Intell
+      
+    
+    </summary>
+    
+      <category term="经验分享" scheme="http://blog.lovedata.net/categories/%E7%BB%8F%E9%AA%8C%E5%88%86%E4%BA%AB/"/>
+    
+    
+      <category term="java 经验分享" scheme="http://blog.lovedata.net/tags/java-%E7%BB%8F%E9%AA%8C%E5%88%86%E4%BA%AB/"/>
+    
+  </entry>
   
   <entry>
     <title>Markdown常用语法入门</title>
