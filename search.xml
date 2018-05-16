@@ -1,17 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title><![CDATA[IDEA中怎么设置黑色或白色背景？]]></title>
-    <url>%2F0.html</url>
-    <content type="text"><![CDATA[IDEA中怎么设置黑色或白色背景？开启软件Intellij IDEA，在编辑框上面找到最前端的File。 点击File，找到Setting，点击进入。 然后在Editor—&gt;Colors&Fonts;会有两种背景，一个是白的一个是黑色的，选择一个，然后点击保存成自己设的名字。 我这里设置了两个黑白各设一个。 然后背景想当于保存好了，然后设置字体，来到下面的Colors&amp;Fonts—&gt;Fonts进行字体的设置。选中自己设的名字进行修改字体形式和大小。 黑色背景下字体修改如图。 点击Appearance进入选中四种中的一种背景，一般中间的两种Intellij是白色，Darcula是黑色，选中一种点击最下面的Apply应用。点击OK。 然后再到Fonts里选择黑色的字体然后Apply，OK。就可以了。 字体和框架的设置不是一体的，所以要分开。 IDEA中怎么设置黑色或白色背景？]]></content>
-      <categories>
-        <category>经验分享</category>
-      </categories>
-      <tags>
-        <tag>java 经验分享</tag>
-      </tags>
-  </entry>
-  <entry>
     <title><![CDATA[Markdown常用语法入门]]></title>
     <url>%2F5f17abcf.html</url>
     <content type="text"><![CDATA[本文介绍了一些在写作中常用的markdown语法。 [TOC] TOC语法简书不支持，github支持。 1234567### 1.序号1. 序号12. 序号2 1. 子序号3. 序号3 - 无序子序号1 - 无序子序号2 1.序号 序号1 序号2 子序号 序号3 无序子序号1 无序子序号2 123456### 2.标题# 一级标题## 二级标题### 三级标题#### 四级标题###### 六级标题 2.标题一级标题二级标题三级标题四级标题六级标题12### 3.引用&gt;这是引用 3.引用 这是引用 1234### 4.图片&gt;图片推荐使用 [SM.MS](https://link.zhihu.com/?target=https%3A//sm.ms/) 图床服务![图片.png](https://upload-images.jianshu.io/upload_images/4356971-84e3ccc2e851e30d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240) 4.图片 图片推荐使用 SM.MS 图床服务 123### 5.粗斜体**粗体***斜体* 5.粗斜体粗体斜体 12### 6.代码引用 ``public static void main()`` 6.代码引用public static void main() 123### 7.分割线&gt;分割线 7.分割线 分割线 12345### 8.复选框（简书不支持，github支持）- [x] 选项一 - [ ] 选项二- [ ] 我来演示一下 8.复选框（简书不支持，github支持） 选项一 选项二 我来演示一下 代码块注意：语法块中java和python要挨着三个点，并且三个点和上面和下面的代码要有一个空行，否则在印象笔记中无法显示！ python代码块 123456789101112131415import osdef check_encoding(stream, encoding): """Test, whether the encoding of `stream` matches `encoding`. Returns :None: if `encoding` or `stream.encoding` are not a valid encoding argument (e.g. ``None``) or `stream.encoding is missing. :True: if the encoding argument resolves to the same value as `encoding`, :False: if the encodings differ. """ try: return codecs.lookup(stream.encoding) == codecs.lookup(encoding) except (LookupError, AttributeError, TypeError): return None java代码块 123456789import java.util.Mappublic class Test &#123; public static void main(String[] args)&#123;// MovieLensALS movie = new MovieLensALS(); System.out.println("Hello, I'm Java"); - &#125;&#125;]]></content>
