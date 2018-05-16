@@ -9,21 +9,14 @@
     </url>
 
     <url>
-        <loc>http://blog.lovedata.net/tags/%E5%8D%9A%E5%AE%A2/</loc>
-        <lastmod>2018-05-03T06:40:04.073Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.2</priority>
-    </url>
-
-    <url>
-        <loc>http://blog.lovedata.net/tags/java%E5%A4%9A%E7%BA%BF%E7%A8%8B/</loc>
+        <loc>http://blog.lovedata.net/tags/kylin/</loc>
         <lastmod>2018-05-03T11:07:17.088Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
-        <loc>http://blog.lovedata.net/tags/kylin/</loc>
+        <loc>http://blog.lovedata.net/tags/java%E5%A4%9A%E7%BA%BF%E7%A8%8B/</loc>
         <lastmod>2018-05-03T11:07:17.088Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
@@ -38,7 +31,14 @@
 
     <url>
         <loc>http://blog.lovedata.net/tags/Markdown-%E7%BB%8F%E9%AA%8C%E5%88%86%E4%BA%AB/</loc>
-        <lastmod>2018-05-04T08:08:10.350Z</lastmod>
+        <lastmod>2018-05-16T02:58:28.742Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>http://blog.lovedata.net/tags/%E5%8D%9A%E5%AE%A2/</loc>
+        <lastmod>2018-05-16T02:58:28.742Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
