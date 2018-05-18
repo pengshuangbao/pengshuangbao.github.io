@@ -56,17 +56,6 @@
       </tags>
   </entry>
   <entry>
-    <title><![CDATA[我的第一篇博客]]></title>
-    <url>%2F9164abc5.html</url>
-    <content type="text"><![CDATA[致读者你好，欢迎你来到慕数博客，我是彭双宝。在这里你将看到我关于大数据技术和框架的一些理解和体会，并且以后所有博客将在这里发布，由于本人技术水平和认知能力有限，文中难免有认识不足和理解错误的地方，欢迎大家留言指正，我将感激不尽！]]></content>
-      <categories>
-        <category>搭建博客</category>
-      </categories>
-      <tags>
-        <tag>博客</tag>
-      </tags>
-  </entry>
-  <entry>
     <title><![CDATA[ScheduledThreadPoolExecutor中的scheduleAtFixedRate和scheduleWithFixedDely的区别]]></title>
     <url>%2F7844dd7d.html</url>
     <content type="text"><![CDATA[我们在开发中经常有定时调度某一个任务的需求，在java中常用的是通过定时调度线程池ScheduledThreadPoolExecutor来实现，这个线程池有两种方法 scheduleAtFixedRate scheduleWithFixedDelay 光知道概念还是比较虚的，下面通过具体的例子来运行一下。 测试代码123456789101112131415161718192021public class ScheduledThreadPoolTest &#123; public static void main(String[] args) &#123; ScheduledExecutorService pool = new ScheduledThreadPoolExecutor(1); int pollSecond = 2; pool.scheduleAtFixedRate(new TestRunner(), pollSecond / 10, pollSecond, TimeUnit.SECONDS); //pool.scheduleWithFixedDelay(new TestRunner(), pollSecond / 10, pollSecond, TimeUnit.SECONDS); &#125; static class TestRunner implements Runnable &#123; @Override public void run() &#123; System.out.println(DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss SSS")); try &#123; Thread.sleep(2000);//实验变量 &#125; catch (InterruptedException e) &#123; e.printStackTrace(); &#125; &#125; &#125;&#125; 运行结果scheduleAtFixedRate 当实验变量 Thread.sleep(2000); 值小于period 值 1234562018-04-08 09:44:58 2392018-04-08 09:45:00 3672018-04-08 09:45:02 3672018-04-08 09:45:04 3692018-04-08 09:45:06 3692018-04-08 09:45:08 369 当实验变量 Thread.sleep(3000); 值大于period 值 123452018-04-08 09:48:41 8822018-04-08 09:48:44 9692018-04-08 09:48:47 9692018-04-08 09:48:50 9692018-04-08 09:48:53 969 scheduleWithFixedDelay 当实验变量 Thread.sleep(2000); 值小于period 值 1234562018-04-08 09:50:29 3252018-04-08 09:50:33 4202018-04-08 09:50:37 4212018-04-08 09:50:41 4222018-04-08 09:50:45 4232018-04-08 09:50:49 424 当实验变量 Thread.sleep(3000); 值大于period 值 1234562018-04-08 09:51:20 8582018-04-08 09:51:26 0362018-04-08 09:51:31 0362018-04-08 09:51:36 0382018-04-08 09:51:41 0382018-04-08 09:51:46 039 结论 scheduleAtFixedRate 是以上一个任务开始的时间计时，period时间过去后，检测上一个任务是否执行完毕，如果上一个任务执行完毕，则当前任务立即执行，如果上一个任务没有执行完毕，则需要等上一个任务执行完毕后立即执行。 执行周期是 initialDelay 、initialDelay+period 、initialDelay + 2 * period} 、 … 如果延迟任务的执行时间大于了 period，比如为 5s，则后面的执行会等待5s才回去执行 scheduleWithFixedDelay 是以上一个任务结束时开始计时，period时间过去后，立即执行, 由上面的运行结果可以看出，第一个任务开始和第二个任务开始的间隔时间是 第一个任务的运行时间+period]]></content>
@@ -75,6 +64,17 @@
       </categories>
       <tags>
         <tag>java多线程</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[我的第一篇博客]]></title>
+    <url>%2F9164abc5.html</url>
+    <content type="text"><![CDATA[致读者你好，欢迎你来到慕数博客，我是彭双宝。在这里你将看到我关于大数据技术和框架的一些理解和体会，并且以后所有博客将在这里发布，由于本人技术水平和认知能力有限，文中难免有认识不足和理解错误的地方，欢迎大家留言指正，我将感激不尽！]]></content>
+      <categories>
+        <category>搭建博客</category>
+      </categories>
+      <tags>
+        <tag>博客</tag>
       </tags>
   </entry>
   <entry>
