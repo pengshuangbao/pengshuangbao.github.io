@@ -9,13 +9,6 @@
     </url>
 
     <url>
-        <loc>http://blog.lovedata.net/tags/kylin/</loc>
-        <lastmod>2018-05-03T11:07:17.088Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.2</priority>
-    </url>
-
-    <url>
         <loc>http://blog.lovedata.net/tags/java%E5%A4%9A%E7%BA%BF%E7%A8%8B/</loc>
         <lastmod>2018-05-03T11:07:17.088Z</lastmod>
         <changefreq>weekly</changefreq>
@@ -44,15 +37,22 @@
     </url>
 
     <url>
+        <loc>http://blog.lovedata.net/tags/kylin/</loc>
+        <lastmod>2019-04-02T10:05:03.889Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
         <loc>http://blog.lovedata.net/tags/linux-%E5%91%BD%E4%BB%A4/</loc>
-        <lastmod>2018-05-24T02:08:10.359Z</lastmod>
+        <lastmod>2019-04-02T10:05:03.889Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
         <loc>http://blog.lovedata.net/tags/linux%E5%91%BD%E4%BB%A4/</loc>
-        <lastmod>2018-05-24T02:08:10.360Z</lastmod>
+        <lastmod>2019-04-02T10:05:03.890Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
