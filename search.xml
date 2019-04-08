@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title></title>
-    <url>%2F0.html</url>
+    <title><![CDATA[Flink系列之Flink核心技术]]></title>
+    <url>%2F9c4e1887.html</url>
     <content type="text"></content>
+      <categories>
+        <category>Flink</category>
+      </categories>
+      <tags>
+        <tag>Flink 大数据</tag>
+      </tags>
   </entry>
   <entry>
     <title><![CDATA[AIfred的Snippets功能在VSCode上失效的解决办法]]></title>
