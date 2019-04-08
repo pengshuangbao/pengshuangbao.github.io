@@ -14,7 +14,7 @@
   <entry>
     <title><![CDATA[linux ln命令使用]]></title>
     <url>%2Ff342ad0c.html</url>
-    <content type="text"><![CDATA[ln 命令使用ln命令为创建软连接 1. ln -s 新建一个link_source目录 1mkdir link_source 在link_souce下面新建一个文件 1touch link_source/source_file 新建软连接 1ln -s link_source link_target 删除软连接 删除软连接需要注意，一个不小心可能就把源文件给删除了下面举例说明正确的删除方法 1rm -rf link_target 此时再去查看 link_source目录下面 文件还是存在的 错误的删除方法在重新创建软链接后，使用下面的方法删除 1rm -rf link_target/ 看到，软连接没有删除掉，反而把源文件删除了！]]></content>
+    <content type="text"><![CDATA[ln命令为创建软连接 1. ln -s 新建一个link_source目录 1mkdir link_source 在link_souce下面新建一个文件 1touch link_source/source_file 新建软连接 1ln -s link_source link_target 删除软连接 删除软连接需要注意，一个不小心可能就把源文件给删除了下面举例说明正确的删除方法 1rm -rf link_target 此时再去查看 link_source目录下面 文件还是存在的 错误的删除方法在重新创建软链接后，使用下面的方法删除 1rm -rf link_target/ 看到，软连接没有删除掉，反而把源文件删除了！]]></content>
       <categories>
         <category>linux命令</category>
       </categories>
