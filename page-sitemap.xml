@@ -7,21 +7,7 @@
     </url>
     
     <url>
-        <loc>http://blog.lovedata.net/Flink%E7%B3%BB%E5%88%97/Flink%E7%B3%BB%E5%88%97%E4%B9%8BFlink%E6%A0%B8%E5%BF%83%E6%8A%80%E6%9C%AF.html</loc>
-        <lastmod>2019-04-08T03:17:46.095Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-    </url>
-    
-    <url>
         <loc>http://blog.lovedata.net/about/</loc>
-        <lastmod>2019-04-08T03:17:46.095Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-    </url>
-    
-    <url>
-        <loc>http://blog.lovedata.net/%E6%95%88%E7%8E%87/AIfred%E7%9A%84Snippets%E5%8A%9F%E8%83%BD%E5%9C%A8VSCode%E4%B8%8A%E5%A4%B1%E6%95%88%E7%9A%84%E8%A7%A3%E5%86%B3%E5%8A%9E%E6%B3%95.html</loc>
         <lastmod>2019-04-08T03:17:46.095Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
@@ -35,14 +21,14 @@
     </url>
     
     <url>
-        <loc>http://blog.lovedata.net/tags/</loc>
+        <loc>http://blog.lovedata.net/categories/</loc>
         <lastmod>2018-04-28T11:26:58.795Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>http://blog.lovedata.net/categories/</loc>
+        <loc>http://blog.lovedata.net/tags/</loc>
         <lastmod>2018-04-28T11:26:58.795Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
