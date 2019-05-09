@@ -8,63 +8,63 @@
 
     <url>
         <loc>http://blog.lovedata.net/categories/%E6%95%88%E7%8E%87/</loc>
-        <lastmod>2019-05-09T11:01:34.578Z</lastmod>
+        <lastmod>2019-05-09T11:04:44.340Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
         <loc>http://blog.lovedata.net/categories/Flink/</loc>
-        <lastmod>2019-05-09T11:01:34.578Z</lastmod>
+        <lastmod>2019-05-09T11:04:44.340Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
         <loc>http://blog.lovedata.net/categories/%E5%A4%A7%E6%95%B0%E6%8D%AE/</loc>
-        <lastmod>2019-05-09T11:01:34.578Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.2</priority>
-    </url>
-
-    <url>
-        <loc>http://blog.lovedata.net/categories/Java/</loc>
-        <lastmod>2019-05-09T11:01:34.578Z</lastmod>
+        <lastmod>2019-05-09T11:04:44.340Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
         <loc>http://blog.lovedata.net/categories/%E7%BB%8F%E9%AA%8C%E5%88%86%E4%BA%AB/</loc>
-        <lastmod>2019-05-09T11:01:34.579Z</lastmod>
+        <lastmod>2019-05-09T11:04:44.340Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>http://blog.lovedata.net/categories/Java/</loc>
+        <lastmod>2019-05-09T11:04:44.340Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
         <loc>http://blog.lovedata.net/categories/linux%E5%91%BD%E4%BB%A4/</loc>
-        <lastmod>2019-05-09T11:01:34.579Z</lastmod>
+        <lastmod>2019-05-09T11:04:44.340Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
         <loc>http://blog.lovedata.net/categories/%E6%90%AD%E5%BB%BA%E5%8D%9A%E5%AE%A2/</loc>
-        <lastmod>2019-05-09T11:01:34.579Z</lastmod>
+        <lastmod>2019-05-09T11:04:44.340Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
         <loc>http://blog.lovedata.net/categories/%E7%9F%A5%E8%AF%86%E5%88%86%E4%BA%AB/</loc>
-        <lastmod>2019-05-09T11:01:34.579Z</lastmod>
+        <lastmod>2019-05-09T11:04:44.340Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
         <loc>http://blog.lovedata.net/categories/Kylin/</loc>
-        <lastmod>2019-05-09T11:01:38.284Z</lastmod>
+        <lastmod>2019-05-09T11:04:45.257Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
