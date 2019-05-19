@@ -37,4 +37,122 @@
         <tag>回忆</tag>
       </tags>
   </entry>
+  <entry>
+    <title><![CDATA[Kylin项目源码结构信息]]></title>
+    <url>%2Fa13ac350.html</url>
+    <content type="text"><![CDATA[Kylin项目源码结构信息展开查看├── core-common│ ├── 介绍: kylin通用类库│ ├── KylinConfig.java│ | └── 介绍│ └── QueryContext.java├── core-cube│ ├── 介绍: Cube相关的核心包，比如Cube描述、Cube管理、Cube分发│ ├── CubeManager.java├── core-dictionary│ ├── 介绍: 字典相关的核心包，如字典对象，字典元数据、字典管理器等│ ├── DictionaryManager.java├── core-job│ ├── 介绍: job相关，job描述│ ├──├── core-metadata│ ├── 介绍:│ ├──├── core-metrics│ ├── 介绍:│ ├──├── core-storage│ ├── 介绍:│ ├──├── engine-mr│ ├── 介绍:│ ├──├── engine-spark│ ├── 介绍:│ ├──├── examples│ ├── 介绍:│ ├──├── jdbc│ ├── 介绍:│ ├──├── metrics-reporter-hive│ ├── 介绍:│ ├──├── metrics-reporter-kafka│ ├── 介绍:│ ├──├── query│ ├── 介绍:│ ├──├── server│ ├── 介绍:│ ├──├── server-base│ ├── 介绍:│ ├──├── source-hive│ ├── 介绍:│ ├──├── source-kafka│ ├── 介绍:│ ├──├── storage-hbase│ ├── 介绍:│ ├──├── tool│ ├── 介绍:│ ├──├── pom.xml│ ├──]]></content>
+      <categories>
+        <category>Kylin</category>
+      </categories>
+      <tags>
+        <tag>大数据</tag>
+        <tag>Java</tag>
+        <tag>彭双宝</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[AIfred的Snippets功能在VSCode上失效的解决办法]]></title>
+    <url>%2Fe66d98dc.html</url>
+    <content type="text"><![CDATA[环境 AIfred v3.6.2 MacOS 10.14.1 VsCode 1.33.0 问题描述今天在Vscode上使用AIfred的snippets功能的时候，总是会出现替换关键字不全的情况，比如一个 snip的 keyword 是 “idi”，然后snip是“19930705”，在vscode上输入“idi”的时候，智能替换最后一个“i”，或者“di”,编程了 ”i19930705”。 解决办法打开 Alfred Preferences &gt; Snippets &gt; Auto Expansion Options &gt; Tweaking and setting Simulated key event speed to 4/5 (默认为Faster，调整为比它低一个等级就可以了)，如下图]]></content>
+      <categories>
+        <category>效率</category>
+      </categories>
+      <tags>
+        <tag>效率</tag>
+        <tag>MacBook</tag>
+        <tag>AIFred</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[美团技术合集]]></title>
+    <url>%2F4c03c513.html</url>
+    <content type="text"><![CDATA[美团技术合集地址美团技术合集百度云盘下载提取码需要关注下方公众号后输入文件标题后得到 目录 下载须知免责声明电子版仅供预览，下载后24小时内务必删除，支持正版，喜欢的请购买正版书籍]]></content>
+      <categories>
+        <category>知识分享</category>
+      </categories>
+      <tags>
+        <tag>知识分享</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[linux ln命令使用]]></title>
+    <url>%2Ff342ad0c.html</url>
+    <content type="text"><![CDATA[ln命令为创建软连接 1. ln -s 新建一个link_source目录 1mkdir link_source 在link_souce下面新建一个文件 1touch link_source/source_file 新建软连接 1ln -s link_source link_target 删除软连接 删除软连接需要注意，一个不小心可能就把源文件给删除了下面举例说明正确的删除方法 1rm -rf link_target 此时再去查看 link_source目录下面 文件还是存在的 错误的删除方法在重新创建软链接后，使用下面的方法删除 1rm -rf link_target/ 看到，软连接没有删除掉，反而把源文件删除了！]]></content>
+      <categories>
+        <category>linux命令</category>
+      </categories>
+      <tags>
+        <tag>linux命令</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[linux磁盘与文件管理相关的一些命令使用]]></title>
+    <url>%2F9f2cef45.html</url>
+    <content type="text"><![CDATA[概念介绍 tmpfs 是一种虚拟内存文件系统，是基于内存的文件系统。 devtmpfs 的功用是在 Linux 核心 启动早期建立一个初步的 /dev，令一般启动程序不用等待 udev，缩短 GNU/Linux 的开机时间。 至于磁盘的档名部分，基本上，所有实体磁盘的档名都已经被模拟成 /dev/sd[a-p] 的格式，第一颗磁盘档名为 /dev/sda。 而分割槽的档名若以第一颗磁盘为例，则为 /dev/sda[1-128] 。除了实体磁盘之外， 虚拟机的磁盘通常为 /dev/vd[a-p] 的格式。 若有使用到軟体磁盘阵列的话，那还有 /dev/md[0-128] 的磁盘档名。 /dev/sd[a-p][1-128]：为实体磁盘的磁盘档名； /dev/vd[a-d][1-128]：为虚拟磁盘的磁盘档名 至于 Linux 的正统档案系统则为 Ext2 (Linux second extended file system, ext2fs)这一个 每个 filesystem 都有独立的 inode / block / superblock 等资讯，这个档案系统要能够连结到目录树才能被我们使用。 将档案系统与目录树结合的动作我们称为 ‘挂载’ df 列出档案系统的整体磁盘使用量123456789df [-ahikHTm] [目录或档名]选项与参数：-a ：列出所有的档案系统，包括系统特有的 /proc 等档案系统；-k ：以 KBytes 的容量显示各档案系统；-m ：以 MBytes 的容量显示各档案系统；-h ：以人们较易阅读的 GBytes, MBytes, KBytes 等格式自行显示；-H ：以 M=1000K 取代 M=1024K 的进位方式；-T ：连同该 partition 的 filesystem 名称 (例如 xfs) 也列出；-i ：不用磁盘容量，而以 inode 的数量来显示 范例一：将系统内所有的 filesystem 列出来！df Filesystem：代表该档案系统是在哪个 partition ，所以列出装置名称；1k-blocks：说明底下的数字单位是 1KB 呦！可利用 -h 或 -m 来改变容量；Used：顾名思义，就是使用掉的磁盘空间！Available：也就是剩下的磁盘空间大小；Use%：就是磁盘的使用率啦！如果使用率高达 90% 以上时， 最好需要注意一下了，免得容量不足造成系统问题喔！(例如最容易被灌爆的 /var/spool/mail 这个放置邮件的磁盘)Mounted on：就是磁盘挂载的目录所在啦！(挂载点啦！) 在显示的结果中你需要特别留意的是那个根目录的剩余容量！ 因为我们所有的资料都是由根目录衍生出来的，因此当根目录的剩余容量剩下 0 时，那你的 Linux 可能就问题很大了。 du 评估档案系统的磁盘使用量(常用在推估目录所占容量)范例一：列出目前目录下的所有档案容量du 范例二：同范例一，但是将档案的容量也列出来du -a 范例三：检查根目录底下每个目录所占用的容量 这个是最常用的功能du -sm /* 参考： 鸟哥的私房菜 ln使用 ln 如果不加任何参数的话，那么就是 Hard Link Hard Link (实体连结, 硬式连结或实际连结) 透过档案系统的 inode 连结来产生新档名，而不是产生新档案多个档名对应到同一个 inode 号码呢？有的！那就是 hard link 的由来hard link 只是在某个目录下新增一笔档名连结到某 inode 号码的关连记录而已。 创建硬链接 12345678[root@VM_71_28_centos test]# ll -i lntest 455414 -rw-r--r-- 1 root root 0 May 23 17:40 lntest[root@VM_71_28_centos test]# ln lntest lntest1 &lt;= 创建一个硬的链接[root@VM_71_28_centos test]# [root@VM_71_28_centos test]# [root@VM_71_28_centos test]# ll -i lntest lntest1455414 -rw-r--r-- 2 root root 0 May 23 17:40 lntest455414 -rw-r--r-- 2 root root 0 May 23 17:40 lntest1 修改与删除文件 123456789101112[root@VM_71_28_centos test]# clear[root@VM_71_28_centos test]# echo 'hello'&gt;lntest1 &lt;= 修改其中一个文件[root@VM_71_28_centos test]# [root@VM_71_28_centos test]# cat lntest1hello[root@VM_71_28_centos test]# cat lntest &lt;= 两个文件都改变了 hello[root@VM_71_28_centos test]# rm -f lntest1 &lt;= 删除其中一个文件[root@VM_71_28_centos test]# [root@VM_71_28_centos test]# cat lntest &lt;= 另外一个文件还是存在的hello 修改源文件 123456[root@VM_71_28_centos test]# ln lntest lntest1[root@VM_71_28_centos test]# cat lntest1hello[root@VM_71_28_centos test]# rm -f lntest[root@VM_71_28_centos test]# cat lntest1 hello hard link 是有限制的： 不能跨 Filesystem； 不能 link 目录,可能导致搜索循环问题，比如 .. 上一层目录。所以不建议这样做 Symbolic Link (符号连结，亦即是捷径)Symbolic link 就是在建立一个 独立的档案 ，而这个档案会让资料的读取指向他 link 的那个档案的档名 源文件删除后，会导致打开不了文件了。 新建软链接 12345678[root@VM_71_28_centos test]# touch slinktest[root@VM_71_28_centos test]# [root@VM_71_28_centos test]# ln -s slinktest slinktest1[root@VM_71_28_centos test]# [root@VM_71_28_centos test]# ll -i slinktest slinktest1455415 -rw-r--r-- 1 root root 0 May 23 17:54 slinktest &lt;= inode是不同的455416 lrwxrwxrwx 1 root root 9 May 23 17:54 slinktest1 -&gt; slinktest &lt;= 这里长度为9 是因为文件名长度为9 lsblk 列出系统上的所有磁盘列表lsblk 可以看成‘ list block device ’的缩写，就是列出所有储存装置的意思 12345678910[root@testserver1 /]# lsblkNAME MAJ:MIN RM SIZE RO TYPE MOUNTPOINTsda 8:0 0 3.7T 0 disk├─sda1 8:1 0 1M 0 part├─sda2 8:2 0 1G 0 part /boot├─sda3 8:3 0 1.2T 0 part /data3├─sda4 8:4 0 1.2T 0 part /data1├─sda5 8:5 0 1.2T 0 part /data2├─sda6 8:6 0 50G 0 part /└─sda7 8:7 0 7.8G 0 part [SWAP] NAME：就是装置的档名啰！会省略 /dev 等前导目录！ MAJ:MIN：其实核心认识的装置都是透过这两个代码来熟悉的！分别是主要：次要装置代码！ RM：是否为可卸载装置 (removable device)，如光碟、USB 磁盘等等 SIZE：当然就是容量啰！ RO：是否为只读装置的意思 TYPE：是磁盘 (disk)、分割槽 (partition) 还是只读内存 (rom) 等输出 MOUTPOINT：就是前一章谈到的挂载点！ blkidblkid 列出装置的 UUID 等参数12345678[root@testserver1 /]# blkid/dev/sda6: UUID="8eab240e-e26a-4244-b8ff-2cede227ab63" TYPE="ext4" PARTUUID="c1901736-b73f-4a75-981e-e4de2df426f0"/dev/sda2: UUID="0995c7e3-e9e3-4e9e-b42a-2753564d9a3d" TYPE="ext4" PARTUUID="05f4a19f-b882-406e-90be-eb4c893c3380"/dev/sda7: UUID="487a2745-138c-45e5-8c89-027b788c57de" TYPE="swap" PARTUUID="105ffff6-594d-4629-b147-79af76695c71"/dev/sda1: PARTUUID="2b902b92-5daa-4616-ade4-b10285d962ff" /dev/sda3: UUID="e64c20bc-d94a-4323-8a7a-f4db8fc82c3c" TYPE="ext4" PARTUUID="e4bebdda-35b1-4c08-b469-49cdc24d684a"/dev/sda4: UUID="2cf235f9-5c19-4c7f-bdc9-a157bea72723" TYPE="ext4" PARTUUID="7b3507a2-8799-4b8f-9ad4-e1e0154cf6fd"/dev/sda5: UUID="bfc8724d-8f66-4c7a-af12-a9ad8a7b2222" TYPE="ext4" PARTUUID="cefe2474-bebb-4d1e-a77b-1d9beb76463d" parted 列出磁盘的分割表类型与分割资讯123456789101112131415[root@testserver1 /]# parted /dev/sda printModel: ATA TOSHIBA HDWE140 (scsi)Disk /dev/sda: 4001GBSector size (logical/physical): 512B/4096BPartition Table: gptDisk Flags: pmbr_bootNumber Start End Size File system Name Flags 1 1049kB 2097kB 1049kB bios_grub 2 2097kB 1076MB 1074MB ext4 3 1076MB 1314GB 1313GB ext4 4 1314GB 2626GB 1313GB ext4 5 2626GB 3939GB 1313GB ext4 6 3939GB 3992GB 53.7GB ext4 7 3992GB 4001GB 8390MB linux-swap(v1)]]></content>
+      <categories>
+        <category>linux命令</category>
+      </categories>
+      <tags>
+        <tag>linux命令</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Markdown常用语法入门]]></title>
+    <url>%2F5f17abcf.html</url>
+    <content type="text"><![CDATA[本文介绍了一些在写作中常用的markdown语法。 [TOC] TOC语法简书不支持，github支持。 1234567### 1.序号1. 序号12. 序号2 1. 子序号3. 序号3 - 无序子序号1 - 无序子序号2 1.序号 序号1 序号2 子序号 序号3 无序子序号1 无序子序号2 123456### 2.标题# 一级标题## 二级标题### 三级标题#### 四级标题###### 六级标题 2.标题一级标题二级标题三级标题四级标题六级标题12### 3.引用&gt;这是引用 3.引用 这是引用 1234### 4.图片&gt;图片推荐使用 [SM.MS](https://link.zhihu.com/?target=https%3A//sm.ms/) 图床服务![图片.png](https://upload-images.jianshu.io/upload_images/4356971-84e3ccc2e851e30d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240) 4.图片 图片推荐使用 SM.MS 图床服务 123### 5.粗斜体**粗体***斜体* 5.粗斜体粗体斜体 12### 6.代码引用 ``public static void main()`` 6.代码引用public static void main() 123### 7.分割线&gt;分割线 7.分割线 分割线 12345### 8.复选框（简书不支持，github支持）- [x] 选项一 - [ ] 选项二- [ ] 我来演示一下 8.复选框（简书不支持，github支持） 选项一 选项二 我来演示一下 代码块注意：语法块中java和python要挨着三个点，并且三个点和上面和下面的代码要有一个空行，否则在印象笔记中无法显示！ python代码块 123456789101112131415import osdef check_encoding(stream, encoding): """Test, whether the encoding of `stream` matches `encoding`. Returns :None: if `encoding` or `stream.encoding` are not a valid encoding argument (e.g. ``None``) or `stream.encoding is missing. :True: if the encoding argument resolves to the same value as `encoding`, :False: if the encodings differ. """ try: return codecs.lookup(stream.encoding) == codecs.lookup(encoding) except (LookupError, AttributeError, TypeError): return None java代码块 123456789import java.util.Mappublic class Test &#123; public static void main(String[] args)&#123;// MovieLensALS movie = new MovieLensALS(); System.out.println("Hello, I'm Java"); - &#125;&#125;]]></content>
+      <categories>
+        <category>经验分享</category>
+      </categories>
+      <tags>
+        <tag>Markdown</tag>
+        <tag>经验分享</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[使用Jar命令直接替换jar包中的class]]></title>
+    <url>%2F734335ef.html</url>
+    <content type="text"><![CDATA[使用场景在平常的开发中，经常会遇到一些代码bug，并且有了bug修改后需要重新打包部署至服务器以修复bug，而在一些上线部属流程比较严格的公司，这个 打包-&gt;构建-&gt;代码检测-&gt;安全检测-&gt;提交流程-&gt;审批-&gt;部署 整个流程可能就需要耗时一天，所以一般情况下，我们是通过直接替换class然后重启的方式来进行变更的。 使用方法 在这里准备一个简单的小例子来说明如何使用 这个命令 新建两个测试类 Main.java 这个类是主类，用于调用需要被替换的类的 12345678910111213141516package com.lovedata.bigdata.jar;/** * Created by pengshuangbao on 2018/4/28. * &lt;p&gt; * 测试直接替换class文件而不用重启jar包 * * @author pengshuangbao */public class Main &#123; public static void main(String[] args) &#123; NeedReplace.print(); &#125;&#125; NeedReplace 这个类是需要被替换的类，这里是修改之前。1234567891011121314package com.lovedata.bigdata.jar;/** * Created by pengshuangbao on 2018/4/28. * * @author pengshuangbao */public class NeedReplace &#123; public static void print() &#123; System.out.println("before replace"); &#125;&#125; 打包为test.jar并且执行 java -jar test.jar 命令执行，执行结果如下 现在需要修改 NeedReplace 类 ，将 “before replace” 修改为 “ after replace” 在test.jar 的同目录下新建一个与NeedReplace 类的全路径相同的目录，执行以下命令1md com\lovedata\bigdata\jar 执行 java -jar 来进行替换1jar uvf test.jar com\lovedata\bigdata\jar\NeedReplace.class 再次执行 java -jar 命令查看效果，结果如下]]></content>
+      <categories>
+        <category>经验分享</category>
+      </categories>
+      <tags>
+        <tag>经验分享</tag>
+        <tag>java</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Kylin构建流程分析-加载HFile到Hbase中(Load HFile to HBase Table)]]></title>
+    <url>%2F5a9a3875.html</url>
+    <content type="text"><![CDATA[环境信息系统：win10代码编辑器：IDEAkylin：2.3.0hadoop:2.7.1 本文介绍了kylin构建的第四个阶段，根据cuboid文件创建Hfile并且将cuboid Hfile加载到hbase之中，也就是BatchCubingJobBuilder2类中的build方法的第四个阶段。 1outputSide.addStepPhase3_BuildCube(result); 123456789101112131415161718192021222324252627@Override public IMRBatchCubingOutputSide2 getBatchCubingOutputSide(final CubeSegment seg) &#123; return new IMRBatchCubingOutputSide2() &#123; HBaseMRSteps steps = new HBaseMRSteps(seg); @Override public void addStepPhase2_BuildDictionary(DefaultChainedExecutable jobFlow) &#123; jobFlow.addTask(steps.createCreateHTableStepWithStats(jobFlow.getId())); &#125; @Override public void addStepPhase3_BuildCube(DefaultChainedExecutable jobFlow) &#123; jobFlow.addTask(steps.createConvertCuboidToHfileStep(jobFlow.getId())); jobFlow.addTask(steps.createBulkLoadStep(jobFlow.getId())); &#125; @Override public void addStepPhase4_Cleanup(DefaultChainedExecutable jobFlow) &#123; // nothing to do &#125; @Override public IMROutputFormat getOuputFormat() &#123; return new HBaseMROutputFormat(); &#125; &#125;; &#125; 用到的是HBaseMROutput2Transition类中的内部类，分为两个步骤： createConvertCuboidToHfileStep 加载前面生成的cuboid文件，并生成Hfile createBulkLoadStep 根据生成的Hfile，使用Hbase bulkload 将hfile快速加载进入到Htable中。 1.createConvertCuboidToHfileStep2.createBulkLoadStep下面分析一下bulk load的代码。首先入口是 BatchCubingJobBuilder2 类中createBulkLoadStep方法。 123456789101112131415161718public HadoopShellExecutable createBulkLoadStep(String jobId) &#123; //实例化一个hadoop任务 HadoopShellExecutable bulkLoadStep = new HadoopShellExecutable(); bulkLoadStep.setName(ExecutableConstants.STEP_NAME_BULK_LOAD_HFILE); StringBuilder cmd = new StringBuilder(); //设置前面保存的hfile路径 appendExecCmdParameters(cmd, BatchConstants.ARG_INPUT, getHFilePath(jobId)); //设置htable name appendExecCmdParameters(cmd, BatchConstants.ARG_HTABLE_NAME, seg.getStorageLocationIdentifier()); //设置cube name appendExecCmdParameters(cmd, BatchConstants.ARG_CUBE_NAME, seg.getRealization().getName()); //设置cmd 参数 bulkLoadStep.setJobParams(cmd.toString()); //设置job 类 bulkLoadStep.setJobClass(BulkLoadJob.class); return bulkLoadStep; &#125; 上面代码中生成cmd.toString 参数的实例如下： 12-input hdfs://server1.fibo.com:8020/apps/kylin/kylin_metadata/kylin-c2974055-2ccf-4b06-a98b-6f14e946e1ca/unload/hfile-htablename KYLIN_BYH4SABC2Y -cubename unload 进入到BulkLoadJob类中，主要的run方法如下： 1234567891011121314151617181920212223242526272829303132333435@Override public int run(String[] args) throws Exception &#123; Options options = new Options(); options.addOption(OPTION_INPUT_PATH); options.addOption(OPTION_HTABLE_NAME); options.addOption(OPTION_CUBE_NAME); parseOptions(options, args); String tableName = getOptionValue(OPTION_HTABLE_NAME); // /tmp/kylin-3f150b00-3332-41ca-9d3d-652f67f044d7/test_kylin_cube_with_slr_ready_2_segments/hfile/ // end with "/" String input = getOptionValue(OPTION_INPUT_PATH); Configuration conf = HBaseConnection.getCurrentHBaseConfiguration(); FsShell shell = new FsShell(conf); int exitCode = -1; int retryCount = 10; // 给上面的hfile文件赋予读权限 while (exitCode != 0 &amp;&amp; retryCount &gt;= 1) &#123; exitCode = shell.run(new String[] &#123; "-chmod", "-R", "777", input &#125;); retryCount--; Thread.sleep(5000); &#125; if (exitCode != 0) &#123; logger.error("Failed to change the file permissions: " + input); throw new IOException("Failed to change the file permissions: " + input); &#125; String[] newArgs = new String[2]; newArgs[0] = input; newArgs[1] = tableName; logger.debug("Start to run LoadIncrementalHFiles"); //将Hfile输出格式的输出加载到现有表中的工具。 int ret = ToolRunner.run(new LoadIncrementalHFiles(conf), newArgs); logger.debug("End to run LoadIncrementalHFiles"); return ret; &#125; 可以看到，最后调用的是Hbase包的类LoadIncrementalHFiles，这是一个工具类，官方解释是“Tool to load the output of HFileOutputFormat into an existing table.” 。对于这个类的解释可以参考这个文章 HBase 写优化之 BulkLoad 实现数据快速入库]]></content>
+      <categories>
+        <category>大数据</category>
+      </categories>
+      <tags>
+        <tag>大数据</tag>
+        <tag>Java</tag>
+        <tag>彭双宝</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[我的第一篇博客]]></title>
+    <url>%2Fd95d7e09.html</url>
+    <content type="text"><![CDATA[致读者你好，欢迎你来到慕数博客，我是彭双宝。在这里你将看到我关于大数据技术和框架的一些理解和体会，并且以后所有博客将在这里发布，由于本人技术水平和认知能力有限，文中难免有认识不足和理解错误的地方，欢迎大家留言指正，我将感激不尽！]]></content>
+      <categories>
+        <category>搭建博客</category>
+      </categories>
+      <tags>
+        <tag>博客</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[ScheduledThreadPoolExecutor中的scheduleAtFixedRate和scheduleWithFixedDely的区别]]></title>
+    <url>%2F7844dd7d.html</url>
+    <content type="text"><![CDATA[我们在开发中经常有定时调度某一个任务的需求，在java中常用的是通过定时调度线程池ScheduledThreadPoolExecutor来实现，这个线程池有两种方法 scheduleAtFixedRate scheduleWithFixedDelay 光知道概念还是比较虚的，下面通过具体的例子来运行一下。 测试代码123456789101112131415161718192021public class ScheduledThreadPoolTest &#123; public static void main(String[] args) &#123; ScheduledExecutorService pool = new ScheduledThreadPoolExecutor(1); int pollSecond = 2; pool.scheduleAtFixedRate(new TestRunner(), pollSecond / 10, pollSecond, TimeUnit.SECONDS); //pool.scheduleWithFixedDelay(new TestRunner(), pollSecond / 10, pollSecond, TimeUnit.SECONDS); &#125; static class TestRunner implements Runnable &#123; @Override public void run() &#123; System.out.println(DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss SSS")); try &#123; Thread.sleep(2000);//实验变量 &#125; catch (InterruptedException e) &#123; e.printStackTrace(); &#125; &#125; &#125;&#125; 运行结果scheduleAtFixedRate 当实验变量 Thread.sleep(2000); 值小于period 值 1234562018-04-08 09:44:58 2392018-04-08 09:45:00 3672018-04-08 09:45:02 3672018-04-08 09:45:04 3692018-04-08 09:45:06 3692018-04-08 09:45:08 369 当实验变量 Thread.sleep(3000); 值大于period 值 123452018-04-08 09:48:41 8822018-04-08 09:48:44 9692018-04-08 09:48:47 9692018-04-08 09:48:50 9692018-04-08 09:48:53 969 scheduleWithFixedDelay 当实验变量 Thread.sleep(2000); 值小于period 值 1234562018-04-08 09:50:29 3252018-04-08 09:50:33 4202018-04-08 09:50:37 4212018-04-08 09:50:41 4222018-04-08 09:50:45 4232018-04-08 09:50:49 424 当实验变量 Thread.sleep(3000); 值大于period 值 1234562018-04-08 09:51:20 8582018-04-08 09:51:26 0362018-04-08 09:51:31 0362018-04-08 09:51:36 0382018-04-08 09:51:41 0382018-04-08 09:51:46 039 结论 scheduleAtFixedRate 是以上一个任务开始的时间计时，period时间过去后，检测上一个任务是否执行完毕，如果上一个任务执行完毕，则当前任务立即执行，如果上一个任务没有执行完毕，则需要等上一个任务执行完毕后立即执行。 执行周期是 initialDelay 、initialDelay+period 、initialDelay + 2 * period} 、 … 如果延迟任务的执行时间大于了 period，比如为 5s，则后面的执行会等待5s才回去执行 scheduleWithFixedDelay 是以上一个任务结束时开始计时，period时间过去后，立即执行, 由上面的运行结果可以看出，第一个任务开始和第二个任务开始的间隔时间是 第一个任务的运行时间+period]]></content>
+      <categories>
+        <category>Java</category>
+      </categories>
+      <tags>
+        <tag>java多线程</tag>
+      </tags>
+  </entry>
 </search>
