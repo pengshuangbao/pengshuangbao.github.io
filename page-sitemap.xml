@@ -8,28 +8,28 @@
     
     <url>
         <loc>http://blog.lovedata.net/about/</loc>
-        <lastmod>2019-05-09T05:51:08.735Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-    </url>
-    
-    <url>
-        <loc>http://blog.lovedata.net/404.html</loc>
-        <lastmod>2019-04-02T10:05:03.889Z</lastmod>
+        <lastmod>2019-10-24T07:01:16.208Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
         <loc>http://blog.lovedata.net/categories/</loc>
-        <lastmod>2018-04-28T11:26:58.795Z</lastmod>
+        <lastmod>2019-10-24T07:01:16.208Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
         <loc>http://blog.lovedata.net/tags/</loc>
-        <lastmod>2018-04-28T11:26:58.795Z</lastmod>
+        <lastmod>2019-10-24T07:01:16.208Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <url>
+        <loc>http://blog.lovedata.net/404.html</loc>
+        <lastmod>2019-10-24T07:01:16.025Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
