@@ -3,7 +3,7 @@
   <entry>
     <title><![CDATA[Kibana格式化单位为毫秒的字段为秒]]></title>
     <url>%2F7277eab0.html</url>
-    <content type="text"><![CDATA[优化原因在收集日志的时候，单位为毫秒，而毫秒在Kibana做查询的时候，可读性肯定会差一些，所以需要转换为秒为单位。 优化方法打开Kibana&gt;Management&gt;Index Patterns，选中索引，找到编辑需要转换的字段,按照图中方式修改。]]></content>
+    <content type="text"><![CDATA[优化原因在收集日志的时候，单位为毫秒，而毫秒在Kibana做查询的时候，可读性肯定会差一些 , 所以需要转换为秒为单位。 优化方法打开Kibana&gt;Management&gt;Index Patterns，选中索引，找到编辑需要转换的字段,按照图中方式修改。]]></content>
       <categories>
         <category>ELK</category>
       </categories>
