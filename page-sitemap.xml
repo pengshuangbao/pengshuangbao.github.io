@@ -7,13 +7,6 @@
     </url>
     
     <url>
-        <loc>http://blog.lovedata.net/Flink%E7%B3%BB%E5%88%97/%E4%BD%BF%E7%94%A8%E6%99%AE%E7%BD%97%E7%B1%B3%E4%BF%AE%E6%96%AF%E5%92%8CGrafana%E7%9B%91%E6%8E%A7Flink%E8%BF%90%E8%A1%8C%E7%8A%B6%E6%80%81.html</loc>
-        <lastmod>2019-11-12T11:07:20.959Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-    </url>
-    
-    <url>
         <loc>http://blog.lovedata.net/about/</loc>
         <lastmod>2019-10-24T07:01:16.208Z</lastmod>
         <changefreq>weekly</changefreq>
@@ -21,14 +14,14 @@
     </url>
     
     <url>
-        <loc>http://blog.lovedata.net/tags/</loc>
+        <loc>http://blog.lovedata.net/categories/</loc>
         <lastmod>2019-10-24T07:01:16.208Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     
     <url>
-        <loc>http://blog.lovedata.net/categories/</loc>
+        <loc>http://blog.lovedata.net/tags/</loc>
         <lastmod>2019-10-24T07:01:16.208Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
