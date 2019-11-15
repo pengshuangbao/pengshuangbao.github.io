@@ -3,7 +3,7 @@
 
     <sitemap>
         <loc>http://blog.lovedata.net/post-sitemap.xml</loc>
-        <lastmod>2019-11-15T03:28:25.366Z</lastmod>
+        <lastmod>2019-11-15T03:35:18.599Z</lastmod>
     </sitemap>
 
     <sitemap>
@@ -13,12 +13,12 @@
 
     <sitemap>
         <loc>http://blog.lovedata.net/category-sitemap.xml</loc>
-        <lastmod>2019-11-15T03:28:23.659Z</lastmod>
+        <lastmod>2019-11-15T03:35:18.590Z</lastmod>
     </sitemap>
 
     <sitemap>
         <loc>http://blog.lovedata.net/tag-sitemap.xml</loc>
-        <lastmod>2019-11-15T03:28:23.659Z</lastmod>
+        <lastmod>2019-11-15T03:35:18.590Z</lastmod>
     </sitemap>
 
 </sitemapindex>
