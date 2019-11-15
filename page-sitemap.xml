@@ -8,6 +8,13 @@
     
     <url>
         <loc>http://blog.lovedata.net/about/</loc>
+        <lastmod>2019-11-15T03:28:25.366Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <url>
+        <loc>http://blog.lovedata.net/tags/</loc>
         <lastmod>2019-10-24T07:01:16.208Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
@@ -15,13 +22,6 @@
     
     <url>
         <loc>http://blog.lovedata.net/categories/</loc>
-        <lastmod>2019-10-24T07:01:16.208Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-    </url>
-    
-    <url>
-        <loc>http://blog.lovedata.net/tags/</loc>
         <lastmod>2019-10-24T07:01:16.208Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
