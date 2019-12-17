@@ -77,13 +77,6 @@
     </url>
 
     <url>
-        <loc>http://blog.lovedata.net/categories/Flink/</loc>
-        <lastmod>2019-12-17T08:55:48.550Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.2</priority>
-    </url>
-
-    <url>
         <loc>http://blog.lovedata.net/categories/%E7%94%9F%E6%B4%BB%E9%9A%8F%E7%AC%94/</loc>
         <lastmod>2019-12-17T08:55:48.551Z</lastmod>
         <changefreq>weekly</changefreq>
@@ -93,6 +86,13 @@
     <url>
         <loc>http://blog.lovedata.net/categories/%E8%BF%90%E7%BB%B4/</loc>
         <lastmod>2019-12-17T08:55:48.551Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>http://blog.lovedata.net/categories/Flink/</loc>
+        <lastmod>2019-12-17T09:40:07.953Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
