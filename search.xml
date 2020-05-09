@@ -109,7 +109,7 @@
   <entry>
     <title><![CDATA[VSCode 编辑器打开文件右边只显示一个Tab的解决办法]]></title>
     <url>%2F13039f24.html</url>
-    <content type="text"><![CDATA[环境 MacOS 10.14.1 VsCode 1.33.0 问题描述今天不知道按了什么快捷键，点了什么按钮，VSCode的标签栏一直只能显示一个文件tab，点一次被替换，让人丈二和尚摸不着头脑，如下图。 并且在想新建文件的时候，显示的确实一个帮助搜索框，跟以前的编码习惯完全不同了，强迫症的我，必须给调整回来 解决办法一番谷歌后，找到下面的方法:点击Code&gt;首选项&gt;设置，在搜索框输入 “show tabs” ，选中第一个 “Show Tabs” 选择框，一切回归正常。]]></content>
+    <content type="text"><![CDATA[环境 MacOS 10.14.1 VsCode 1.33.0 问题描述今天不知道按了什么快捷键，点了什么按钮，VSCode的标签栏一直只能显示一个文件tab，点一次被替换，让人丈二和尚摸不着头脑，如下图 。 并且在想新建文件的时候，显示的确实一个帮助搜索框，跟以前的编码习惯完全不同了，强迫症的我，必须给调整回来 解决办法一番谷歌后，找到下面的方法:点击Code&gt;首选项&gt;设置，在搜索框输入 “show tabs” ，选中第一个 “Show Tabs” 选择框，一切回归正常。]]></content>
       <categories>
         <category>经验分享</category>
       </categories>
