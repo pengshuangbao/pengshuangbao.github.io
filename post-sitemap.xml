@@ -7,6 +7,14 @@
     </url>
 
     <url>
+        <loc>http://blog.lovedata.net/0.html</loc>
+        <lastmod>2020-05-21T13:52:50.984Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+
+    </url>
+
+    <url>
         <loc>http://blog.lovedata.net/13039f24.html</loc>
         <lastmod>2020-05-18T03:43:37.930Z</lastmod>
         <changefreq>weekly</changefreq>
@@ -23,7 +31,7 @@
     </url>
 
     <url>
-        <loc>http://blog.lovedata.net/106c955e.html</loc>
+        <loc>http://blog.lovedata.net/761a39dc.html</loc>
         <lastmod>2020-05-09T02:41:14.075Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -31,7 +39,7 @@
     </url>
 
     <url>
-        <loc>http://blog.lovedata.net/761a39dc.html</loc>
+        <loc>http://blog.lovedata.net/106c955e.html</loc>
         <lastmod>2020-05-09T02:41:14.075Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -55,7 +63,7 @@
     </url>
 
     <url>
-        <loc>http://blog.lovedata.net/729f0d.html</loc>
+        <loc>http://blog.lovedata.net/99f2425c.html</loc>
         <lastmod>2019-12-18T02:49:30.124Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
@@ -63,7 +71,7 @@
     </url>
 
     <url>
-        <loc>http://blog.lovedata.net/99f2425c.html</loc>
+        <loc>http://blog.lovedata.net/729f0d.html</loc>
         <lastmod>2019-12-18T02:49:30.124Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
