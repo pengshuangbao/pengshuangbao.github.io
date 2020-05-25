@@ -178,28 +178,35 @@
 
     <url>
         <loc>http://blog.lovedata.net/tags/%E7%94%9F%E6%B4%BB%E6%84%9F%E6%82%9F/</loc>
-        <lastmod>2020-05-25T10:03:34.890Z</lastmod>
+        <lastmod>2020-05-25T11:53:34.967Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
         <loc>http://blog.lovedata.net/tags/%E5%9B%9E%E5%BF%86/</loc>
-        <lastmod>2020-05-25T10:03:35.673Z</lastmod>
+        <lastmod>2020-05-25T11:53:34.968Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
         <loc>http://blog.lovedata.net/tags/%E9%9A%8F%E7%AC%94/</loc>
-        <lastmod>2020-05-25T10:03:35.673Z</lastmod>
+        <lastmod>2020-05-25T11:53:34.968Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
         <loc>http://blog.lovedata.net/tags/%E7%AB%A5%E5%B9%B4/</loc>
-        <lastmod>2020-05-25T10:03:35.673Z</lastmod>
+        <lastmod>2020-05-25T11:53:34.968Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>http://blog.lovedata.net/tags/jenkins/</loc>
+        <lastmod>2020-05-25T11:53:35.658Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
