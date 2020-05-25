@@ -121,6 +121,13 @@
     </url>
 
     <url>
+        <loc>http://blog.lovedata.net/tags/%E9%9A%8F%E7%AC%94/</loc>
+        <lastmod>2019-12-18T02:49:30.124Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
         <loc>http://blog.lovedata.net/tags/Flink/</loc>
         <lastmod>2020-05-09T02:41:14.075Z</lastmod>
         <changefreq>weekly</changefreq>
@@ -185,14 +192,7 @@
 
     <url>
         <loc>http://blog.lovedata.net/tags/%E7%94%9F%E6%B4%BB%E6%84%9F%E6%82%9F/</loc>
-        <lastmod>2020-05-25T06:04:09.960Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.2</priority>
-    </url>
-
-    <url>
-        <loc>http://blog.lovedata.net/tags/%E9%9A%8F%E7%AC%94/</loc>
-        <lastmod>2020-05-25T06:04:09.960Z</lastmod>
+        <lastmod>2020-05-25T06:59:01.022Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
