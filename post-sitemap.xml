@@ -7,16 +7,8 @@
     </url>
 
     <url>
-        <loc>http://blog.lovedata.net/677d25fa.html</loc>
-        <lastmod>2020-05-27T06:37:20.536Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.6</priority>
-
-    </url>
-
-    <url>
         <loc>http://blog.lovedata.net/be4c4827.html</loc>
-        <lastmod>2020-05-27T06:37:19.701Z</lastmod>
+        <lastmod>2020-05-27T06:50:50.217Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
 
@@ -24,7 +16,7 @@
 
     <url>
         <loc>http://blog.lovedata.net/c9d3e91e.html</loc>
-        <lastmod>2020-05-27T06:37:19.701Z</lastmod>
+        <lastmod>2020-05-27T06:50:50.217Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
 
@@ -32,7 +24,15 @@
 
     <url>
         <loc>http://blog.lovedata.net/86c67651.html</loc>
-        <lastmod>2020-05-27T06:37:19.701Z</lastmod>
+        <lastmod>2020-05-27T06:50:50.217Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+
+    </url>
+
+    <url>
+        <loc>http://blog.lovedata.net/677d25fa.html</loc>
+        <lastmod>2020-05-27T06:50:50.217Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.6</priority>
 
