@@ -51,13 +51,6 @@
     </url>
 
     <url>
-        <loc>http://blog.lovedata.net/tags/Flink/</loc>
-        <lastmod>2020-05-09T02:41:14.075Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.2</priority>
-    </url>
-
-    <url>
         <loc>http://blog.lovedata.net/tags/Flink%E5%89%96%E6%9E%90%E7%B3%BB%E5%88%97/</loc>
         <lastmod>2020-05-09T02:41:14.075Z</lastmod>
         <changefreq>weekly</changefreq>
@@ -163,14 +156,14 @@
     </url>
 
     <url>
-        <loc>http://blog.lovedata.net/tags/%E9%9A%8F%E7%AC%94/</loc>
+        <loc>http://blog.lovedata.net/tags/%E7%94%9F%E6%B4%BB%E6%84%9F%E6%82%9F/</loc>
         <lastmod>2020-05-27T06:50:50.217Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
-        <loc>http://blog.lovedata.net/tags/%E7%94%9F%E6%B4%BB%E6%84%9F%E6%82%9F/</loc>
+        <loc>http://blog.lovedata.net/tags/%E9%9A%8F%E7%AC%94/</loc>
         <lastmod>2020-05-27T06:50:50.217Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
@@ -228,6 +221,34 @@
     <url>
         <loc>http://blog.lovedata.net/tags/%E5%A5%94%E8%B7%91%E7%9A%84%E8%9C%97%E7%89%9B/</loc>
         <lastmod>2020-05-27T09:17:25.393Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>http://blog.lovedata.net/tags/Flink/</loc>
+        <lastmod>2020-05-29T02:15:39.797Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>http://blog.lovedata.net/tags/%E5%85%B3%E9%94%AE%E8%AF%8D/</loc>
+        <lastmod>2020-05-29T02:15:39.797Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>http://blog.lovedata.net/tags/Hive/</loc>
+        <lastmod>2020-05-29T02:15:39.797Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>http://blog.lovedata.net/tags/FlinkSql/</loc>
+        <lastmod>2020-05-29T02:15:39.797Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>

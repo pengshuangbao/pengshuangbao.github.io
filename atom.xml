@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://blog.lovedata.net/"/>
-  <updated>2020-05-27T06:50:50.217Z</updated>
+  <updated>2020-05-29T02:15:39.797Z</updated>
   <id>http://blog.lovedata.net/</id>
   
   <author>
@@ -15,6 +15,38 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>一个本应三十秒解决掉的Flink函数名冲突问题</title>
+    <link href="http://blog.lovedata.net/71a0e226.html"/>
+    <id>http://blog.lovedata.net/71a0e226.html</id>
+    <published>2020-05-29T01:46:57.000Z</published>
+    <updated>2020-05-29T02:15:39.797Z</updated>
+    
+    <content type="html"><![CDATA[<h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>今天在跑一个Flink Table Api 实现的从Hive到Kafka的数据迁移的ETL任务的时候，产生了莫名其妙的错误。</p><p>有一个表假设表名为 table1,存放的是日志数据，表中有一个字段 localtime,是代表日志上报的时间戳，是number类型的。sql为 ” select localtime from table1 “,然后再用localtime去做一些转换操作，然后就报了错， java.lang.NumberFormatException,转换异常。</p><h2 id="问题分析"><a href="#问题分析" class="headerlink" title="问题分析"></a>问题分析</h2><h3 id="数据异常"><a href="#数据异常" class="headerlink" title="数据异常"></a>数据异常</h3><p>最开始的时候，一直是以为在这个表中，有脏数据，比如传入了未经转换的时间数据进去，因为报错的信息是说下面这种字符串无法转换，所以就去hive里面去查询，然而并没有找到类似的数据。</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">18:16:35.547</span><br></pre></td></tr></table></figure><h3 id="对比原始数据和flink查出的row数据"><a href="#对比原始数据和flink查出的row数据" class="headerlink" title="对比原始数据和flink查出的row数据"></a>对比原始数据和flink查出的row数据</h3><p>查出hive里面的原始数据，然后在打印出flink的row对象，一个个字段对比，发现了端倪。在经过对比后，发现所有的数据都是一致的，唯独这个localtime这一列不同，而且经过时间戳转换后发现，下面的时间和上面的时间完全没有任何联系。</p><p>后来定睛一看，下面的事件竟然和当前的时间一致，wtf,</p><p>“这是一个函数，返回当前时间!”</p><p><img src="http://static.lovedata.net/20-05-29-2037582630848e55c147f1857e2c4af8.png-wm" alt="image"></p><p>请看这个链接  <a href="https://ci.apache.org/projects/flink/flink-docs-master/dev/table/sql/" target="_blank" rel="noopener">Apache Flink 1.12-SNAPSHOT Documentation: SQL</a> ，localtime为保留字，<a href="https://ci.apache.org/projects/flink/flink-docs-release-1.8/dev/table/functions.html" target="_blank" rel="noopener">Apache Flink 1.8 Documentation: Built-In Functions</a> 这个网页上可以看到具体的函数定义。</p><p><img src="http://static.lovedata.net/20-05-29-c47b20ac9a610287f4cba039c696c1a3.png-wm" alt="image"></p><h2 id="问题解决"><a href="#问题解决" class="headerlink" title="问题解决"></a>问题解决</h2><p>既然是关键字，所以肯定不能直接写localtime，但是表里的字段已经定了，肯定不能轻易改的，所以加个转义就好了，类似下面的sql。</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">select `localtime` from table1</span><br></pre></td></tr></table></figure><h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>在建表建库的时候，坚决避免使用可能是保留字的词语，比如 local、time、timestamp、schema这些词，一个好的实践可以在表格字段前面加一些前缀，比如 t_table, c_name 等。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h2 id=&quot;背景&quot;&gt;&lt;a href=&quot;#背景&quot; class=&quot;headerlink&quot; title=&quot;背景&quot;&gt;&lt;/a&gt;背景&lt;/h2&gt;&lt;p&gt;今天在跑一个Flink Table Api 实现的从Hive到Kafka的数据迁移的ETL任务的时候，产生了莫名其妙的错误。&lt;/p&gt;
+&lt;p&gt;
+      
+    
+    </summary>
+    
+      <category term="Flink" scheme="http://blog.lovedata.net/categories/Flink/"/>
+    
+    
+      <category term="Flink" scheme="http://blog.lovedata.net/tags/Flink/"/>
+    
+      <category term="关键词" scheme="http://blog.lovedata.net/tags/%E5%85%B3%E9%94%AE%E8%AF%8D/"/>
+    
+      <category term="Hive" scheme="http://blog.lovedata.net/tags/Hive/"/>
+    
+      <category term="FlinkSql" scheme="http://blog.lovedata.net/tags/FlinkSql/"/>
+    
+  </entry>
   
   <entry>
     <title>基于HDP搭建的的Hbase调优实践-CMS GC调优</title>
@@ -529,34 +561,6 @@
     
     
       <category term="知识分享" scheme="http://blog.lovedata.net/tags/%E7%9F%A5%E8%AF%86%E5%88%86%E4%BA%AB/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>linux ln命令使用</title>
-    <link href="http://blog.lovedata.net/f342ad0c.html"/>
-    <id>http://blog.lovedata.net/f342ad0c.html</id>
-    <published>2018-05-23T03:59:33.000Z</published>
-    <updated>2020-05-25T09:51:19.299Z</updated>
-    
-    <content type="html"><![CDATA[<p>ln命令为创建软连接</p><h2 id="1-ln-s"><a href="#1-ln-s" class="headerlink" title="1. ln -s"></a>1. ln -s</h2><ul><li>新建一个link_source目录</li></ul><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mkdir link_source</span><br></pre></td></tr></table></figure><p><img src="http://static.lovedata.net/jpg/2018/5/23/0c159910014d3d70a7f303956c04904c.jpg-wm" alt="image"></p><ul><li>在link_souce下面新建一个文件</li></ul><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">touch link_source/source_file</span><br></pre></td></tr></table></figure><ul><li>新建软连接</li></ul><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ln -s link_source link_target</span><br></pre></td></tr></table></figure><p><img src="http://static.lovedata.net/jpg/2018/5/23/b1fcb0dd2cffdb234f0bf024df3dcadd.jpg-wm" alt="image"></p><ul><li>删除软连接</li></ul><p>删除软连接需要注意，一个不小心可能就把源文件给删除了下面举例说明<br><strong>正确的删除方法</strong></p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rm -rf link_target</span><br></pre></td></tr></table></figure><p>此时再去查看 link_source目录下面 文件还是存在的</p><p><img src="http://static.lovedata.net/jpg/2018/5/23/e235ec8fda3588aad4e216d2507cdab2.jpg-wm" alt="image"></p><p><strong>错误的删除方法</strong><br>在重新创建软链接后，使用下面的方法删除</p><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rm -rf link_target/</span><br></pre></td></tr></table></figure><p>看到，软连接没有删除掉，反而把源文件删除了！</p><p><img src="http://static.lovedata.net/jpg/2018/5/23/0130802cd66613a5bcb2016490d66637.jpg-wm" alt="image"></p><p><img src="http://static.lovedata.net/jpg/2018/5/23/cd8d41e2de08fafab0e41d946efe228f.jpg-wm" alt="image"></p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;ln命令为创建软连接&lt;/p&gt;
-&lt;h2 id=&quot;1-ln-s&quot;&gt;&lt;a href=&quot;#1-ln-s&quot; class=&quot;headerlink&quot; title=&quot;1. ln -s&quot;&gt;&lt;/a&gt;1. ln -s&lt;/h2&gt;&lt;ul&gt;
-&lt;li&gt;新建一个link_source目录&lt;/li&gt;
-&lt;/u
-      
-    
-    </summary>
-    
-      <category term="linux" scheme="http://blog.lovedata.net/categories/linux/"/>
-    
-    
-      <category term="linux命令" scheme="http://blog.lovedata.net/tags/linux%E5%91%BD%E4%BB%A4/"/>
     
   </entry>
   
