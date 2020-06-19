@@ -64,21 +64,21 @@
 
     <url>
         <loc>http://blog.lovedata.net/categories/Flink/</loc>
-        <lastmod>2020-06-18T02:08:32.918Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.2</priority>
-    </url>
-
-    <url>
-        <loc>http://blog.lovedata.net/categories/%E9%9A%8F%E7%AC%94/</loc>
-        <lastmod>2020-06-18T02:08:32.921Z</lastmod>
+        <lastmod>2020-06-19T02:08:30.366Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
         <loc>http://blog.lovedata.net/categories/Kylin/</loc>
-        <lastmod>2020-06-18T02:08:33.762Z</lastmod>
+        <lastmod>2020-06-19T02:08:30.632Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>http://blog.lovedata.net/categories/%E9%9A%8F%E7%AC%94/</loc>
+        <lastmod>2020-06-19T02:08:31.449Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>

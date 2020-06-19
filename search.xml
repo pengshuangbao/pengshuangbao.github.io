@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title><![CDATA[世界会像你对待她一样对待你]]></title>
+    <url>%2F6b5fe2c.html</url>
+    <content type="text"><![CDATA[​ 你对世界怎么样，世界就会对你怎么样。 ​ 社会就像一面镜子，你对她笑一笑，她也会对你笑一笑，你对她愁眉苦脸，她也会对你愁眉苦脸。有句老话说的很好：种瓜得瓜，种豆得豆。 在生活中，就有很多类似的例子，一个人经常埋怨社会，埋怨自己受到了不公平的待遇，觉得周围的人都在针对他，因而变得孤僻、沉默、小气、虚荣、斤斤计较，周而复始。相反，有的人就非常乐观地看待世界，常怀感恩，感恩清晨的太阳，感恩社会的安定，感恩马路清洁工的辛勤付出，感恩同事朋友的真诚相待，因而变得开朗、和善、慷慨、朴素、宽大为怀，循环不息。 ​ 2020年06月19日的早晨，我好想就变成了那个孤僻、沉默、小气、虚荣、斤斤计较的人。 ​ 早上依旧起来很早，七点多就出发去公司了，悠闲的骑着自行车往园区的方向去。这是一个有四个分园区组成的超大园区，纵深超过一公里，所以到了园区的边缘的时候，我并没有停下车，而是继续往里骑了一小段，大概一百米左右，找了一个空地停下来。其实，大多数自行车都是停在园区外围的，只有零星几辆停在这里的，而我仅仅是为了图这一百米距离的方便，就骑了进来。 ​ 当我关好锁，准备走的时候，一个穿着白色衬衣的保安跑了过来，说道： ​ “这里不能停单车的，你得停到那边去”，他指向了园区边上的停车区。 当听到这句话的时候，我内心其实并不抗拒，毕竟是自己理亏了，无话可说。 ​ “你是哪个公司的？是在这里上班吗？”， ​ “是啊”， ​ 听到这句话的时候，我犯了嘀咕，停个单车，你还得调查我的户口？我走了过去，推着自行车往外边走去。 这个时候，不忿，不爽，不屑，不理智情绪占据了大脑，我相信，大多数冲突都是因为这种心理在在作祟，我推了五十米左右，把车放在路边的空地上，因为旁边也有一辆单车，我觉得别人都停这了。 ​ “你得停到外面去!”，他追了上来。 ​ 我停下了脚步，没有说话。 ​ “你是哪个公司的？是在这里上班吗？” ​ 我又听到了这句话，我内心感觉他好像觉得我不配在这里上班，我感受到了深深的鄙视。 ​ “我是哪个公司上班你管得着么？”，我在爆发的边缘。 ​ “那里不能停车，我也没办法，别人都是停在外面的”， ​ 我没有多说什么了，把车推到了园区外面，理性艰难的压制住了愤怒。 ​ 这件事的根本原因是懒惰，次要原因是气量太小，斤斤计较，虚荣心作祟。如果不是偷那一百米的懒，如果不是逞那一毛钱的强，如果不是那一分钱不值的虚荣心，这一切都不会发生。 ​ 这些道理，在自己平静的时候，能够运用自如，能够娓娓道来，但真正遇到一些事情的时候，就完全抛之脑后了。 ​ 谨以此文，诫勉自己。]]></content>
+      <categories>
+        <category>随笔</category>
+      </categories>
+      <tags>
+        <tag>随笔</tag>
+        <tag>修身</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[Kylin源码解析-生成Hive宽表及其他操作]]></title>
     <url>%2F92eee585.html</url>
     <content type="text"><![CDATA[​ 前一章介绍了构建引擎相关的原理，本章介绍其中的Hive输入的相关操作。 ​ Hive相关主要分为以下几步： 生成Hive宽表 均匀打散上面生成的宽表 物化lookup维表 生成Hive宽表 这一步将数据从源Hive表提取出来(和所有join的表一起)插入到一个中间平表 。 ​ 在构建BatchCubingJobBuilder2的时候，会传入一个IJoinedFlatTableDesc实例，具体类图如下。这个实例代表着一个joined过后的一个宽表描述。他的tableName生成方式是 “kylin_intermediate_” + cubename + cube segementid。 ​ 这一步会根据上面的 flatDesc,生成 drop语句(主要为了防止任务一次执行失败后再次执行报错),create语句，以及插入数据的语句。具体生成的cmd命令如下。 12345678910111213141516171819hive -e "USE default;DROP TABLE IF EXISTS kylin_intermediate_test_95c27f57_d688_441f_9290_88a5bc17fc91;CREATE EXTERNAL TABLE IF NOT EXISTS kylin_intermediate_test_95c27f57_d688_441f_9290_88a5bc17fc91(name string,scroe string)STORED AS SEQUENCEFILELOCATION 'hdfs://xxx:8020/ssd/kylin/kylin_metadata_ssd/kylin-e4a1d140-2e7f-43e4-be4c-a6400a180ced/kylin_intermediate_test_95c27f57_d688_441f_9290_88a5bc17fc91';ALTER TABLE kylin_intermediate_test_95c27f57_d688_441f_9290_88a5bc17fc91 SET TBLPROPERTIES('auto.purge'='true');INSERT OVERWRITE TABLE kylin_intermediate_test_95c27f57_d688_441f_9290_88a5bc17fc91 SELECTtest.name as TEST_NAME,test.scroe as TEST_SCROEFROM ODS.TEST as TEST LEFT JOIN DIMENSION.REGION as REGIONON LOGFLOW_SHARE_CUBE.REGIONID = REGION.IDWHERE 1=1 AND (((TEST.DT = '2020-06-17' AND TEST.HR &gt;= '17') OR (TEST.DT &gt; '2020-06-17')) AND ((TEST.DT = '2020-06-17' AND TEST.HR &lt; '18') OR (TEST.DT &lt; '2020-06-17'))); ​ 具体的执行逻辑在 CreateFlatHiveTableStep 这个Executable中，是一个CubingJob的子任务。这一步分为以下几个步骤： 使用 HiveCmdBuilder这个类，依次传入前面的 init、drop、create、insert hql,生成一个hive命令，默认是使用 “hive -e”,如果配置了beeline，则先将上面的hql保存到临时文件中，在生成beeline语句，使用 -f 参数指向刚才生成的临时文件。 使用CliCommandExecutor类执行上面生成的cmd命令，如果kylin配置了kylin.job.use-remote-cli为true，则会获取kylin.job.remote-cli-hostname、kylin.job.remote-cli-port、kylin.job.remote-cli-username、kylin.job.remote-cli-password来进行远程登录执行脚本。 根据第二步，调用Hadoop API获取生成的HDFS文件的大小。 修改kylin_metadata中相关job的大小数据，如下图。 均匀打散上面生成的宽表​ 在上一步中，只是简单的将数据查出粗来，并且插入到一个平表当中，数据非常不均匀，有的文件大，有的文件小，有的事空的。在上一步，是 insert overwrite语句，所以只会生成 Mapper，没有Reducer。而后面的字典构建和Cuboid构建，是需要依赖这些生成的文件的，会根据这写文件生成相应的Mapper，如果这些文件不均匀，则有可能会导致数据倾斜，有的Mapper很快完成，有的则需要很久。 ​ 针对这个问题，Kylin增加一个一个重新打散的操作。这一步的Step类是RedistributeFlatHiveTableStep，是在HiveMRInput中实例化，会传入上一步生成的宽表，以及redistribute的hql语句，这个hql语句是根据cube的配置生成的，默认是按照 cube rowkey列的最前面3个列生成distribute by 语句。如果在配置rowkey的时候指定了 shard by ，则会按照这个字段进行 distribute by。 ​ 重新分发有下面几个步骤 构建重新分发的语句 获取上一步的宽表名称和数据库名称 根据第一步的表名，调用Hive API获取表的行数rowCount 获取kylin配置kylin.engine.mr.mapper-input-rows，默认值为 100000 计算numReducer 1numReducer = Math.round(rowCount / ((float) mapperInputRows)) 根据第一步生成的语句，调用 CliCommandExecutor，执行命令 将执行的命令存入到 Job的元数据信息中，比如下面框线里的就是 stepLogger记录的内容，这个内容或被加入到job元数据中，方便后面定位 获取这个重新分发的表的大小，并写入到Job元数据中。 物化lookup维表 这一步如果lookup表不是视图，就不会执行。 ​ 如果维度表是视图，就需要将这个视图物化为一张hivie表，表的存储目录在当前的job的工作空间+jobId目录下面。这个在日常工作中很少碰到，就不详细介绍了。 总结​ 本章介绍了Hive相关的三个步骤生成Hive宽表、均匀打散宽表和物化lookup维表。 下一章将介绍根据事实表抽取唯一列。 参考 Hive中order、sort、distribute、cluster by区别与联系 - 知乎]]></content>
@@ -350,14 +362,14 @@
       </tags>
   </entry>
   <entry>
-    <title><![CDATA[我的第一篇博客]]></title>
-    <url>%2Fd95d7e09.html</url>
-    <content type="text"><![CDATA[致读者你好，欢迎你来到编程狂想，我是奔跑的蜗牛。在这里你将看到我关于大数据技术和框架的一些理解和体会，并且以后所有博客将在这里发布，由于本人技术水平和认知能力有限，文中难免有认识不足和理解错误的地方，欢迎大家留言指正，我将感激不尽！]]></content>
+    <title><![CDATA[ScheduledThreadPoolExecutor中的scheduleAtFixedRate和scheduleWithFixedDely的区别]]></title>
+    <url>%2F7844dd7d.html</url>
+    <content type="text"><![CDATA[我们在开发中经常有定时调度某一个任务的需求，在java中常用的是通过定时调度线程池ScheduledThreadPoolExecutor来实现，这个线程池有两种方法 scheduleAtFixedRate scheduleWithFixedDelay 光知道概念还是比较虚的，下面通过具体的例子来运行一下。 测试代码123456789101112131415161718192021public class ScheduledThreadPoolTest &#123; public static void main(String[] args) &#123; ScheduledExecutorService pool = new ScheduledThreadPoolExecutor(1); int pollSecond = 2; pool.scheduleAtFixedRate(new TestRunner(), pollSecond / 10, pollSecond, TimeUnit.SECONDS); //pool.scheduleWithFixedDelay(new TestRunner(), pollSecond / 10, pollSecond, TimeUnit.SECONDS); &#125; static class TestRunner implements Runnable &#123; @Override public void run() &#123; System.out.println(DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss SSS")); try &#123; Thread.sleep(2000);//实验变量 &#125; catch (InterruptedException e) &#123; e.printStackTrace(); &#125; &#125; &#125;&#125; 运行结果scheduleAtFixedRate 当实验变量 Thread.sleep(2000); 值小于period 值 1234562018-04-08 09:44:58 2392018-04-08 09:45:00 3672018-04-08 09:45:02 3672018-04-08 09:45:04 3692018-04-08 09:45:06 3692018-04-08 09:45:08 369 当实验变量 Thread.sleep(3000); 值大于period 值 123452018-04-08 09:48:41 8822018-04-08 09:48:44 9692018-04-08 09:48:47 9692018-04-08 09:48:50 9692018-04-08 09:48:53 969 scheduleWithFixedDelay 当实验变量 Thread.sleep(2000); 值小于period 值 1234562018-04-08 09:50:29 3252018-04-08 09:50:33 4202018-04-08 09:50:37 4212018-04-08 09:50:41 4222018-04-08 09:50:45 4232018-04-08 09:50:49 424 当实验变量 Thread.sleep(3000); 值大于period 值 1234562018-04-08 09:51:20 8582018-04-08 09:51:26 0362018-04-08 09:51:31 0362018-04-08 09:51:36 0382018-04-08 09:51:41 0382018-04-08 09:51:46 039 结论 scheduleAtFixedRate 是以上一个任务开始的时间计时，period时间过去后，检测上一个任务是否执行完毕，如果上一个任务执行完毕，则当前任务立即执行，如果上一个任务没有执行完毕，则需要等上一个任务执行完毕后立即执行。 执行周期是 initialDelay 、initialDelay+period 、initialDelay + 2 * period} 、 … 如果延迟任务的执行时间大于了 period，比如为 5s，则后面的执行会等待5s才回去执行 scheduleWithFixedDelay 是以上一个任务结束时开始计时，period时间过去后，立即执行, 由上面的运行结果可以看出，第一个任务开始和第二个任务开始的间隔时间是 第一个任务的运行时间+period]]></content>
       <categories>
-        <category>随笔</category>
+        <category>Java</category>
       </categories>
       <tags>
-        <tag>博客</tag>
+        <tag>java多线程</tag>
       </tags>
   </entry>
   <entry>
@@ -371,17 +383,6 @@
         <tag>大数据</tag>
         <tag>Java</tag>
         <tag>奔跑的蜗牛</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[ScheduledThreadPoolExecutor中的scheduleAtFixedRate和scheduleWithFixedDely的区别]]></title>
-    <url>%2F7844dd7d.html</url>
-    <content type="text"><![CDATA[我们在开发中经常有定时调度某一个任务的需求，在java中常用的是通过定时调度线程池ScheduledThreadPoolExecutor来实现，这个线程池有两种方法 scheduleAtFixedRate scheduleWithFixedDelay 光知道概念还是比较虚的，下面通过具体的例子来运行一下。 测试代码123456789101112131415161718192021public class ScheduledThreadPoolTest &#123; public static void main(String[] args) &#123; ScheduledExecutorService pool = new ScheduledThreadPoolExecutor(1); int pollSecond = 2; pool.scheduleAtFixedRate(new TestRunner(), pollSecond / 10, pollSecond, TimeUnit.SECONDS); //pool.scheduleWithFixedDelay(new TestRunner(), pollSecond / 10, pollSecond, TimeUnit.SECONDS); &#125; static class TestRunner implements Runnable &#123; @Override public void run() &#123; System.out.println(DateUtils.format(new Date(), "yyyy-MM-dd HH:mm:ss SSS")); try &#123; Thread.sleep(2000);//实验变量 &#125; catch (InterruptedException e) &#123; e.printStackTrace(); &#125; &#125; &#125;&#125; 运行结果scheduleAtFixedRate 当实验变量 Thread.sleep(2000); 值小于period 值 1234562018-04-08 09:44:58 2392018-04-08 09:45:00 3672018-04-08 09:45:02 3672018-04-08 09:45:04 3692018-04-08 09:45:06 3692018-04-08 09:45:08 369 当实验变量 Thread.sleep(3000); 值大于period 值 123452018-04-08 09:48:41 8822018-04-08 09:48:44 9692018-04-08 09:48:47 9692018-04-08 09:48:50 9692018-04-08 09:48:53 969 scheduleWithFixedDelay 当实验变量 Thread.sleep(2000); 值小于period 值 1234562018-04-08 09:50:29 3252018-04-08 09:50:33 4202018-04-08 09:50:37 4212018-04-08 09:50:41 4222018-04-08 09:50:45 4232018-04-08 09:50:49 424 当实验变量 Thread.sleep(3000); 值大于period 值 1234562018-04-08 09:51:20 8582018-04-08 09:51:26 0362018-04-08 09:51:31 0362018-04-08 09:51:36 0382018-04-08 09:51:41 0382018-04-08 09:51:46 039 结论 scheduleAtFixedRate 是以上一个任务开始的时间计时，period时间过去后，检测上一个任务是否执行完毕，如果上一个任务执行完毕，则当前任务立即执行，如果上一个任务没有执行完毕，则需要等上一个任务执行完毕后立即执行。 执行周期是 initialDelay 、initialDelay+period 、initialDelay + 2 * period} 、 … 如果延迟任务的执行时间大于了 period，比如为 5s，则后面的执行会等待5s才回去执行 scheduleWithFixedDelay 是以上一个任务结束时开始计时，period时间过去后，立即执行, 由上面的运行结果可以看出，第一个任务开始和第二个任务开始的间隔时间是 第一个任务的运行时间+period]]></content>
-      <categories>
-        <category>Java</category>
-      </categories>
-      <tags>
-        <tag>java多线程</tag>
       </tags>
   </entry>
   <entry>
@@ -408,6 +409,17 @@
         <tag>大数据</tag>
         <tag>Java</tag>
         <tag>奔跑的蜗牛</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[我的第一篇博客]]></title>
+    <url>%2Fd95d7e09.html</url>
+    <content type="text"><![CDATA[致读者你好，欢迎你来到编程狂想，我是奔跑的蜗牛。在这里你将看到我关于大数据技术和框架的一些理解和体会，并且以后所有博客将在这里发布，由于本人技术水平和认知能力有限，文中难免有认识不足和理解错误的地方，欢迎大家留言指正，我将感激不尽！]]></content>
+      <categories>
+        <category>随笔</category>
+      </categories>
+      <tags>
+        <tag>博客</tag>
       </tags>
   </entry>
 </search>
