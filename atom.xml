@@ -191,34 +191,6 @@
   </entry>
   
   <entry>
-    <title>Kylin源码解析-kylin构建流程总览</title>
-    <link href="http://blog.lovedata.net/b6c1ac95.html"/>
-    <id>http://blog.lovedata.net/b6c1ac95.html</id>
-    <published>2020-06-16T03:14:32.000Z</published>
-    <updated>2020-06-19T09:57:06.852Z</updated>
-    
-    <content type="html"><![CDATA[<p><img src="http://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png-wm" alt="麒麟出没，必有祥瑞"></p><p>​    在上文<a href="https://blog.lovedata.net/1166eeb4.html">Kylin源码解析-kylin构建任务生成与调度执行 | 编程狂想</a> 中详细介绍了Kylin构建任务的生成和调度，其中讲到，会调用BatchCubingJobBuilder2的build方法，生成一个CubingJob实例，本文就介绍下这个build方法大致流程，并描述整个构建过程。    如下图所示，分为四个阶段和十四步。 </p><p><img src="http://static.lovedata.net/20-06-17-0775e4822d499ca415cf45cc80d73cc3.png-wm" alt="image">    </p><h2 id="阶段一：Create-Flat-Table-amp-Materialize-Hive-View-in-Lookup-Tables"><a href="#阶段一：Create-Flat-Table-amp-Materialize-Hive-View-in-Lookup-Tables" class="headerlink" title="阶段一：Create Flat Table &amp; Materialize Hive View in Lookup Tables"></a>阶段一：Create Flat Table &amp; Materialize Hive View in Lookup Tables</h2><h3 id="第一步：Create-Intermediate-Flat-Hive-Table"><a href="#第一步：Create-Intermediate-Flat-Hive-Table" class="headerlink" title="第一步：Create Intermediate Flat Hive Table"></a>第一步：Create Intermediate Flat Hive Table</h3><p>这一步将数据从Hive表中提取出来（会join所有的维表），并且一起插入到一张临时中间宽表中。会加上时间分区条件确保只有指定时间的数据才会被提取。</p><h3 id="第二步：Redistribute-Flat-Hive-Table"><a href="#第二步：Redistribute-Flat-Hive-Table" class="headerlink" title="第二步：Redistribute Flat Hive Table"></a>第二步：Redistribute Flat Hive Table</h3><p>上一步，hive在hdfs上的目录里生成了数据文件，但是不均匀，有的很大，有的很小，有的是空的，非常可能在后面的MR程序中导致数据倾斜，有的Mapper很快跑完，其他就很慢，kylin增加了这一步“重新分发”数据。</p><h3 id="第三步：Materialize-Hive-View-in-Lookup-Tables"><a href="#第三步：Materialize-Hive-View-in-Lookup-Tables" class="headerlink" title="第三步：Materialize Hive View in Lookup Tables"></a>第三步：Materialize Hive View in Lookup Tables</h3><hr><h2 id="阶段二：Build-Dictionary"><a href="#阶段二：Build-Dictionary" class="headerlink" title="阶段二：Build Dictionary"></a>阶段二：Build Dictionary</h2><h3 id="第四步：Extract-Fact-Table-Distinct-Columns"><a href="#第四步：Extract-Fact-Table-Distinct-Columns" class="headerlink" title="第四步：Extract Fact Table Distinct Columns"></a>第四步：Extract Fact Table Distinct Columns</h3><p>​    提取事实表的为一列，这一步kylin运行MR任务提取使用字典编码的维度列的谓一致。这一步还顺带通过HHL计数器手机cube的统计数据，用于估算每个cuboid的行数。</p><h3 id="第五步：Build-Dimension-Dictionary"><a href="#第五步：Build-Dimension-Dictionary" class="headerlink" title="第五步：Build Dimension Dictionary"></a>第五步：Build Dimension Dictionary</h3><p>​    这一步会根据前面的提取的维度列的谓一致，在内存里面构建字典，然后将字典存在hbase当中，并且修改cube的元数据。</p><h3 id="第六步：Save-Cuboid-Statistics"><a href="#第六步：Save-Cuboid-Statistics" class="headerlink" title="第六步：Save Cuboid Statistics"></a>第六步：Save Cuboid Statistics</h3><p>​    保存第四步生成的统计数据到cube元数据中。</p><h3 id="第七步：Create-HTable"><a href="#第七步：Create-HTable" class="headerlink" title="第七步：Create HTable"></a>第七步：Create HTable</h3><hr><h2 id="阶段三：Build-Cube"><a href="#阶段三：Build-Cube" class="headerlink" title="阶段三：Build Cube"></a>阶段三：Build Cube</h2><p>​    在hbase中创建htable。</p><h3 id="第八步：Build-Base-Cuboid"><a href="#第八步：Build-Base-Cuboid" class="headerlink" title="第八步：Build Base Cuboid"></a>第八步：Build Base Cuboid</h3><p>​    这一步用Hive的中间表的数据构建基础cuboid，是“layer”构建cube算法中的第一步。后面的构建会依赖于这个base cuboid。</p><h3 id="第九步：Build-ND-Cuboid"><a href="#第九步：Build-ND-Cuboid" class="headerlink" title="第九步：Build ND Cuboid"></a>第九步：Build ND Cuboid</h3><p>​    构建N维cuboid，这一步是一个逐层构建的过程，是根据cuboid数组计算出的一个层次，并循环这个层次数层层构建。每一步都会以前一步的输出作为输入，然后去掉一个维度以聚合得到一个子的cuboid。所以层级越往后，构建速度会越快。</p><h3 id="第十步：Convert-Cuboid-Data-to-HFile"><a href="#第十步：Convert-Cuboid-Data-to-HFile" class="headerlink" title="第十步：Convert Cuboid Data to HFile"></a>第十步：Convert Cuboid Data to HFile</h3><p>​    这一步使用MR任务将cuboid文件（序列文件格式）转换为hbase的hfile格式。</p><h3 id="第十一步：-Load-HFile-to-HBase-Table"><a href="#第十一步：-Load-HFile-to-HBase-Table" class="headerlink" title="第十一步： Load HFile to HBase Table"></a>第十一步： Load HFile to HBase Table</h3><p>​    将上一步生成的hfile使用hbase api导入到region server,轻量快速。</p><hr><h2 id="阶段四：Update-Metadata-amp-Cleanup"><a href="#阶段四：Update-Metadata-amp-Cleanup" class="headerlink" title="阶段四：Update Metadata &amp; Cleanup"></a>阶段四：Update Metadata &amp; Cleanup</h2><h3 id="第十二步：Update-Cube-Info"><a href="#第十二步：Update-Cube-Info" class="headerlink" title="第十二步：Update Cube Info"></a>第十二步：Update Cube Info</h3><p>​    修改kylin元数据，将对应的cube segment标记为ready。</p><h3 id="第十三步：Hive-Cleanup"><a href="#第十三步：Hive-Cleanup" class="headerlink" title="第十三步：Hive Cleanup"></a>第十三步：Hive Cleanup</h3><p>​    将中间宽表从Hive删除。</p><h3 id="第十四步：Garbage-Collection-on-HBase"><a href="#第十四步：Garbage-Collection-on-HBase" class="headerlink" title="第十四步：Garbage Collection on HBase"></a>第十四步：Garbage Collection on HBase</h3><p>​    Hbase上的垃圾数据删除。</p><hr><p>本文先大致列出相关的阶段和步骤，在后面文章中每个步骤都会详细介绍。</p><p>参考文档</p><p><a href="http://kylin.apache.org/cn/docs/howto/howto_optimize_build.html" target="_blank" rel="noopener">Apache Kylin | 优化 Cube 构建</a></p><hr><h3 id="Kylin源码解析系列目录"><a href="#Kylin源码解析系列目录" class="headerlink" title="Kylin源码解析系列目录"></a>Kylin源码解析系列目录</h3><h4 id="构建引擎系列"><a href="#构建引擎系列" class="headerlink" title="构建引擎系列"></a>构建引擎系列</h4><p>1、<a href="https://blog.lovedata.net/1166eeb4.html">Kylin源码解析-kylin构建任务生成与调度执行 | 编程狂想</a></p><p>2、<a href="https://blog.lovedata.net/b6c1ac95.html">Kylin源码解析-kylin构建流程总览 | 编程狂想</a></p><p>3、<a href="https://blog.lovedata.net/afece5b5.html">Kylin源码解析-构建引擎实现原理 | 编程狂想</a></p><p>4、<a href="https://blog.lovedata.net/92eee585.html">Kylin源码解析-生成Hive宽表及其他操作 | 编程狂想</a></p><p>5、<a href="https://blog.lovedata.net/b97d4c62.html">Kylin源码解析-提取事实表唯一列 | 编程狂想</a></p><p>6、<a href="https://blog.lovedata.net/37750c96.html">Kylin源码解析-构建层级分析 | 编程狂想</a></p><p>7、Kylin源码解析-构建数据字典和生成Cuboid统计数据</p><p>8、Kylin源码解析-生成Hbase表</p><p>9、Kylin源码解析-构建Cuboid</p><p>10、Kylin源码解析-转换HDFS为Hfile</p><p>11、Kylin源码解析-加载Hfile到Hbase中</p><p>12、Kylin源码解析-修改元数据以及其他清理工作</p><h4 id="查询引擎系列"><a href="#查询引擎系列" class="headerlink" title="查询引擎系列"></a>查询引擎系列</h4>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;&lt;img src=&quot;http://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png-wm&quot; alt=&quot;麒麟出没，必有祥瑞&quot;&gt;&lt;/p&gt;
-&lt;p&gt;​    在上文&lt;a href=&quot;https://b
-      
-    
-    </summary>
-    
-      <category term="Kylin" scheme="http://blog.lovedata.net/categories/Kylin/"/>
-    
-    
-      <category term="kylin" scheme="http://blog.lovedata.net/tags/kylin/"/>
-    
-      <category term="源码分析" scheme="http://blog.lovedata.net/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
-    
-  </entry>
-  
-  <entry>
     <title>Kylin源码解析-kylin构建任务生成与调度执行</title>
     <link href="http://blog.lovedata.net/1166eeb4.html"/>
     <id>http://blog.lovedata.net/1166eeb4.html</id>
@@ -233,6 +205,34 @@
       
         &lt;p&gt;&lt;img src=&quot;http://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png-wm&quot; alt=&quot;麒麟出没，必有祥瑞&quot;&gt;&lt;/p&gt;
 &lt;p&gt;​    本文介绍kylin的构建任务的生成流程，包
+      
+    
+    </summary>
+    
+      <category term="Kylin" scheme="http://blog.lovedata.net/categories/Kylin/"/>
+    
+    
+      <category term="kylin" scheme="http://blog.lovedata.net/tags/kylin/"/>
+    
+      <category term="源码分析" scheme="http://blog.lovedata.net/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Kylin源码解析-kylin构建流程总览</title>
+    <link href="http://blog.lovedata.net/b6c1ac95.html"/>
+    <id>http://blog.lovedata.net/b6c1ac95.html</id>
+    <published>2020-06-16T03:14:32.000Z</published>
+    <updated>2020-06-19T09:57:06.852Z</updated>
+    
+    <content type="html"><![CDATA[<p><img src="http://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png-wm" alt="麒麟出没，必有祥瑞"></p><p>​    在上文<a href="https://blog.lovedata.net/1166eeb4.html">Kylin源码解析-kylin构建任务生成与调度执行 | 编程狂想</a> 中详细介绍了Kylin构建任务的生成和调度，其中讲到，会调用BatchCubingJobBuilder2的build方法，生成一个CubingJob实例，本文就介绍下这个build方法大致流程，并描述整个构建过程。    如下图所示，分为四个阶段和十四步。 </p><p><img src="http://static.lovedata.net/20-06-17-0775e4822d499ca415cf45cc80d73cc3.png-wm" alt="image">    </p><h2 id="阶段一：Create-Flat-Table-amp-Materialize-Hive-View-in-Lookup-Tables"><a href="#阶段一：Create-Flat-Table-amp-Materialize-Hive-View-in-Lookup-Tables" class="headerlink" title="阶段一：Create Flat Table &amp; Materialize Hive View in Lookup Tables"></a>阶段一：Create Flat Table &amp; Materialize Hive View in Lookup Tables</h2><h3 id="第一步：Create-Intermediate-Flat-Hive-Table"><a href="#第一步：Create-Intermediate-Flat-Hive-Table" class="headerlink" title="第一步：Create Intermediate Flat Hive Table"></a>第一步：Create Intermediate Flat Hive Table</h3><p>这一步将数据从Hive表中提取出来（会join所有的维表），并且一起插入到一张临时中间宽表中。会加上时间分区条件确保只有指定时间的数据才会被提取。</p><h3 id="第二步：Redistribute-Flat-Hive-Table"><a href="#第二步：Redistribute-Flat-Hive-Table" class="headerlink" title="第二步：Redistribute Flat Hive Table"></a>第二步：Redistribute Flat Hive Table</h3><p>上一步，hive在hdfs上的目录里生成了数据文件，但是不均匀，有的很大，有的很小，有的是空的，非常可能在后面的MR程序中导致数据倾斜，有的Mapper很快跑完，其他就很慢，kylin增加了这一步“重新分发”数据。</p><h3 id="第三步：Materialize-Hive-View-in-Lookup-Tables"><a href="#第三步：Materialize-Hive-View-in-Lookup-Tables" class="headerlink" title="第三步：Materialize Hive View in Lookup Tables"></a>第三步：Materialize Hive View in Lookup Tables</h3><hr><h2 id="阶段二：Build-Dictionary"><a href="#阶段二：Build-Dictionary" class="headerlink" title="阶段二：Build Dictionary"></a>阶段二：Build Dictionary</h2><h3 id="第四步：Extract-Fact-Table-Distinct-Columns"><a href="#第四步：Extract-Fact-Table-Distinct-Columns" class="headerlink" title="第四步：Extract Fact Table Distinct Columns"></a>第四步：Extract Fact Table Distinct Columns</h3><p>​    提取事实表的为一列，这一步kylin运行MR任务提取使用字典编码的维度列的谓一致。这一步还顺带通过HHL计数器手机cube的统计数据，用于估算每个cuboid的行数。</p><h3 id="第五步：Build-Dimension-Dictionary"><a href="#第五步：Build-Dimension-Dictionary" class="headerlink" title="第五步：Build Dimension Dictionary"></a>第五步：Build Dimension Dictionary</h3><p>​    这一步会根据前面的提取的维度列的谓一致，在内存里面构建字典，然后将字典存在hbase当中，并且修改cube的元数据。</p><h3 id="第六步：Save-Cuboid-Statistics"><a href="#第六步：Save-Cuboid-Statistics" class="headerlink" title="第六步：Save Cuboid Statistics"></a>第六步：Save Cuboid Statistics</h3><p>​    保存第四步生成的统计数据到cube元数据中。</p><h3 id="第七步：Create-HTable"><a href="#第七步：Create-HTable" class="headerlink" title="第七步：Create HTable"></a>第七步：Create HTable</h3><hr><h2 id="阶段三：Build-Cube"><a href="#阶段三：Build-Cube" class="headerlink" title="阶段三：Build Cube"></a>阶段三：Build Cube</h2><p>​    在hbase中创建htable。</p><h3 id="第八步：Build-Base-Cuboid"><a href="#第八步：Build-Base-Cuboid" class="headerlink" title="第八步：Build Base Cuboid"></a>第八步：Build Base Cuboid</h3><p>​    这一步用Hive的中间表的数据构建基础cuboid，是“layer”构建cube算法中的第一步。后面的构建会依赖于这个base cuboid。</p><h3 id="第九步：Build-ND-Cuboid"><a href="#第九步：Build-ND-Cuboid" class="headerlink" title="第九步：Build ND Cuboid"></a>第九步：Build ND Cuboid</h3><p>​    构建N维cuboid，这一步是一个逐层构建的过程，是根据cuboid数组计算出的一个层次，并循环这个层次数层层构建。每一步都会以前一步的输出作为输入，然后去掉一个维度以聚合得到一个子的cuboid。所以层级越往后，构建速度会越快。</p><h3 id="第十步：Convert-Cuboid-Data-to-HFile"><a href="#第十步：Convert-Cuboid-Data-to-HFile" class="headerlink" title="第十步：Convert Cuboid Data to HFile"></a>第十步：Convert Cuboid Data to HFile</h3><p>​    这一步使用MR任务将cuboid文件（序列文件格式）转换为hbase的hfile格式。</p><h3 id="第十一步：-Load-HFile-to-HBase-Table"><a href="#第十一步：-Load-HFile-to-HBase-Table" class="headerlink" title="第十一步： Load HFile to HBase Table"></a>第十一步： Load HFile to HBase Table</h3><p>​    将上一步生成的hfile使用hbase api导入到region server,轻量快速。</p><hr><h2 id="阶段四：Update-Metadata-amp-Cleanup"><a href="#阶段四：Update-Metadata-amp-Cleanup" class="headerlink" title="阶段四：Update Metadata &amp; Cleanup"></a>阶段四：Update Metadata &amp; Cleanup</h2><h3 id="第十二步：Update-Cube-Info"><a href="#第十二步：Update-Cube-Info" class="headerlink" title="第十二步：Update Cube Info"></a>第十二步：Update Cube Info</h3><p>​    修改kylin元数据，将对应的cube segment标记为ready。</p><h3 id="第十三步：Hive-Cleanup"><a href="#第十三步：Hive-Cleanup" class="headerlink" title="第十三步：Hive Cleanup"></a>第十三步：Hive Cleanup</h3><p>​    将中间宽表从Hive删除。</p><h3 id="第十四步：Garbage-Collection-on-HBase"><a href="#第十四步：Garbage-Collection-on-HBase" class="headerlink" title="第十四步：Garbage Collection on HBase"></a>第十四步：Garbage Collection on HBase</h3><p>​    Hbase上的垃圾数据删除。</p><hr><p>本文先大致列出相关的阶段和步骤，在后面文章中每个步骤都会详细介绍。</p><p>参考文档</p><p><a href="http://kylin.apache.org/cn/docs/howto/howto_optimize_build.html" target="_blank" rel="noopener">Apache Kylin | 优化 Cube 构建</a></p><hr><h3 id="Kylin源码解析系列目录"><a href="#Kylin源码解析系列目录" class="headerlink" title="Kylin源码解析系列目录"></a>Kylin源码解析系列目录</h3><h4 id="构建引擎系列"><a href="#构建引擎系列" class="headerlink" title="构建引擎系列"></a>构建引擎系列</h4><p>1、<a href="https://blog.lovedata.net/1166eeb4.html">Kylin源码解析-kylin构建任务生成与调度执行 | 编程狂想</a></p><p>2、<a href="https://blog.lovedata.net/b6c1ac95.html">Kylin源码解析-kylin构建流程总览 | 编程狂想</a></p><p>3、<a href="https://blog.lovedata.net/afece5b5.html">Kylin源码解析-构建引擎实现原理 | 编程狂想</a></p><p>4、<a href="https://blog.lovedata.net/92eee585.html">Kylin源码解析-生成Hive宽表及其他操作 | 编程狂想</a></p><p>5、<a href="https://blog.lovedata.net/b97d4c62.html">Kylin源码解析-提取事实表唯一列 | 编程狂想</a></p><p>6、<a href="https://blog.lovedata.net/37750c96.html">Kylin源码解析-构建层级分析 | 编程狂想</a></p><p>7、Kylin源码解析-构建数据字典和生成Cuboid统计数据</p><p>8、Kylin源码解析-生成Hbase表</p><p>9、Kylin源码解析-构建Cuboid</p><p>10、Kylin源码解析-转换HDFS为Hfile</p><p>11、Kylin源码解析-加载Hfile到Hbase中</p><p>12、Kylin源码解析-修改元数据以及其他清理工作</p><h4 id="查询引擎系列"><a href="#查询引擎系列" class="headerlink" title="查询引擎系列"></a>查询引擎系列</h4>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;&lt;img src=&quot;http://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png-wm&quot; alt=&quot;麒麟出没，必有祥瑞&quot;&gt;&lt;/p&gt;
+&lt;p&gt;​    在上文&lt;a href=&quot;https://b
       
     
     </summary>
