@@ -28,14 +28,14 @@
     </url>
 
     <url>
-        <loc>http://blog.lovedata.net/categories/%E5%86%99%E4%BD%9C/</loc>
+        <loc>http://blog.lovedata.net/categories/linux/</loc>
         <lastmod>2020-05-25T09:51:19.299Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
-        <loc>http://blog.lovedata.net/categories/linux/</loc>
+        <loc>http://blog.lovedata.net/categories/%E5%86%99%E4%BD%9C/</loc>
         <lastmod>2020-05-25T09:51:19.299Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
@@ -64,21 +64,21 @@
 
     <url>
         <loc>http://blog.lovedata.net/categories/Flink/</loc>
-        <lastmod>2020-06-19T02:18:30.504Z</lastmod>
+        <lastmod>2020-06-19T08:06:11.075Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
         <loc>http://blog.lovedata.net/categories/Kylin/</loc>
-        <lastmod>2020-06-19T02:18:30.518Z</lastmod>
+        <lastmod>2020-06-19T08:06:11.086Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
         <loc>http://blog.lovedata.net/categories/%E9%9A%8F%E7%AC%94/</loc>
-        <lastmod>2020-06-19T02:18:31.387Z</lastmod>
+        <lastmod>2020-06-19T08:06:11.087Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
