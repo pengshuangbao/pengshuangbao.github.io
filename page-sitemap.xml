@@ -7,7 +7,7 @@
     </url>
     
     <url>
-        <loc>http://blog.lovedata.net/about/</loc>
+        <loc>http://blog.lovedata.net/tags/</loc>
         <lastmod>2020-06-19T09:57:06.925Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
@@ -21,7 +21,7 @@
     </url>
     
     <url>
-        <loc>http://blog.lovedata.net/tags/</loc>
+        <loc>http://blog.lovedata.net/about/</loc>
         <lastmod>2020-06-19T09:57:06.925Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
