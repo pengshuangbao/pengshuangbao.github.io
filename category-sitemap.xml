@@ -42,14 +42,14 @@
     </url>
 
     <url>
-        <loc>http://blog.lovedata.net/categories/Kylin/</loc>
+        <loc>http://blog.lovedata.net/categories/%E5%B7%A5%E5%85%B7/</loc>
         <lastmod>2020-06-19T09:57:06.864Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
 
     <url>
-        <loc>http://blog.lovedata.net/categories/%E5%B7%A5%E5%85%B7/</loc>
+        <loc>http://blog.lovedata.net/categories/Kylin/</loc>
         <lastmod>2020-06-19T09:57:06.864Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
@@ -85,7 +85,7 @@
 
     <url>
         <loc>http://blog.lovedata.net/categories/Kudu/</loc>
-        <lastmod>2020-07-22T01:28:12.431Z</lastmod>
+        <lastmod>2020-10-29T08:40:09.394Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
