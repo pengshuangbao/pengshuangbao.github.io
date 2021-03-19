@@ -42,13 +42,6 @@
     </url>
 
     <url>
-        <loc>http://blog.lovedata.net/categories/Kudu/</loc>
-        <lastmod>2020-10-29T08:41:04.789Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.2</priority>
-    </url>
-
-    <url>
         <loc>http://blog.lovedata.net/categories/%E5%B7%A5%E5%85%B7/</loc>
         <lastmod>2020-10-29T08:41:04.791Z</lastmod>
         <changefreq>weekly</changefreq>
@@ -70,6 +63,13 @@
     </url>
 
     <url>
+        <loc>http://blog.lovedata.net/categories/%E9%9A%8F%E7%AC%94/</loc>
+        <lastmod>2020-10-29T08:41:04.792Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
         <loc>http://blog.lovedata.net/categories/%E8%BF%90%E7%BB%B4/</loc>
         <lastmod>2020-10-29T08:41:04.792Z</lastmod>
         <changefreq>weekly</changefreq>
@@ -84,8 +84,8 @@
     </url>
 
     <url>
-        <loc>http://blog.lovedata.net/categories/%E9%9A%8F%E7%AC%94/</loc>
-        <lastmod>2020-10-29T08:41:04.793Z</lastmod>
+        <loc>http://blog.lovedata.net/categories/Kudu/</loc>
+        <lastmod>2021-03-19T02:02:52.163Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
