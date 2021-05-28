@@ -42,13 +42,6 @@
     </url>
 
     <url>
-        <loc>http://blog.lovedata.net/categories/%E5%B7%A5%E5%85%B7/</loc>
-        <lastmod>2020-10-29T08:41:04.791Z</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.2</priority>
-    </url>
-
-    <url>
         <loc>http://blog.lovedata.net/categories/Kylin/</loc>
         <lastmod>2020-10-29T08:41:04.791Z</lastmod>
         <changefreq>weekly</changefreq>
@@ -57,6 +50,13 @@
 
     <url>
         <loc>http://blog.lovedata.net/categories/linux/</loc>
+        <lastmod>2020-10-29T08:41:04.791Z</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.2</priority>
+    </url>
+
+    <url>
+        <loc>http://blog.lovedata.net/categories/%E5%B7%A5%E5%85%B7/</loc>
         <lastmod>2020-10-29T08:41:04.791Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
@@ -78,7 +78,7 @@
 
     <url>
         <loc>http://blog.lovedata.net/categories/Kudu/</loc>
-        <lastmod>2021-04-21T07:07:52.064Z</lastmod>
+        <lastmod>2021-05-28T08:38:47.328Z</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.2</priority>
     </url>
