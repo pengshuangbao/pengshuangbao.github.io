@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.lovedata.net","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="背景环境HDP : 2.6.5.0-292 Hbase : 1.1.2 Kylin : 2.6.2 Kylin使用hbase作为存储，每小时的第五分钟开始构建，有十几个Cube，平均构建时间十五分钟。采用构建集群和存储集群分离。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="基于HDP搭建的的Hbase调优实践-CMS GC调优">
+<meta property="og:url" content="http://blog.lovedata.net/677d25fa.html">
+<meta property="og:site_name" content="编程狂想">
+<meta property="og:description" content="背景环境HDP : 2.6.5.0-292 Hbase : 1.1.2 Kylin : 2.6.2 Kylin使用hbase作为存储，每小时的第五分钟开始构建，有十几个Cube，平均构建时间十五分钟。采用构建集群和存储集群分离。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://static.lovedata.net/20-05-27-93f19ee1e72c734f38627fc2b95ba5e1.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/20-05-27-07d5a7f5b7b397f83f11cd10007ba23d.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/20-05-27-628e00b009eff46ccb22efd224dcef1d.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/20-05-27-2abaf80cf370a4a9d0c0d5c3228d83f5.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/20-05-27-ad7a1437b95263b6050fcaa14d3e0d4a.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/20-05-27-4dda28e65ac2a4b26da65c344295a333.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/20-05-27-d34e512d75b41e07022f496b534c8e10.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/20-05-27-7092c9e970f2909006642b66dcab3548.png-wm">
+<meta property="article:published_time" content="2020-05-27T02:47:13.000Z">
+<meta property="article:modified_time" content="2022-03-10T04:02:49.459Z">
+<meta property="article:author" content="奔跑的蜗牛">
+<meta property="article:tag" content="Hbase">
+<meta property="article:tag" content="JVM">
+<meta property="article:tag" content="HDP">
+<meta property="article:tag" content="Ambari">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://static.lovedata.net/20-05-27-93f19ee1e72c734f38627fc2b95ba5e1.png-wm">
+
+<link rel="canonical" href="http://blog.lovedata.net/677d25fa.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>基于HDP搭建的的Hbase调优实践-CMS GC调优 | 编程狂想</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?111de68d01ad3c3504848c187c4bae5c";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="编程狂想" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta custom-logo">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">编程狂想</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">让数据飞一会儿</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lovedata.net/677d25fa.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="奔跑的蜗牛">
+      <meta itemprop="description" content="大数据技术文章、技术研究与交流">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="编程狂想">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          基于HDP搭建的的Hbase调优实践-CMS GC调优
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-05-27 10:47:13" itemprop="dateCreated datePublished" datetime="2020-05-27T10:47:13+08:00">2020-05-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-10 12:02:49" itemprop="dateModified" datetime="2022-03-10T12:02:49+08:00">2022-03-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Hbase/" itemprop="url" rel="index"><span itemprop="name">Hbase</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/677d25fa.html" class="post-meta-item leancloud_visitors" data-flag-title="基于HDP搭建的的Hbase调优实践-CMS GC调优" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/677d25fa.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/677d25fa.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><h3 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h3><p>HDP : 2.6.5.0-292</p>
+<p>Hbase : 1.1.2</p>
+<p>Kylin : 2.6.2</p>
+<p>Kylin使用hbase作为存储，每小时的第五分钟开始构建，有十几个Cube，平均构建时间十五分钟。采用构建集群和存储集群分离。</p>
+<span id="more"></span>
+<h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>最近几天观察Kylin的查询响应时间曲线图，发现每天的响应时间在1-3秒请求的在逐步增多，也就是说，kylin查询变得越来越慢，但是三秒以上的却很少，几乎没有，说明这个慢，是比较平稳的变慢，而不是一会儿很快，一会慢的很离谱(可能发生了Full GC，或者老年代GC时间过长)，请看下图。</p>
+<p><img src="https://static.lovedata.net/20-05-27-93f19ee1e72c734f38627fc2b95ba5e1.png-wm" alt="image"></p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><h3 id="由于访问量增加导致？"><a href="#由于访问量增加导致？" class="headerlink" title="由于访问量增加导致？"></a>由于访问量增加导致？</h3><p>通过查看过去几天的访问量，发现并没有过多变化，非常平稳。所以这个原因排除	<img src="https://static.lovedata.net/20-05-27-07d5a7f5b7b397f83f11cd10007ba23d.png-wm" alt="image"></p>
+<h3 id="由于机器负载过高或者内存不足或者网络流量过高导致"><a href="#由于机器负载过高或者内存不足或者网络流量过高导致" class="headerlink" title="由于机器负载过高或者内存不足或者网络流量过高导致?"></a>由于机器负载过高或者内存不足或者网络流量过高导致?</h3><ol>
+<li>负载并无异常</li>
+</ol>
+<p><img src="https://static.lovedata.net/20-05-27-628e00b009eff46ccb22efd224dcef1d.png-wm" alt="image"></p>
+<ol start="2">
+<li>内存并无异常</li>
+</ol>
+<p><img src="https://static.lovedata.net/20-05-27-2abaf80cf370a4a9d0c0d5c3228d83f5.png-wm" alt="image"></p>
+<ol start="3">
+<li>网络并无异常</li>
+</ol>
+<p><img src="https://static.lovedata.net/20-05-27-ad7a1437b95263b6050fcaa14d3e0d4a.png-wm" alt="image"></p>
+<h3 id="Kylin-JVM-异常"><a href="#Kylin-JVM-异常" class="headerlink" title="Kylin JVM 异常"></a>Kylin JVM 异常</h3><h4 id="查看Vm-args-信息"><a href="#查看Vm-args-信息" class="headerlink" title="查看Vm args 信息"></a>查看Vm args 信息</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jinfo  -flags 98730</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://static.lovedata.net/20-05-27-4dda28e65ac2a4b26da65c344295a333.png-wm" alt="image"></p>
+<p>可以看出，Kylin使用的是CMS老年代垃圾收集器，搭配ParNew作为新生代垃圾回收器，最大晋升年龄为6。</p>
+<h4 id="查看GC基本信息"><a href="#查看GC基本信息" class="headerlink" title="查看GC基本信息"></a>查看GC基本信息</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jstat -gcutil 98730  2000 100</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">S0     S1     E      O      M     CCS    YGC     YGCT    FGC    FGCT     GCT</span><br><span class="line">5.05   0.00  52.12  22.66  66.71  44.97    930   78.303     8    1.574   79.877</span><br><span class="line">5.05   0.00  54.85  22.66  66.71  44.97    930   78.303     8    1.574   79.877</span><br><span class="line">5.05   0.00  56.57  22.66  66.71  44.97    930   78.303     8    1.574   79.877</span><br><span class="line">5.05   0.00  60.09  22.66  66.71  44.97    930   78.303     8    1.574   79.877</span><br><span class="line">5.05   0.00  62.48  22.66  66.71  44.97    930   78.303     8    1.574   79.877</span><br><span class="line">5.05   0.00  67.98  22.66  66.71  44.97    930   78.303     8    1.574   79.877</span><br><span class="line">5.05   0.00  71.43  22.66  66.71  44.97    930   78.303     8    1.574   79.877</span><br><span class="line">5.05   0.00  77.33  22.66  66.71  44.97    930   78.303     8    1.574   79.877</span><br><span class="line">5.05   0.00  84.86  22.66  66.71  44.97    930   78.303     8    1.574   79.877</span><br><span class="line">5.05   0.00  93.40  22.66  66.71  44.97    930   78.303     8    1.574   79.877</span><br><span class="line">5.05   0.00  97.94  22.66  66.71  44.97    930   78.303     8    1.574   79.877</span><br><span class="line">0.00   5.72   6.87  22.66  66.67  45.00    931   78.362     8    1.574   79.936</span><br><span class="line">0.00   5.72  10.84  22.66  66.67  45.00    931   78.362     8    1.574   79.936</span><br><span class="line">0.00   5.72  19.11  22.66  66.67  45.00    931   78.362     8    1.574   79.936</span><br><span class="line">0.00   5.72  24.05  22.66  66.67  45.00    931   78.362     8    1.574   79.936</span><br></pre></td></tr></table></figure>
+
+
+
+<p> 从上面可以发现:</p>
+<ol>
+<li><p>从运行至今，总共进行了8次Full GC，总用时不到两秒；</p>
+</li>
+<li><p>YGC次数在20秒左右增加了一次，并且这一次Eden区减少到了 6.87%，S1区域使用5.72%,但是老年代却是没有增加加；仍然是66.67，说明Kylin虚拟机内存分布中，大都是朝生夕灭的短寿对象；</p>
+</li>
+<li><p>Monitor GC时间也非常短。</p>
+</li>
+</ol>
+<p><img src="https://static.lovedata.net/20-05-27-d34e512d75b41e07022f496b534c8e10.png-wm" alt="image"></p>
+<h4 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h4><p>  Kylin 的 JVM无异常现象，排除。</p>
+<h3 id="Hbase-Regionserver的JVM问题"><a href="#Hbase-Regionserver的JVM问题" class="headerlink" title="Hbase Regionserver的JVM问题"></a>Hbase Regionserver的JVM问题</h3><p>Hbase主要对外提供服务的进程是RegionServer，负责的任务非常多，比如<strong>读写缓存，storefile的合并</strong>等等。另外regionserver是<strong>长寿对象居多</strong>的工程，分为以下几种对象：</p>
+<ol>
+<li>RPC请求对象，短寿对象，随请求销毁而忘；</li>
+<li>Memstore 对象， 长寿对象 写入MemStore之后就一直存在，直到flush到hdfs，通常需要一个小时到几个小时。 一般都很大，有 2M左右；</li>
+<li>BlockCache对象，和MemStore一样，长寿对象，默认64K。</li>
+</ol>
+<p>  所以regionserver的jvm调优就变得非常重要。分析流程：</p>
+<h4 id="JVM-vm-args分析"><a href="#JVM-vm-args分析" class="headerlink" title="JVM vm args分析"></a>JVM vm args分析</h4>  <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">VM Flags:</span><br><span class="line">Non-default VM flags: -XX:CICompilerCount=15 -XX:CMSInitiatingOccupancyFraction=50 -XX:ErrorFile=null -XX:InitialHeapSize=13153337344 -XX:+ManagementServer -XX:MaxHeapSize=13153337344 -XX:MaxNewSize=2625634304 -XX:MaxTenuringThreshold=6 -XX:MinHeapDeltaBytes=196608 -XX:NewSize=2625634304 -XX:OldPLABSize=16 -XX:OldSize=10527703040 -XX:OnOutOfMemoryError=null -XX:+PrintGC -XX:+PrintGCDateStamps -XX:+PrintGCDetails -XX:+PrintGCTimeStamps -XX:+UseCMSInitiatingOccupancyOnly -XX:+UseCompressedClassPointers -XX:+UseCompressedOops -XX:+UseConcMarkSweepGC -XX:+UseFastUnorderedTimeStamps -XX:+UseParNewGC</span><br><span class="line">Command line:  -Dproc_regionserver -XX:OnOutOfMemoryError=kill -9 %p -Dhdp.version=2.6.5.0-292 -XX:+UseConcMarkSweepGC -XX:ErrorFile=/var/log/hbase/hs_err_pid%p.log -Djava.io.tmpdir=/tmp -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:/var/log/hbase/gc.log-202005141054 -Xmn2504m -XX:CMSInitiatingOccupancyFraction=50 -XX:+UseCMSInitiatingOccupancyOnly -Xms12544m -Xmx12544m -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.port=10102 -javaagent:/data1/prometheus/jmx_prometheus_javaagent-0.12.0.jar=17001:/data1/prometheus/hbase_jmx_config.yaml -Dhbase.log.dir=/var/log/hbase -Dhbase.log.file=hbase-hbase-regionserver-ssd3.log -Dhbase.home.dir=/usr/hdp/current/hbase-regionserver/bin/.. -Dhbase.id.str=hbase -Dhbase.root.logger=INFO,RFA -Djava.library.path=:/usr/hdp/2.6.5.0-292/hadoop/lib/native/Linux-amd64-64:/usr/hdp/2.6.5.0-292/hadoop/lib/native/Linux-amd64-64:/usr/hdp/2.6.5.0-292/hadoop/lib/native -Dhbase.security.logger=INFO,RFAS</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>使用CMS老年代垃圾收集器，搭配ParNew作为新生代垃圾回收器，最大晋升年龄为6。</li>
+<li>CMSInitiatingOccupancyFraction为50，也就是老年代在内存占用为50%的时候，就会触发CMS GC。</li>
+</ol>
+<h4 id="GC-情况"><a href="#GC-情况" class="headerlink" title="GC 情况"></a>GC 情况</h4> <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jstat -gcutil  109443   2000 100</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">  S0     S1     E      O      M     CCS    YGC     YGCT    FGC    FGCT     GCT</span><br><span class="line">100.00   0.00  35.92  70.33  71.54  42.51 219024 48865.108 237744 12510.026 61375.134</span><br><span class="line">  0.00  96.18  47.73  72.92  71.54  42.51 219025 48865.267 237744 12510.026 61375.293</span><br><span class="line">  0.00  96.18  95.20  72.92  71.54  42.51 219025 48865.267 237745 12510.064 61375.330</span><br><span class="line"> 25.66   0.00  38.03  72.92  71.54  42.51 219026 48865.281 237745 12510.064 61375.345</span><br><span class="line"> 25.66   0.00  58.60  68.28  71.54  42.51 219026 48865.281 237746 12510.131 61375.412</span><br><span class="line">  0.00  16.30   7.49  64.22  71.55  42.51 219027 48865.296 237747 12510.134 61375.430</span><br><span class="line">  0.00  16.30  68.66  64.21  71.55  42.51 219027 48865.296 237748 12510.230 61375.526</span><br><span class="line">100.00   0.00  51.23  69.66  71.55  42.51 219028 48866.550 237748 12510.230 61376.779</span><br><span class="line">  0.00  87.40  79.47  72.36  71.55  42.51 219029 48866.728 237749 12510.246 61376.974</span><br><span class="line"> 42.13   0.00  45.35  72.36  71.55  42.51 219030 48866.756 237749 12510.246 61377.002</span><br><span class="line"> 42.13   0.00  56.93  69.08  71.55  42.51 219030 48866.756 237750 12510.330 61377.086</span><br><span class="line"> 42.13   0.00  93.60  64.76  71.55  42.51 219030 48866.756 237750 12510.330 61377.086</span><br><span class="line">  0.00  49.08   6.81  63.74  71.55  42.51 219031 48866.784 237750 12510.330 61377.114</span><br><span class="line">  0.00  49.08  78.97  63.74  71.55  42.51 219031 48866.784 237751 12510.339 61377.123</span><br><span class="line">100.00   0.00  60.26  68.84  71.55  42.51 219032 48867.879 237752 12510.447 61378.326</span><br><span class="line">  0.00  90.35  59.46  71.46  71.55  42.51 219033 48868.052 237753 12510.463 61378.515</span><br><span class="line"> 41.10   0.00  59.31  71.83  71.55  42.51 219034 48868.160 237754 12510.562 61378.722</span><br></pre></td></tr></table></figure>
+
+<p>结果分析：</p>
+<ol>
+<li><p>YGC非常频繁，平均每两秒就会又一次YGC，总共进行二十多万次YGC，平均每一次200ms左右，时间过长；</p>
+</li>
+<li><p>YCC每次清理的并不是很干净，比如上面第一次，Eden区从95%清理到38%；</p>
+</li>
+<li><p>YGC发生后，老年代的使用率也增加较快，证明对象过早的进入了老年代；</p>
+</li>
+<li><p>老年代的GC也非常频繁,甚至比新生代的次数还要多，说明收集过于频繁。</p>
+</li>
+</ol>
+<p>  下面是截取的一段具体的GC日志</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br></pre></td><td class="code"><pre><span class="line">2020-05-26T17:04:03.872+0800: 1058975.570: [CMS-concurrent-abortable-preclean: 1.554/1.863 secs] [Times: user=5.96 sys=0.00, real=1.86 secs]</span><br><span class="line">2020-05-26T17:04:03.874+0800: 1058975.572: [GC (CMS Final Remark) [YG occupancy: 1437824 K (2307712 K)]2020-05-26T17:04:03.874+0800: 1058975.572: [Rescan (parallel) , 0.0891795 secs]2020-05-26T17:04:03.963+0800: 1058975.661: [weak refs processing, 0.0000377 secs]2020-05-26T17:04:03.963+0800: 1058975.661: [class unloading, 0.0188261 secs]2020-05-26T17:04:03.982+0800: 1058975.680: [scrub symbol table, 0.0064729 secs]2020-05-26T17:04:03.988+0800: 1058975.686: [scrub string table, 0.0007631 secs][1 CMS-remark: 7479514K(10280960K)] 8917339K(12588672K), 0.1154363 secs] [Times: user=2.06 sys=0.00, real=0.12 secs]</span><br><span class="line">2020-05-26T17:04:03.989+0800: 1058975.687: [CMS-concurrent-sweep-start]</span><br><span class="line">2020-05-26T17:04:05.636+0800: 1058977.334: [CMS-concurrent-sweep: 1.647/1.647 secs] [Times: user=2.90 sys=0.00, real=1.64 secs]</span><br><span class="line">2020-05-26T17:04:05.641+0800: 1058977.340: [CMS-concurrent-reset-start]</span><br><span class="line">2020-05-26T17:04:05.659+0800: 1058977.357: [CMS-concurrent-reset: 0.018/0.018 secs] [Times: user=0.04 sys=0.00, real=0.02 secs]</span><br><span class="line">2020-05-26T17:04:07.660+0800: 1058979.359: [GC (CMS Initial Mark) [1 CMS-initial-mark: 6593887K(10280960K)] 8489670K(12588672K), 0.0829345 secs] [Times: user=1.60 sys=0.00, real=0.08 secs]</span><br><span class="line">2020-05-26T17:04:07.743+0800: 1058979.442: [CMS-concurrent-mark-start]</span><br><span class="line">2020-05-26T17:04:08.096+0800: 1058979.794: [CMS-concurrent-mark: 0.353/0.353 secs] [Times: user=2.18 sys=0.00, real=0.35 secs]</span><br><span class="line">2020-05-26T17:04:08.096+0800: 1058979.795: [CMS-concurrent-preclean-start]</span><br><span class="line">2020-05-26T17:04:08.117+0800: 1058979.815: [CMS-concurrent-preclean: 0.020/0.020 secs] [Times: user=0.02 sys=0.00, real=0.02 secs]</span><br><span class="line">2020-05-26T17:04:08.117+0800: 1058979.815: [CMS-concurrent-abortable-preclean-start]</span><br><span class="line">2020-05-26T17:04:10.577+0800: 1058982.275: [GC (Allocation Failure) 2020-05-26T17:04:10.577+0800: 1058982.275: [ParNew: 2267483K-&gt;80578K(2307712K), 0.0291582 secs] 8861370K-&gt;6674466K(12588672K), 0.0293826 secs] [Times: user=0.58 sys=0.00, real=0.03 secs]</span><br><span class="line"> CMS: abort preclean due to time 2020-05-26T17:04:13.332+0800: 1058985.030: [CMS-concurrent-abortable-preclean: 4.169/5.215 secs] [Times: user=6.60 sys=0.00, real=5.22 secs]</span><br><span class="line">2020-05-26T17:04:13.334+0800: 1058985.032: [GC (CMS Final Remark) [YG occupancy: 586392 K (2307712 K)]2020-05-26T17:04:13.334+0800: 1058985.032: [Rescan (parallel) , 0.0208641 secs]2020-05-26T17:04:13.355+0800: 1058985.053: [weak refs processing, 0.0000680 secs]2020-05-26T17:04:13.355+0800: 1058985.053: [class unloading, 0.0568393 secs]2020-05-26T17:04:13.412+0800: 1058985.110: [scrub symbol table, 0.0138110 secs]2020-05-26T17:04:13.425+0800: 1058985.124: [scrub string table, 0.0011695 secs][1 CMS-remark: 6593887K(10280960K)] 7180280K(12588672K), 0.0929308 secs] [Times: user=0.53 sys=0.00, real=0.09 secs]</span><br><span class="line">2020-05-26T17:04:13.427+0800: 1058985.125: [CMS-concurrent-sweep-start]</span><br><span class="line">2020-05-26T17:04:14.511+0800: 1058986.210: [CMS-concurrent-sweep: 1.080/1.085 secs] [Times: user=2.27 sys=0.00, real=1.09 secs]</span><br><span class="line">2020-05-26T17:04:14.512+0800: 1058986.210: [CMS-concurrent-reset-start]</span><br><span class="line">2020-05-26T17:04:14.538+0800: 1058986.236: [CMS-concurrent-reset: 0.026/0.026 secs] [Times: user=0.05 sys=0.00, real=0.03 secs]</span><br><span class="line">2020-05-26T17:04:15.144+0800: 1058986.842: [GC (Allocation Failure) 2020-05-26T17:04:15.144+0800: 1058986.842: [ParNew: 2131906K-&gt;256384K(2307712K), 1.2043355 secs] 8710471K-&gt;7428897K(12588672K), 1.2045373 secs] [Times: user=22.59 sys=0.86, real=1.21 secs]</span><br><span class="line">2020-05-26T17:04:16.350+0800: 1058988.048: [GC (CMS Initial Mark) [1 CMS-initial-mark: 7172513K(10280960K)] 7453650K(12588672K), 0.0183647 secs] [Times: user=0.34 sys=0.03, real=0.02 secs]</span><br><span class="line">2020-05-26T17:04:16.368+0800: 1058988.066: [CMS-concurrent-mark-start]</span><br><span class="line">2020-05-26T17:04:16.640+0800: 1058988.339: [CMS-concurrent-mark: 0.272/0.272 secs] [Times: user=1.89 sys=0.40, real=0.27 secs]</span><br><span class="line">2020-05-26T17:04:16.641+0800: 1058988.339: [CMS-concurrent-preclean-start]</span><br><span class="line">2020-05-26T17:04:16.685+0800: 1058988.383: [CMS-concurrent-preclean: 0.044/0.044 secs] [Times: user=0.08 sys=0.01, real=0.04 secs]</span><br><span class="line">2020-05-26T17:04:16.685+0800: 1058988.383: [CMS-concurrent-abortable-preclean-start]</span><br><span class="line">2020-05-26T17:04:17.742+0800: 1058989.441: [GC (Allocation Failure) 2020-05-26T17:04:17.743+0800: 1058989.441: [ParNew: 2307712K-&gt;215445K(2307712K), 0.1832540 secs] 9480225K-&gt;7666856K(12588672K), 0.1834614 secs] [Times: user=2.20 sys=0.29, real=0.18 secs]</span><br><span class="line">2020-05-26T17:04:18.652+0800: 1058990.350: [CMS-concurrent-abortable-preclean: 1.673/1.967 secs] [Times: user=5.81 sys=0.97, real=1.97 secs]</span><br><span class="line">2020-05-26T17:04:18.654+0800: 1058990.352: [GC (CMS Final Remark) [YG occupancy: 1800437 K (2307712 K)]2020-05-26T17:04:18.654+0800: 1058990.352: [Rescan (parallel) , 0.0794339 secs]2020-05-26T17:04:18.734+0800: 1058990.432: [weak refs processing, 0.0000383 secs]2020-05-26T17:04:18.734+0800: 1058990.432: [class unloading, 0.0239246 secs]2020-05-26T17:04:18.758+0800: 1058990.456: [scrub symbol table, 0.0074005 secs]2020-05-26T17:04:18.765+0800: 1058990.463: [scrub string table, 0.0008843 secs][1 CMS-remark: 7451411K(10280960K)] 9251848K(12588672K), 0.1118495 secs] [Times: user=1.69 sys=0.16, real=0.11 secs]</span><br><span class="line">2020-05-26T17:04:18.766+0800: 1058990.464: [CMS-concurrent-sweep-start]</span><br><span class="line">2020-05-26T17:04:19.791+0800: 1058991.489: [GC (GCLocker Initiated GC) 2020-05-26T17:04:19.791+0800: 1058991.490: [ParNew: 2271621K-&gt;108904K(2307712K), 0.0271725 secs] 9398478K-&gt;7235761K(12588672K), 0.0274050 secs] [Times: user=0.53 sys=0.06, real=0.03 secs]</span><br><span class="line">2020-05-26T17:04:20.395+0800: 1058992.093: [CMS-concurrent-sweep: 1.597/1.629 secs] [Times: user=3.04 sys=0.55, real=1.63 secs]</span><br><span class="line">2020-05-26T17:04:20.395+0800: 1058992.094: [CMS-concurrent-reset-start]</span><br><span class="line">2020-05-26T17:04:20.413+0800: 1058992.111: [CMS-concurrent-reset: 0.018/0.018 secs] [Times: user=0.02 sys=0.00, real=0.02 secs]</span><br><span class="line">2020-05-26T17:04:22.414+0800: 1058994.112: [GC (CMS Initial Mark) [1 CMS-initial-mark: 6684475K(10280960K)] 7681507K(12588672K), 0.0121276 secs] [Times: user=0.21 sys=0.02, real=0.01 secs]</span><br><span class="line">2020-05-26T17:04:22.427+0800: 1058994.125: [CMS-concurrent-mark-start]</span><br><span class="line">2020-05-26T17:04:22.746+0800: 1058994.444: [CMS-concurrent-mark: 0.320/0.320 secs] [Times: user=1.73 sys=0.19, real=0.32 secs]</span><br><span class="line">2020-05-26T17:04:22.746+0800: 1058994.444: [CMS-concurrent-preclean-start]</span><br><span class="line">2020-05-26T17:04:22.780+0800: 1058994.479: [CMS-concurrent-preclean: 0.034/0.034 secs] [Times: user=0.03 sys=0.00, real=0.04 secs]</span><br><span class="line">2020-05-26T17:04:22.780+0800: 1058994.479: [CMS-concurrent-abortable-preclean-start]</span><br><span class="line">2020-05-26T17:04:26.688+0800: 1058998.386: [GC (Allocation Failure) 2020-05-26T17:04:26.688+0800: 1058998.386: [ParNew: 2159435K-&gt;111685K(2307712K), 0.0286155 secs] 8843911K-&gt;6796161K(12588672K), 0.0288247 secs] [Times: user=0.63 sys=0.00, real=0.02 secs]</span><br><span class="line"> CMS: abort preclean due to time 2020-05-26T17:04:28.055+0800: 1058999.753: [CMS-concurrent-abortable-preclean: 4.903/5.274 secs] [Times: user=7.02 sys=0.00, real=5.27 secs]</span><br><span class="line">2020-05-26T17:04:28.057+0800: 1058999.755: [GC (CMS Final Remark) [YG occupancy: 370337 K (2307712 K)]2020-05-26T17:04:28.057+0800: 1058999.755: [Rescan (parallel) , 0.0147381 secs]2020-05-26T17:04:28.072+0800: 1058999.770: [weak refs processing, 0.0000485 secs]2020-05-26T17:04:28.072+0800: 1058999.770: [class unloading, 0.0330506 secs]2020-05-26T17:04:28.105+0800: 1058999.803: [scrub symbol table, 0.0099221 secs]2020-05-26T17:04:28.115+0800: 1058999.813: [scrub string table, 0.0011202 secs][1 CMS-remark: 6684475K(10280960K)] 7054813K(12588672K), 0.0590651 secs] [Times: user=0.36 sys=0.00, real=0.06 secs]</span><br><span class="line">2020-05-26T17:04:28.116+0800: 1058999.814: [CMS-concurrent-sweep-start]</span><br><span class="line">2020-05-26T17:04:29.244+0800: 1059000.942: [CMS-concurrent-sweep: 1.122/1.128 secs] [Times: user=2.61 sys=0.00, real=1.13 secs]</span><br><span class="line">2020-05-26T17:04:29.244+0800: 1059000.942: [CMS-concurrent-reset-start]</span><br><span class="line">2020-05-26T17:04:29.261+0800: 1059000.960: [CMS-concurrent-reset: 0.017/0.017 secs] [Times: user=0.03 sys=0.00, real=0.02 secs]</span><br><span class="line">2020-05-26T17:04:29.493+0800: 1059001.191: [GC (Allocation Failure) 2020-05-26T17:04:29.493+0800: 1059001.191: [ParNew: 2163013K-&gt;256384K(2307712K), 1.2014500 secs] 8713109K-&gt;7417968K(12588672K), 1.2018116 secs] [Times: user=24.18 sys=0.00, real=1.20 secs]</span><br><span class="line">2020-05-26T17:04:30.698+0800: 1059002.396: [GC (CMS Initial Mark) [1 CMS-initial-mark: 7161584K(10280960K)] 7439893K(12588672K), 0.0217866 secs] [Times: user=0.39 sys=0.00, real=0.02 secs]</span><br><span class="line">2020-05-26T17:04:30.720+0800: 1059002.418: [CMS-concurrent-mark-start]</span><br><span class="line">2020-05-26T17:04:30.968+0800: 1059002.666: [CMS-concurrent-mark: 0.247/0.247 secs] [Times: user=2.05 sys=0.00, real=0.25 secs]</span><br><span class="line">2020-05-26T17:04:30.968+0800: 1059002.666: [CMS-concurrent-preclean-start]</span><br><span class="line">2020-05-26T17:04:30.995+0800: 1059002.693: [CMS-concurrent-preclean: 0.026/0.027 secs] [Times: user=0.05 sys=0.00, real=0.02 secs]</span><br><span class="line">2020-05-26T17:04:30.995+0800: 1059002.693: [CMS-concurrent-abortable-preclean-start]</span><br><span class="line">2020-05-26T17:04:32.373+0800: 1059004.072: [GC (Allocation Failure) 2020-05-26T17:04:32.374+0800: 1059004.072: [ParNew: 2307712K-&gt;211939K(2307712K), 0.1995155 secs] 9469296K-&gt;7651281K(12588672K), 0.1997741 secs] [Times: user=2.73 sys=0.00, real=0.20 secs]</span><br><span class="line">2020-05-26T17:04:33.259+0800: 1059004.958: [CMS-concurrent-abortable-preclean: 1.949/2.265 secs] [Times: user=7.84 sys=0.12, real=2.27 secs]</span><br><span class="line">2020-05-26T17:04:33.261+0800: 1059004.959: [GC (CMS Final Remark) [YG occupancy: 1716846 K (2307712 K)]2020-05-26T17:04:33.261+0800: 1059004.959: [Rescan (parallel) , 0.0738579 secs]2020-05-26T17:04:33.335+0800: 1059005.033: [weak refs processing, 0.0000354 secs]2020-05-26T17:04:33.335+0800: 1059005.033: [class unloading, 0.0726293 secs]2020-05-26T17:04:33.408+0800: 1059005.106: [scrub symbol table, 0.0163362 secs]2020-05-26T17:04:33.424+0800: 1059005.122: [scrub string table, 0.0007886 secs][1 CMS-remark: 7439341K(10280960K)] 9156188K(12588672K), 0.1638405 secs] [Times: user=1.56 sys=0.21, real=0.16 secs]</span><br><span class="line">2020-05-26T17:04:33.425+0800: 1059005.124: [CMS-concurrent-sweep-start]</span><br><span class="line">2020-05-26T17:04:33.807+0800: 1059005.505: [GC (Allocation Failure) 2020-05-26T17:04:33.807+0800: 1059005.506: [ParNew: 2263267K-&gt;107757K(2307712K), 0.0263471 secs] 9589492K-&gt;7433982K(12588672K), 0.0265882 secs] [Times: user=0.51 sys=0.07, real=0.02 secs]</span><br><span class="line">2020-05-26T17:04:34.782+0800: 1059006.480: [CMS-concurrent-sweep: 1.328/1.356 secs] [Times: user=3.01 sys=0.53, real=1.36 secs]</span><br><span class="line">2020-05-26T17:04:34.782+0800: 1059006.480: [CMS-concurrent-reset-start]</span><br><span class="line">2020-05-26T17:04:34.825+0800: 1059006.523: [CMS-concurrent-reset: 0.044/0.044 secs] [Times: user=0.08 sys=0.02, real=0.04 secs]</span><br><span class="line">2020-05-26T17:04:36.826+0800: 1059008.525: [GC (CMS Initial Mark) [1 CMS-initial-mark: 6676453K(10280960K)] 7611455K(12588672K), 0.0377263 secs] [Times: user=0.38 sys=0.13, real=0.04 secs]</span><br><span class="line">2020-05-26T17:04:36.864+0800: 1059008.563: [CMS-concurrent-mark-start]</span><br><span class="line">2020-05-26T17:04:37.175+0800: 1059008.873: [CMS-concurrent-mark: 0.311/0.311 secs] [Times: user=1.64 sys=0.22, real=0.31 secs]</span><br><span class="line">2020-05-26T17:04:37.175+0800: 1059008.873: [CMS-concurrent-preclean-start]</span><br><span class="line">2020-05-26T17:04:37.209+0800: 1059008.907: [CMS-concurrent-preclean: 0.033/0.033 secs] [Times: user=0.03 sys=0.00, real=0.04 secs]</span><br><span class="line">2020-05-26T17:04:37.209+0800: 1059008.907: [CMS-concurrent-abortable-preclean-start]</span><br><span class="line"> CMS: abort preclean due to time 2020-05-26T17:04:42.441+0800: 1059014.139: [CMS-concurrent-abortable-preclean: 4.531/5.232 secs] [Times: user=4.62 sys=0.84, real=5.23 secs]</span><br><span class="line">2020-05-26T17:04:42.443+0800: 1059014.141: [GC (CMS Final Remark) [YG occupancy: 1641955 K (2307712 K)]2020-05-26T17:04:42.443+0800: 1059014.141: [Rescan (parallel) , 0.0463625 secs]2020-05-26T17:04:42.490+0800: 1059014.188: [weak refs processing, 0.0000413 secs]2020-05-26T17:04:42.490+0800: 1059014.188: [class unloading, 0.0212300 secs]2020-05-26T17:04:42.511+0800: 1059014.209: [scrub symbol table, 0.0059408 secs]2020-05-26T17:04:42.517+0800: 1059014.215: [scrub string table, 0.0008717 secs][1 CMS-remark: 6676453K(10280960K)] 8318408K(12588672K), 0.0746340 secs] [Times: user=0.99 sys=0.10, real=0.08 secs]</span><br><span class="line">2020-05-26T17:04:42.518+0800: 1059014.216: [CMS-concurrent-sweep-start]</span><br><span class="line">2020-05-26T17:04:43.531+0800: 1059015.229: [GC (Allocation Failure) 2020-05-26T17:04:43.531+0800: 1059015.229: [ParNew: 2159085K-&gt;256384K(2307712K), 0.1807710 secs] 8715907K-&gt;6887517K(12588672K), 0.1809489 secs] [Times: user=2.99 sys=0.47, real=0.18 secs]</span><br><span class="line">2020-05-26T17:04:44.051+0800: 1059015.749: [CMS-concurrent-sweep: 1.345/1.533 secs] [Times: user=4.59 sys=1.22, real=1.53 secs]</span><br><span class="line">2020-05-26T17:04:44.051+0800: 1059015.750: [CMS-concurrent-reset-start]</span><br><span class="line">2020-05-26T17:04:44.087+0800: 1059015.785: [CMS-concurrent-reset: 0.036/0.036 secs] [Times: user=0.08 sys=0.10, real=0.04 secs]</span><br></pre></td></tr></table></figure>
+
+<h4 id="调优目标"><a href="#调优目标" class="headerlink" title="调优目标"></a>调优目标</h4><ol>
+<li>平均Monitor GC 时间尽可能的短，因为Monitor GC使用 ParNew GC，是并行垃圾处理器，需要STW，</li>
+<li>CMS GC 越少越好 时间越短越好。 频繁CMS产生<strong>内存碎片</strong>，严重时引起Full GC</li>
+</ol>
+<h4 id="具体优化方法"><a href="#具体优化方法" class="headerlink" title="具体优化方法"></a>具体优化方法</h4><ol>
+<li>内存调整为16G</li>
+</ol>
+<ul>
+<li>以前为12G，有点小</li>
+</ul>
+<ol start="2">
+<li>修改 CMSInitiatingOccupancyFraction 为 60</li>
+</ol>
+<ul>
+<li>以前老年代过早进行回收，会增加老年代的GC频率</li>
+</ul>
+<ol start="3">
+<li>新增 -XX:MaxTenuringThreshold&#x3D;15</li>
+</ol>
+<ul>
+<li>对象过早进入到了老年代，导致增加了老年代的回收次数</li>
+</ul>
+<ol start="4">
+<li>新增 -XX:+UseCMSCompactAtFullCollection</li>
+</ol>
+<ul>
+<li>防止垃圾碎片</li>
+</ul>
+<ol start="5">
+<li>新增 -XX:+PrintTenuringDistribution</li>
+</ol>
+<ul>
+<li>只有在添加参数-XX:+PrintTenuringDistribution才能打印对应日志，<strong>强烈建议线上集群开启该参数</strong></li>
+</ul>
+<h2 id="优化结果"><a href="#优化结果" class="headerlink" title="优化结果"></a>优化结果</h2><h3 id="Hbase-regionserver-GC情况"><a href="#Hbase-regionserver-GC情况" class="headerlink" title="Hbase regionserver GC情况"></a>Hbase regionserver GC情况</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">S0     S1     E      O      M     CCS    YGC     YGCT    FGC    FGCT     GCT</span><br><span class="line">2.70   0.00  88.20  22.77  66.18  44.45    970   81.137     8    1.574   82.710</span><br><span class="line">2.70   0.00  90.19  22.77  66.18  44.45    970   81.137     8    1.574   82.710</span><br><span class="line">2.70   0.00  94.74  22.77  66.18  44.45    970   81.137     8    1.574   82.710</span><br><span class="line">2.70   0.00  96.47  22.77  66.18  44.45    970   81.137     8    1.574   82.710</span><br><span class="line">2.70   0.00  99.41  22.77  66.18  44.45    970   81.137     8    1.574   82.710</span><br><span class="line">0.00   2.55   0.49  22.77  66.08  44.39    971   81.216     8    1.574   82.790</span><br><span class="line">0.00   2.55   6.04  22.77  66.08  44.39    971   81.216     8    1.574   82.790</span><br><span class="line">0.00   2.55   9.17  22.77  66.08  44.39    971   81.216     8    1.574   82.790</span><br><span class="line">0.00   2.55  11.85  22.77  66.08  44.39    971   81.216     8    1.574   82.790</span><br><span class="line">0.00   2.55  15.71  22.77  66.08  44.39    971   81.216     8    1.574   82.790</span><br></pre></td></tr></table></figure>
+
+<p> Eden区每次回收都非常的干净，基本上都是全部回收了，存活到Survivor区的数量也少，并且基本上没有晋升到老年代的对象，标识增大晋升年龄起到了作用。</p>
+<h3 id="查询请求的响应情况"><a href="#查询请求的响应情况" class="headerlink" title="查询请求的响应情况"></a>查询请求的响应情况</h3><p>查询响应速度大幅度提升，99.97%的请求都在1s以内响应</p>
+<p>  <img src="https://static.lovedata.net/20-05-27-7092c9e970f2909006642b66dcab3548.png-wm" alt="image"></p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">相关文章</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/13cb1a02.html" rel="bookmark">记一次生产环境hbase的regionserver进程频繁消失的问题</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Hbase/" rel="tag"># Hbase</a>
+              <a href="/tags/JVM/" rel="tag"># JVM</a>
+              <a href="/tags/HDP/" rel="tag"># HDP</a>
+              <a href="/tags/Ambari/" rel="tag"># Ambari</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/be4c4827.html" rel="prev" title="Jenkins匿名用户禁止浏览">
+      <i class="fa fa-chevron-left"></i> Jenkins匿名用户禁止浏览
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/71a0e226.html" rel="next" title="一个本应三十秒解决掉的Flink函数名冲突问题">
+      一个本应三十秒解决掉的Flink函数名冲突问题 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83"><span class="nav-number">1.1.</span> <span class="nav-text">环境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%97%AE%E9%A2%98"><span class="nav-number">1.2.</span> <span class="nav-text">问题</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%B1%E4%BA%8E%E8%AE%BF%E9%97%AE%E9%87%8F%E5%A2%9E%E5%8A%A0%E5%AF%BC%E8%87%B4%EF%BC%9F"><span class="nav-number">2.1.</span> <span class="nav-text">由于访问量增加导致？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%B1%E4%BA%8E%E6%9C%BA%E5%99%A8%E8%B4%9F%E8%BD%BD%E8%BF%87%E9%AB%98%E6%88%96%E8%80%85%E5%86%85%E5%AD%98%E4%B8%8D%E8%B6%B3%E6%88%96%E8%80%85%E7%BD%91%E7%BB%9C%E6%B5%81%E9%87%8F%E8%BF%87%E9%AB%98%E5%AF%BC%E8%87%B4"><span class="nav-number">2.2.</span> <span class="nav-text">由于机器负载过高或者内存不足或者网络流量过高导致?</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Kylin-JVM-%E5%BC%82%E5%B8%B8"><span class="nav-number">2.3.</span> <span class="nav-text">Kylin JVM 异常</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8BVm-args-%E4%BF%A1%E6%81%AF"><span class="nav-number">2.3.1.</span> <span class="nav-text">查看Vm args 信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8BGC%E5%9F%BA%E6%9C%AC%E4%BF%A1%E6%81%AF"><span class="nav-number">2.3.2.</span> <span class="nav-text">查看GC基本信息</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%93%E8%AE%BA"><span class="nav-number">2.3.3.</span> <span class="nav-text">结论</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hbase-Regionserver%E7%9A%84JVM%E9%97%AE%E9%A2%98"><span class="nav-number">2.4.</span> <span class="nav-text">Hbase Regionserver的JVM问题</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#JVM-vm-args%E5%88%86%E6%9E%90"><span class="nav-number">2.4.1.</span> <span class="nav-text">JVM vm args分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#GC-%E6%83%85%E5%86%B5"><span class="nav-number">2.4.2.</span> <span class="nav-text">GC 情况</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B0%83%E4%BC%98%E7%9B%AE%E6%A0%87"><span class="nav-number">2.4.3.</span> <span class="nav-text">调优目标</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B7%E4%BD%93%E4%BC%98%E5%8C%96%E6%96%B9%E6%B3%95"><span class="nav-number">2.4.4.</span> <span class="nav-text">具体优化方法</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%98%E5%8C%96%E7%BB%93%E6%9E%9C"><span class="nav-number">3.</span> <span class="nav-text">优化结果</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Hbase-regionserver-GC%E6%83%85%E5%86%B5"><span class="nav-number">3.1.</span> <span class="nav-text">Hbase regionserver GC情况</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2%E8%AF%B7%E6%B1%82%E7%9A%84%E5%93%8D%E5%BA%94%E6%83%85%E5%86%B5"><span class="nav-number">3.2.</span> <span class="nav-text">查询请求的响应情况</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">奔跑的蜗牛</p>
+  <div class="site-description" itemprop="description">大数据技术文章、技术研究与交流</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/pengshuangbao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;pengshuangbao" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">奔跑的蜗牛</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : '7eDspFpe1gjdIyKDr2c51BjD-gzGzoHsz',
+      appKey     : 'Rvd22QedGjPX4cuLgdPWLw83',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.lovedata.net","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="方法介绍​	这一步是Kylin运行MR任务来提取使用字典编码(rowkey配置也的编码类型为dict)的维度列的唯一值。 123456789101112131415161718&#x2F;&#x2F;构建方法 public MapReduceExecutable createFactDistinctColumnsStep(String jobId) &amp;#123;        MapReduceExecutable">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kylin源码解析-提取事实表唯一列">
+<meta property="og:url" content="http://blog.lovedata.net/b97d4c62.html">
+<meta property="og:site_name" content="编程狂想">
+<meta property="og:description" content="方法介绍​	这一步是Kylin运行MR任务来提取使用字典编码(rowkey配置也的编码类型为dict)的维度列的唯一值。 123456789101112131415161718&#x2F;&#x2F;构建方法 public MapReduceExecutable createFactDistinctColumnsStep(String jobId) &amp;#123;        MapReduceExecutable">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/20-06-18-0e4ad6bdc12b49b3b91e74eed46390ca.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/20-06-18-28c45bd4f85b0e3b2ec28557e3859aa0.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/20-06-18-e746df3418fff25d5dbaaa21f94a003c.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/20-06-19-4adbd30926606ff11ae6f92fa1db9a3b.png-wm">
+<meta property="article:published_time" content="2020-06-18T08:14:42.000Z">
+<meta property="article:modified_time" content="2022-03-10T04:02:49.461Z">
+<meta property="article:author" content="奔跑的蜗牛">
+<meta property="article:tag" content="网络、数据、大数据、hadoop、kylin">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png-wm">
+
+<link rel="canonical" href="http://blog.lovedata.net/b97d4c62.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Kylin源码解析-提取事实表唯一列 | 编程狂想</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?111de68d01ad3c3504848c187c4bae5c";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="编程狂想" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta custom-logo">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">编程狂想</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">让数据飞一会儿</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lovedata.net/b97d4c62.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="奔跑的蜗牛">
+      <meta itemprop="description" content="大数据技术文章、技术研究与交流">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="编程狂想">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Kylin源码解析-提取事实表唯一列
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-06-18 16:14:42" itemprop="dateCreated datePublished" datetime="2020-06-18T16:14:42+08:00">2020-06-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-10 12:02:49" itemprop="dateModified" datetime="2022-03-10T12:02:49+08:00">2022-03-10</time>
+              </span>
+
+          
+            <span id="/b97d4c62.html" class="post-meta-item leancloud_visitors" data-flag-title="Kylin源码解析-提取事实表唯一列" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/b97d4c62.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/b97d4c62.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img src="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png-wm" alt="麒麟出没，必有祥瑞"></p>
+<h2 id="方法介绍"><a href="#方法介绍" class="headerlink" title="方法介绍"></a>方法介绍</h2><p>​	这一步是Kylin运行MR任务来提取使用字典编码(rowkey配置也的编码类型为dict)的维度列的唯一值。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//构建方法 </span></span><br><span class="line"><span class="keyword">public</span> MapReduceExecutable <span class="title function_">createFactDistinctColumnsStep</span><span class="params">(String jobId)</span> &#123;</span><br><span class="line">        <span class="type">MapReduceExecutable</span> <span class="variable">result</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MapReduceExecutable</span>();</span><br><span class="line">        result.setName(ExecutableConstants.STEP_NAME_FACT_DISTINCT_COLUMNS);</span><br><span class="line">        result.setMapReduceJobClass(FactDistinctColumnsJob.class);</span><br><span class="line">        <span class="type">StringBuilder</span> <span class="variable">cmd</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringBuilder</span>();</span><br><span class="line">        appendMapReduceParameters(cmd);</span><br><span class="line">        appendExecCmdParameters(cmd, BatchConstants.ARG_CUBE_NAME, seg.getRealization().getName());</span><br><span class="line">        appendExecCmdParameters(cmd, BatchConstants.ARG_OUTPUT, getFactDistinctColumnsPath(jobId));</span><br><span class="line">        appendExecCmdParameters(cmd, BatchConstants.ARG_SEGMENT_ID, seg.getUuid());</span><br><span class="line">        appendExecCmdParameters(cmd, BatchConstants.ARG_STATS_OUTPUT, getStatisticsPath(jobId));</span><br><span class="line">        appendExecCmdParameters(cmd, BatchConstants.ARG_STATS_SAMPLING_PERCENT, String.valueOf(config.getConfig().getCubingInMemSamplingPercent()));</span><br><span class="line">        appendExecCmdParameters(cmd, BatchConstants.ARG_JOB_NAME, <span class="string">&quot;Kylin_Fact_Distinct_Columns_&quot;</span> + seg.getRealization().getName() + <span class="string">&quot;_Step&quot;</span>);</span><br><span class="line">        appendExecCmdParameters(cmd, BatchConstants.ARG_CUBING_JOB_ID, jobId);</span><br><span class="line">        result.setMapReduceParams(cmd.toString());</span><br><span class="line">        result.setCounterSaveAs(CubingJob.SOURCE_RECORD_COUNT + <span class="string">&quot;,&quot;</span> + CubingJob.SOURCE_SIZE_BYTES);</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<span id="more"></span>
+
+<p>​	上面这一步就是提取事实表唯一列的链式子任务的<strong>构建方法</strong>，返回的是一个MapReduceExecutable,它是AbstractExecutable的子类，在doWork方法中，会调用一个AbstractHadoopJob的<strong>子类</strong>的run方法，在run方法中，会将该任务提交到Yarn上面执行。也就是说，这是MR任务的提交入口。</p>
+<p>​	FactDistinctColumnsJob就是AbstractHadoopJob的一个子类，这些类型初始化的时候都会设置好 mapper、combinaer、partitioner、reducer等类，下面就是FactDistinctColumnsJob的相关类图。核心方法就是实现类的 run 方法，会设置输入和输出，classpath等，然后提交调用父类AbstractHadoopJob的waitForCompletion提交到Yarn集群。抽象类AbstractHadoopJob提供了一些公用的方法，比如获取classpath。</p>
+<p><img src="https://static.lovedata.net/20-06-18-0e4ad6bdc12b49b3b91e74eed46390ca.png-wm" alt="image"></p>
+<h2 id="输入解析"><a href="#输入解析" class="headerlink" title="输入解析"></a>输入解析</h2><p>​	这里要介绍这一步的输入，这一步是读取第二步中生中的成的Hive宽表。在Kylin中，有多重不同的MR任务，有的任务输入是Hive表，有的则是存储在HDFS中的中间数据，所以kylin提供了IMRTableInputFormat接口，是一个工具类，用于配置mapper去读取hive table。如果是HDFS，则是调用另外一个IMROutput2接口下面的子接口IMROutputFormat的configureJobInput方法，为什么要这么设计了？我想大概是因为这些中间数据最后都为经过处理写入hbase吧。</p>
+<p><img src="https://static.lovedata.net/20-06-18-28c45bd4f85b0e3b2ec28557e3859aa0.png-wm" alt="image"></p>
+<h2 id="数据流向举例"><a href="#数据流向举例" class="headerlink" title="数据流向举例"></a>数据流向举例</h2><p> 下面是一个简单任务的数据流向示意图，假设一个表有两个字段 name 和 city，示例数据如下表</p>
+<p>​	<img src="https://static.lovedata.net/20-06-18-e746df3418fff25d5dbaaa21f94a003c.png-wm" alt="image"></p>
+<table>
+<thead>
+<tr>
+<th align="center">name</th>
+<th align="center">City</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">Jack</td>
+<td align="center">Shenzhen</td>
+</tr>
+<tr>
+<td align="center">Mary</td>
+<td align="center">Shanghai</td>
+</tr>
+<tr>
+<td align="center">Mark</td>
+<td align="center">Beijing</td>
+</tr>
+</tbody></table>
+<p>​	假如在最理想的情况下，这个表的三条数据均匀分布在三个hdfs block上，则会有三个mapper，一个mapper读取一条记录。并且会根据维度列的数量来设置有多少个reducer，一般情况会设置维度列的数量n+1个reducer，前面n个reducer分别处理每一个列的值，这样不同mapper的同一列会发送到相同的列，这样就可以去重了。最后一个reducer主要处理统计抽样的任务。每一个mapper都会有cuboidCount个HLLCounter,对每个cuboid进行抽样统计计数，在cleanup阶段，会发送到最后一个reducer进行聚合和汇总。这个汇总在统计sgement的总的大小或者在列出segemnt的cuboid的树形目录（bin&#x2F;kylin.sh org.apache.kylin.engine.mr.common.CubeStatsReader CUBE_NAME）的时候会用到。</p>
+<h2 id="FactDistinctColumnsMapper介绍"><a href="#FactDistinctColumnsMapper介绍" class="headerlink" title="FactDistinctColumnsMapper介绍"></a>FactDistinctColumnsMapper介绍</h2><h3 id="Setup阶段"><a href="#Setup阶段" class="headerlink" title="Setup阶段"></a>Setup阶段</h3><ul>
+<li>获取所有的cuboidIds和nRowKey(总的rowkey个数)</li>
+<li>从配置文件获取抽样比例，默认为100</li>
+<li>构建allCuboidsBitSet<ul>
+<li>返回一个二维数组，第一维长度是总的cuboid的数量，比如只有两个合法的cuboid， 则长度为2，第二维的长度是这个cuboid中为1的位的数量，而值，就是这个在rowkey中的下标</li>
+</ul>
+</li>
+<li>构建allCuboidsHLL，每一个cuboid一个HLLCounter,用于非精确统计数量</li>
+<li>构建CuboidStatCalculator数组，CuboidStatCalculator是一个线程，抽样统计的执行者。<ul>
+<li>这里会根据cuboid的数量进行分片，比如如果cuboid数量太多，就会有多个线程来执行hll counter，这事一个划分分片的逻辑，比如从 0 到 splitSize 的给一个 calculator处理，以此类推。</li>
+</ul>
+</li>
+</ul>
+<h3 id="doMap阶段"><a href="#doMap阶段" class="headerlink" title="doMap阶段"></a>doMap阶段</h3><p><img src="https://static.lovedata.net/20-06-19-4adbd30926606ff11ae6f92fa1db9a3b.png-wm" alt="image"></p>
+<h3 id="cleanUp阶段"><a href="#cleanUp阶段" class="headerlink" title="cleanUp阶段"></a>cleanUp阶段</h3><ul>
+<li>停止CuboidStatCalculator线程</li>
+<li>遍历CuboidStatCalculator数组，输出每一列的hll统计值，这里的key的第一位占位符是MARK_FOR_HLL_COUNTER，是专门用于计算hll的，默认是最后一个reducer。value是hll计算的count值</li>
+<li>遍历dimensionRangeInfoMap，输出这些非字典维度的最大值和最小值。</li>
+</ul>
+<h2 id="FactDistinctColumnsReducer介绍"><a href="#FactDistinctColumnsReducer介绍" class="headerlink" title="FactDistinctColumnsReducer介绍"></a>FactDistinctColumnsReducer介绍</h2><h3 id="Setup阶段-1"><a href="#Setup阶段-1" class="headerlink" title="Setup阶段"></a>Setup阶段</h3><ul>
+<li>根据taskid判断当前reducer的角色，是普通列的reducer还是hll计算的reducer</li>
+<li>如果是普通列reducer，则根据配置判断是否在reducer中构建字典，如果是，则初始化一个字典构建器</li>
+</ul>
+<h3 id="doReduce阶段"><a href="#doReduce阶段" class="headerlink" title="doReduce阶段"></a>doReduce阶段</h3><ul>
+<li>获取当前key</li>
+<li>如果是hll counter<ul>
+<li>获取cuboid，因为每个mapper都会计算cuboid，所以这里需要把不同的mapper的hll做一个merge。</li>
+<li>遍历values<ul>
+<li>这里有一个 Map&lt;Long, HLLCounter&gt; cuboidHLLMap </li>
+<li>在遍历的时候会去map里面去取对应的hllCounter，如果取到了，则merge取到的hll和当前的hll</li>
+<li>如果没有取到，则将当前的hll放入</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>如果不是hll counter<ul>
+<li>拿到当前的key</li>
+<li>判断当前列是否是字典维度列（因为有的列是字典列，有的不是）<ul>
+<li>如果不是，这计算出当前的最大值和最小值，这个值在cleanUp阶段会输出</li>
+<li>如果是字典列<ul>
+<li>如果在reducer阶段构建，则builder加入这个值</li>
+<li>如果不在reducer阶段构建，则直接通过 MultipleOutputs 输出到不同的文件中去，MultipleOutputs的用法参考<a target="_blank" rel="noopener" href="http://www.whitewood.me/2017/04/08/MultipleOutputs%E5%AE%9E%E7%8E%B0MapReduce%E5%A4%9A%E4%B8%AA%E8%BE%93%E5%87%BA/">MultipleOutputs实现MapReduce多个输出 | 时间与精神的小屋</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="cleanUp阶段-1"><a href="#cleanUp阶段-1" class="headerlink" title="cleanUp阶段"></a>cleanUp阶段</h3><ul>
+<li>统计reducer<ul>
+<li>输出统计信息到指定目录</li>
+</ul>
+</li>
+<li>列 reducer<ul>
+<li>如果不是字典维度列，则输出 最小值和最大值到指定目录 </li>
+<li>如果是维度列，并且是在reducer端构建的，则构建字典，输出到 fact_distinct_columns 目录下，如果不在reducer端构建，则不作操作，后面构建字典的步骤的时候，会读取在reducer端写的文件再次进行构建。</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>​	本章节详细介绍了抽取事实表唯一列的任务创建、相关类图、以及Mapper、Reducer的代码逻辑，主要核心是reducer的划分，以及相关任务的分配和HLLCounter的应用。在后面会继续介绍构建字典相关的知识。</p>
+<hr>
+<h3 id="Kylin源码解析系列目录"><a href="#Kylin源码解析系列目录" class="headerlink" title="Kylin源码解析系列目录"></a>Kylin源码解析系列目录</h3><h4 id="构建引擎系列"><a href="#构建引擎系列" class="headerlink" title="构建引擎系列"></a>构建引擎系列</h4><p>1、<a href="https://blog.lovedata.net/1166eeb4.html">Kylin源码解析-kylin构建任务生成与调度执行 | 编程狂想</a></p>
+<p>2、<a href="https://blog.lovedata.net/b6c1ac95.html">Kylin源码解析-kylin构建流程总览 | 编程狂想</a></p>
+<p>3、<a href="https://blog.lovedata.net/afece5b5.html">Kylin源码解析-构建引擎实现原理 | 编程狂想</a></p>
+<p>4、<a href="https://blog.lovedata.net/92eee585.html">Kylin源码解析-生成Hive宽表及其他操作 | 编程狂想</a></p>
+<p>5、<a href="https://blog.lovedata.net/b97d4c62.html">Kylin源码解析-提取事实表唯一列 | 编程狂想</a></p>
+<p>6、<a href="https://blog.lovedata.net/37750c96.html">Kylin源码解析-构建层级分析 | 编程狂想</a></p>
+<p>7、Kylin源码解析-构建数据字典和生成Cuboid统计数据</p>
+<p>8、Kylin源码解析-生成Hbase表</p>
+<p>9、Kylin源码解析-构建Cuboid</p>
+<p>10、Kylin源码解析-转换HDFS为Hfile</p>
+<p>11、Kylin源码解析-加载Hfile到Hbase中</p>
+<p>12、Kylin源码解析-修改元数据以及其他清理工作</p>
+<h4 id="查询引擎系列"><a href="#查询引擎系列" class="headerlink" title="查询引擎系列"></a>查询引擎系列</h4>
+    </div>
+
+    
+    
+    
+      
+
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/92eee585.html" rel="prev" title="Kylin源码解析-生成Hive宽表及其他操作">
+      <i class="fa fa-chevron-left"></i> Kylin源码解析-生成Hive宽表及其他操作
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/3c04f0b4.html" rel="next" title="Kylin源码解析系列">
+      Kylin源码解析系列 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%B3%95%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">方法介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BE%93%E5%85%A5%E8%A7%A3%E6%9E%90"><span class="nav-number">2.</span> <span class="nav-text">输入解析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E6%B5%81%E5%90%91%E4%B8%BE%E4%BE%8B"><span class="nav-number">3.</span> <span class="nav-text">数据流向举例</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FactDistinctColumnsMapper%E4%BB%8B%E7%BB%8D"><span class="nav-number">4.</span> <span class="nav-text">FactDistinctColumnsMapper介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Setup%E9%98%B6%E6%AE%B5"><span class="nav-number">4.1.</span> <span class="nav-text">Setup阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#doMap%E9%98%B6%E6%AE%B5"><span class="nav-number">4.2.</span> <span class="nav-text">doMap阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cleanUp%E9%98%B6%E6%AE%B5"><span class="nav-number">4.3.</span> <span class="nav-text">cleanUp阶段</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#FactDistinctColumnsReducer%E4%BB%8B%E7%BB%8D"><span class="nav-number">5.</span> <span class="nav-text">FactDistinctColumnsReducer介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Setup%E9%98%B6%E6%AE%B5-1"><span class="nav-number">5.1.</span> <span class="nav-text">Setup阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#doReduce%E9%98%B6%E6%AE%B5"><span class="nav-number">5.2.</span> <span class="nav-text">doReduce阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#cleanUp%E9%98%B6%E6%AE%B5-1"><span class="nav-number">5.3.</span> <span class="nav-text">cleanUp阶段</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kylin%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90%E7%B3%BB%E5%88%97%E7%9B%AE%E5%BD%95"><span class="nav-number">6.1.</span> <span class="nav-text">Kylin源码解析系列目录</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA%E5%BC%95%E6%93%8E%E7%B3%BB%E5%88%97"><span class="nav-number">6.1.1.</span> <span class="nav-text">构建引擎系列</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2%E5%BC%95%E6%93%8E%E7%B3%BB%E5%88%97"><span class="nav-number">6.1.2.</span> <span class="nav-text">查询引擎系列</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">奔跑的蜗牛</p>
+  <div class="site-description" itemprop="description">大数据技术文章、技术研究与交流</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/pengshuangbao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;pengshuangbao" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">奔跑的蜗牛</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : '7eDspFpe1gjdIyKDr2c51BjD-gzGzoHsz',
+      appKey     : 'Rvd22QedGjPX4cuLgdPWLw83',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

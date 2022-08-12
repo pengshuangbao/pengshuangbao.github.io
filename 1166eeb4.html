@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.lovedata.net","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="​	本文介绍kylin的构建任务的生成流程，包括前端如何请求的kylin服务端，服务端内部怎么调用生成任务并返回给前端以及内部如何调度的。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Kylin源码解析-kylin构建任务生成与调度执行">
+<meta property="og:url" content="http://blog.lovedata.net/1166eeb4.html">
+<meta property="og:site_name" content="编程狂想">
+<meta property="og:description" content="​	本文介绍kylin的构建任务的生成流程，包括前端如何请求的kylin服务端，服务端内部怎么调用生成任务并返回给前端以及内部如何调度的。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/20-06-16-6d023beae9f317d7af94ea59ccbec268.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/20-06-16-9f553568fb8238d8c89d84eaebd014f8.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/20-06-16-8a9c099c822fb762315f84e531ec0015.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/20-06-16-46779a46362b04bfcf904eab57f204f4.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/20-06-16-239662ed95d7db8d36664b154db3bb7c.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/20-06-16-64b1e249c7f73bbe5e69e8463f7c9517.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/20-06-16-f1cb7f888499c99b988cdf3c38d76254.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/20-06-16-239662ed95d7db8d36664b154db3bb7c.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/20-06-16-effcb10bd0e42c00d1ff96a1959994f4.png-wm">
+<meta property="article:published_time" content="2020-06-16T03:14:32.000Z">
+<meta property="article:modified_time" content="2022-03-10T04:02:49.461Z">
+<meta property="article:author" content="奔跑的蜗牛">
+<meta property="article:tag" content="kylin">
+<meta property="article:tag" content="源码分析">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png-wm">
+
+<link rel="canonical" href="http://blog.lovedata.net/1166eeb4.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Kylin源码解析-kylin构建任务生成与调度执行 | 编程狂想</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?111de68d01ad3c3504848c187c4bae5c";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="编程狂想" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta custom-logo">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">编程狂想</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">让数据飞一会儿</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lovedata.net/1166eeb4.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="奔跑的蜗牛">
+      <meta itemprop="description" content="大数据技术文章、技术研究与交流">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="编程狂想">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Kylin源码解析-kylin构建任务生成与调度执行
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-06-16 11:14:32" itemprop="dateCreated datePublished" datetime="2020-06-16T11:14:32+08:00">2020-06-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-10 12:02:49" itemprop="dateModified" datetime="2022-03-10T12:02:49+08:00">2022-03-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Kylin/" itemprop="url" rel="index"><span itemprop="name">Kylin</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/1166eeb4.html" class="post-meta-item leancloud_visitors" data-flag-title="Kylin源码解析-kylin构建任务生成与调度执行" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/1166eeb4.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/1166eeb4.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><img src="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png-wm" alt="麒麟出没，必有祥瑞"></p>
+<p>​	本文介绍kylin的构建任务的生成流程，包括前端如何请求的kylin服务端，服务端内部怎么调用生成任务并返回给前端以及内部如何调度的。</p>
+<span id="more"></span>
+<h2 id="Kylin任务构建方法"><a href="#Kylin任务构建方法" class="headerlink" title="Kylin任务构建方法"></a>Kylin任务构建方法</h2><p>​	一般构建Kylin是使用调度工具Azkaban或者Airflow来构建，在每天凌晨一点或者每个小时的第五分钟开始构建上一天或者上一个小时的数据。</p>
+<p>​	比如我们公司就是在每个小时第五分钟开始构建，构建任务就是下图中的 server7_kylin_build,在构建之前会有一些准备工作，比如新建hive分区，数据检查等。server7_kylin_build就是一个python脚本，入参为当前构建任务的开始时间，在python中，会把这个时间作为kylin 一个segement的结束时间，然后通过python获取上一个小时作为开始时间，构建任务类型为BUILD，提交到 http:&#x2F;&#x2F;{kylin_host}:7070&#x2F;kylin&#x2F;api&#x2F;cubes&#x2F;{cube_name}&#x2F;build 接口。</p>
+<p><img src="https://static.lovedata.net/20-06-16-6d023beae9f317d7af94ea59ccbec268.png-wm" alt="azkaban job"></p>
+<p>​	<img src="https://static.lovedata.net/20-06-16-9f553568fb8238d8c89d84eaebd014f8.png-wm" alt="server7_build.py"></p>
+<h2 id="构建任务生成"><a href="#构建任务生成" class="headerlink" title="构建任务生成"></a>构建任务生成</h2><h3 id="构建接口Rest-API"><a href="#构建接口Rest-API" class="headerlink" title="构建接口Rest API"></a>构建接口Rest API</h3><p>​	下面是摘自kylin构建接口的接口描述，摘自<a target="_blank" rel="noopener" href="http://kylin.apache.org/docs/howto/howto_use_restapi.html#build-cube">Apache Kylin | Use RESTful API</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PUT /kylin/api/cubes/&#123;cubeName&#125;/build</span><br></pre></td></tr></table></figure>
+
+<h4 id="Path-Variable"><a href="#Path-Variable" class="headerlink" title="Path Variable"></a>Path Variable</h4><ul>
+<li>cubeName - <code>required</code> <code>string</code> Cube name.</li>
+</ul>
+<h4 id="Request-Body"><a href="#Request-Body" class="headerlink" title="Request Body"></a>Request Body</h4><ul>
+<li>startTime - <code>required</code> <code>long</code> Start timestamp of data to build, e.g. 1388563200000 for 2014-1-1</li>
+<li>endTime - <code>required</code> <code>long</code> End timestamp of data to build</li>
+<li>buildType - <code>required</code> <code>string</code> Supported build type: ‘BUILD’, ‘MERGE’, ‘REFRESH’</li>
+</ul>
+<h4 id="Curl-Example"><a href="#Curl-Example" class="headerlink" title="Curl Example"></a>Curl Example</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -X PUT -H &quot;Authorization: Basic XXXXXXXXX&quot; -H &#x27;Content-Type: application/json&#x27; -d &#x27;&#123;&quot;startTime&quot;:&#x27;1423526400000&#x27;, &quot;endTime&quot;:&#x27;1423612800000&#x27;, &quot;buildType&quot;:&quot;BUILD&quot;&#125;&#x27; http://&lt;host&gt;:&lt;port&gt;/kylin/api/cubes/&#123;cubeName&#125;/build</span><br></pre></td></tr></table></figure>
+
+<h4 id="Response-Sample"><a href="#Response-Sample" class="headerlink" title="Response Sample"></a>Response Sample</h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">&#123;  </span><br><span class="line">   &quot;uuid&quot;:&quot;c143e0e4-ac5f-434d-acf3-46b0d15e3dc6&quot;,</span><br><span class="line">   &quot;last_modified&quot;:1407908916705,</span><br><span class="line">   &quot;name&quot;:&quot;test_kylin_cube_with_slr_empty - 19700101000000_20140731160000 - BUILD - PDT 2014-08-12 22:48:36&quot;,</span><br><span class="line">   &quot;type&quot;:&quot;BUILD&quot;,</span><br><span class="line">   &quot;duration&quot;:0,</span><br><span class="line">   &quot;related_cube&quot;:&quot;test_kylin_cube_with_slr_empty&quot;,</span><br><span class="line">   &quot;related_segment&quot;:&quot;19700101000000_20140731160000&quot;,</span><br><span class="line">   &quot;exec_start_time&quot;:0,</span><br><span class="line">   &quot;exec_end_time&quot;:0,</span><br><span class="line">   &quot;mr_waiting&quot;:0,</span><br><span class="line">   &quot;steps&quot;:[  </span><br><span class="line">      &#123;  </span><br><span class="line">         &quot;interruptCmd&quot;:null,</span><br><span class="line">         &quot;name&quot;:&quot;Create Intermediate Flat Hive Table&quot;,</span><br><span class="line">         &quot;sequence_id&quot;:0,</span><br><span class="line">         &quot;exec_cmd&quot;:&quot;hive -e \&quot;DROP TABLE IF EXISTS kylin_intermediate_test_kylin_cube_with_slr_desc_19700101000000_20140731160000_c143e0e4_ac5f_434d_acf3_46b0d15e3dc6;\nCREATE EXTERNAL TABLE IF NOT EXISTS kylin_intermediate_test_kylin_cube_with_slr_desc_19700101000000_20140731160000_c143e0e4_ac5f_434d_acf3_46b0d15e3dc6\n(\nCAL_DT date\n,LEAF_CATEG_ID int\n,LSTG_SITE_ID int\n,META_CATEG_NAME string\n,CATEG_LVL2_NAME string\n,CATEG_LVL3_NAME string\n,LSTG_FORMAT_NAME string\n,SLR_SEGMENT_CD smallint\n,SELLER_ID bigint\n,PRICE decimal\n)\nROW FORMAT DELIMITED FIELDS TERMINATED BY &#x27;\\177&#x27;\nSTORED AS SEQUENCEFILE\nLOCATION &#x27;/tmp/kylin-c143e0e4-ac5f-434d-acf3-46b0d15e3dc6/kylin_intermediate_test_kylin_cube_with_slr_desc_19700101000000_20140731160000_c143e0e4_ac5f_434d_acf3_46b0d15e3dc6&#x27;;\nSET mapreduce.job.split.metainfo.maxsize=-1;\nSET mapred.compress.map.output=true;\nSET mapred.map.output.compression.codec=com.hadoop.compression.lzo.LzoCodec;\nSET mapred.output.compress=true;\nSET mapred.output.compression.codec=com.hadoop.compression.lzo.LzoCodec;\nSET mapred.output.compression.type=BLOCK;\nSET mapreduce.job.max.split.locations=2000;\nSET hive.exec.compress.output=true;\nSET hive.auto.convert.join.noconditionaltask = true;\nSET hive.auto.convert.join.noconditionaltask.size = 300000000;\nINSERT OVERWRITE TABLE kylin_intermediate_test_kylin_cube_with_slr_desc_19700101000000_20140731160000_c143e0e4_ac5f_434d_acf3_46b0d15e3dc6\nSELECT\nTEST_KYLIN_FACT.CAL_DT\n,TEST_KYLIN_FACT.LEAF_CATEG_ID\n,TEST_KYLIN_FACT.LSTG_SITE_ID\n,TEST_CATEGORY_GROUPINGS.META_CATEG_NAME\n,TEST_CATEGORY_GROUPINGS.CATEG_LVL2_NAME\n,TEST_CATEGORY_GROUPINGS.CATEG_LVL3_NAME\n,TEST_KYLIN_FACT.LSTG_FORMAT_NAME\n,TEST_KYLIN_FACT.SLR_SEGMENT_CD\n,TEST_KYLIN_FACT.SELLER_ID\n,TEST_KYLIN_FACT.PRICE\nFROM TEST_KYLIN_FACT\nINNER JOIN TEST_CAL_DT\nON TEST_KYLIN_FACT.CAL_DT = TEST_CAL_DT.CAL_DT\nINNER JOIN TEST_CATEGORY_GROUPINGS\nON TEST_KYLIN_FACT.LEAF_CATEG_ID = TEST_CATEGORY_GROUPINGS.LEAF_CATEG_ID AND TEST_KYLIN_FACT.LSTG_SITE_ID = TEST_CATEGORY_GROUPINGS.SITE_ID\nINNER JOIN TEST_SITES\nON TEST_KYLIN_FACT.LSTG_SITE_ID = TEST_SITES.SITE_ID\nINNER JOIN TEST_SELLER_TYPE_DIM\nON TEST_KYLIN_FACT.SLR_SEGMENT_CD = TEST_SELLER_TYPE_DIM.SELLER_TYPE_CD\nWHERE (test_kylin_fact.cal_dt &lt; &#x27;2014-07-31 16:00:00&#x27;)\n;\n\&quot;&quot;,</span><br><span class="line">         &quot;interrupt_cmd&quot;:null,</span><br><span class="line">         &quot;exec_start_time&quot;:0,</span><br><span class="line">         &quot;exec_end_time&quot;:0,</span><br><span class="line">         &quot;exec_wait_time&quot;:0,</span><br><span class="line">         &quot;step_status&quot;:&quot;PENDING&quot;,</span><br><span class="line">         &quot;cmd_type&quot;:&quot;SHELL_CMD_HADOOP&quot;,</span><br><span class="line">         &quot;info&quot;:null,</span><br><span class="line">         &quot;run_async&quot;:false</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;  </span><br><span class="line">         &quot;interruptCmd&quot;:null,</span><br><span class="line">         &quot;name&quot;:&quot;Extract Fact Table Distinct Columns&quot;,</span><br><span class="line">         &quot;sequence_id&quot;:1,</span><br><span class="line">         &quot;exec_cmd&quot;:&quot; -conf C:/kylin/Kylin/server/src/main/resources/hadoop_job_conf_medium.xml -cubename test_kylin_cube_with_slr_empty -input /tmp/kylin-c143e0e4-ac5f-434d-acf3-46b0d15e3dc6/kylin_intermediate_test_kylin_cube_with_slr_desc_19700101000000_20140731160000_c143e0e4_ac5f_434d_acf3_46b0d15e3dc6 -output /tmp/kylin-c143e0e4-ac5f-434d-acf3-46b0d15e3dc6/test_kylin_cube_with_slr_empty/fact_distinct_columns -jobname Kylin_Fact_Distinct_Columns_test_kylin_cube_with_slr_empty_Step_1&quot;,</span><br><span class="line">         &quot;interrupt_cmd&quot;:null,</span><br><span class="line">         &quot;exec_start_time&quot;:0,</span><br><span class="line">         &quot;exec_end_time&quot;:0,</span><br><span class="line">         &quot;exec_wait_time&quot;:0,</span><br><span class="line">         &quot;step_status&quot;:&quot;PENDING&quot;,</span><br><span class="line">         &quot;cmd_type&quot;:&quot;JAVA_CMD_HADOOP_FACTDISTINCT&quot;,</span><br><span class="line">         &quot;info&quot;:null,</span><br><span class="line">         &quot;run_async&quot;:true</span><br><span class="line">      &#125;,</span><br><span class="line">      &#123;  </span><br><span class="line">         &quot;interruptCmd&quot;:null,</span><br><span class="line">         &quot;name&quot;:&quot;Load HFile to HBase Table&quot;,</span><br><span class="line">         &quot;sequence_id&quot;:12,</span><br><span class="line">         &quot;exec_cmd&quot;:&quot; -input /tmp/kylin-c143e0e4-ac5f-434d-acf3-46b0d15e3dc6/test_kylin_cube_with_slr_empty/hfile/ -htablename KYLIN-CUBE-TEST_KYLIN_CUBE_WITH_SLR_EMPTY-19700101000000_20140731160000_11BB4326-5975-4358-804C-70D53642E03A -cubename test_kylin_cube_with_slr_empty&quot;,</span><br><span class="line">         &quot;interrupt_cmd&quot;:null,</span><br><span class="line">         &quot;exec_start_time&quot;:0,</span><br><span class="line">         &quot;exec_end_time&quot;:0,</span><br><span class="line">         &quot;exec_wait_time&quot;:0,</span><br><span class="line">         &quot;step_status&quot;:&quot;PENDING&quot;,</span><br><span class="line">         &quot;cmd_type&quot;:&quot;JAVA_CMD_HADOOP_NO_MR_BULKLOAD&quot;,</span><br><span class="line">         &quot;info&quot;:null,</span><br><span class="line">         &quot;run_async&quot;:false</span><br><span class="line">      &#125;</span><br><span class="line">   ],</span><br><span class="line">   &quot;job_status&quot;:&quot;PENDING&quot;,</span><br><span class="line">   &quot;progress&quot;:0.0</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里返回的是一个JobInstance实例，主要描述了任务的一些运行时状态，比如运行时间、运行开始时间、结束时间、每个步骤的详情、当前的状态等。</p>
+<p><img src="https://static.lovedata.net/20-06-16-8a9c099c822fb762315f84e531ec0015.png-wm" alt="image"></p>
+<h3 id="任务生成流程"><a href="#任务生成流程" class="headerlink" title="任务生成流程"></a>任务生成流程</h3><p><img src="https://static.lovedata.net/20-06-16-46779a46362b04bfcf904eab57f204f4.png-wm" alt="image"></p>
+<p>步骤详解</p>
+<h4 id="build"><a href="#build" class="headerlink" title="build"></a>build</h4><p>调用rebuild接口</p>
+<h4 id="rebuild"><a href="#rebuild" class="headerlink" title="rebuild"></a>rebuild</h4><p>   直接调用私有方法buildInternal</p>
+<blockquote>
+<p>这一步会根据开始时间和结束时间实例化一个TSRange,用于表示segemnt的范围</p>
+</blockquote>
+<h4 id="buildInternal"><a href="#buildInternal" class="headerlink" title="buildInternal"></a>buildInternal</h4><p>  调用JobService的submitJob方法</p>
+<h4 id="submitJob"><a href="#submitJob" class="headerlink" title="submitJob"></a>submitJob</h4><p>   调用submitJobInternal方法</p>
+<h4 id="submitJobInternal-核心方法"><a href="#submitJobInternal-核心方法" class="headerlink" title="submitJobInternal(核心方法)"></a>submitJobInternal(核心方法)</h4><ol>
+<li>这一步会调用EngineFactory.createBatchCubingJob方法生成一个CubingJob实例，这个实例是DefaultChinedExcutable的子类。<img src="https://static.lovedata.net/20-06-16-239662ed95d7db8d36664b154db3bb7c.png-wm" alt="image"></li>
+</ol>
+<h4 id="EnginFactory-createBatchCubingJob"><a href="#EnginFactory-createBatchCubingJob" class="headerlink" title="EnginFactory.createBatchCubingJob"></a>EnginFactory.createBatchCubingJob</h4><p> 这一步是在当前本地线程变量中获取一个IBatchCubingEngine的子类，我们选用的MR，所以这里返回的就是MRBatchCubingEngine2类</p>
+<h4 id="MRBatchCubingEngine2-createBatchCubingJob"><a href="#MRBatchCubingEngine2-createBatchCubingJob" class="headerlink" title="MRBatchCubingEngine2.createBatchCubingJob"></a>MRBatchCubingEngine2.createBatchCubingJob</h4><p>​	这一步直接实例化一个BatchCubingJobBuilder2类，传入当前的segment，并且调用<strong>build</strong>方法，具体的调用流程将在后面的章节中详细分析</p>
+<h4 id="addJob"><a href="#addJob" class="headerlink" title="addJob"></a>addJob</h4><p>​	这一步会将改job序列化存入到hbase之中，带后面的FetcherRunner线程定期从hbase中拿出待执行的任务正式执行。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//会将该job存入到hbase之中</span></span><br><span class="line">getExecutableManager().addJob(job);</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="任务调度与执行"><a href="#任务调度与执行" class="headerlink" title="任务调度与执行"></a>任务调度与执行</h2><p>​	本章节介绍在任务被添加并加入到hbase之后，如何被调度执行的。</p>
+<h3 id="Kylin调度器"><a href="#Kylin调度器" class="headerlink" title="Kylin调度器"></a>Kylin调度器</h3><p>​	Kylin调度器负责构建、合并等任务的调度与执行，目前有三种实现，分别为DefaultScheduler、DistributedScheduler、NoopScheduler。</p>
+<h4 id="DefaultScheduler"><a href="#DefaultScheduler" class="headerlink" title="DefaultScheduler"></a>DefaultScheduler</h4><p>​	默认调度器，这种一般使用在只有一个kylin model为server的集群中(单构建节点)，使用Java线程池来执行构建任务，并且使用一个，使用一个定时调度任务 FetcherRunner 来定期从hbase中拿出构建任务，并放入到任务池中等待调度执行。</p>
+<h4 id="DistributedScheduler"><a href="#DistributedScheduler" class="headerlink" title="DistributedScheduler"></a>DistributedScheduler</h4><p>​	分布式调度器，当多个构建服务器运行在相同元数据上的时候使用。内部使用Zookeeper来管理分布式状态。开启分布式调度器需要修改kylin.properties</p>
+<ul>
+<li>kylin.job.scheduler.default&#x3D;2</li>
+<li>kylin.job.lock&#x3D;org.apache.kylin.storage.hbase.util.ZookeeperJobLock</li>
+<li>add all the job servers and query servers to the kylin.server.cluster-servers</li>
+</ul>
+<h4 id="NoopScheduler"><a href="#NoopScheduler" class="headerlink" title="NoopScheduler"></a>NoopScheduler</h4><p> 没有任何实现，什么都不做</p>
+<h3 id="调度器初始化"><a href="#调度器初始化" class="headerlink" title="调度器初始化"></a>调度器初始化</h3><p>下图为初始化流程，主要的初始化入口在JobService类中，它是一个Spring托管的bean，在该bean初始化之后，会调用afterPropertiesSet方法，在这个方法中根据配置获取调度器，并异步调用init方法进行初始化。最后会加一个钩子，在系统关闭的时候关闭调度器。</p>
+<p><img src="https://static.lovedata.net/20-06-16-64b1e249c7f73bbe5e69e8463f7c9517.png-wm" alt="调度器初始化流程"></p>
+<p>初始化具体方法。限于篇幅，DefaultScheduler的init方法源码没有贴出，但是可以参考 <a target="_blank" rel="noopener" href="https://github.com/pengshuangbao/kylin/blob/2.5.x-comment/core-job/src/main/java/org/apache/kylin/job/impl/threadpool/DefaultScheduler.java">DefaultScheduler</a></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">afterPropertiesSet</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">  <span class="comment">//此方法在JobService实例化之后调用</span></span><br><span class="line">  <span class="type">String</span> <span class="variable">timeZone</span> <span class="operator">=</span> getConfig().getTimeZone();</span><br><span class="line">  <span class="type">TimeZone</span> <span class="variable">tzone</span> <span class="operator">=</span> TimeZone.getTimeZone(timeZone);</span><br><span class="line">  TimeZone.setDefault(tzone);</span><br><span class="line"></span><br><span class="line">  <span class="comment">//这里根据SchedulerFactory工程类依据配置生成一个调度器，默认是DefaultScheduler</span></span><br><span class="line">  <span class="keyword">final</span> <span class="type">KylinConfig</span> <span class="variable">kylinConfig</span> <span class="operator">=</span> KylinConfig.getInstanceFromEnv();</span><br><span class="line">  <span class="keyword">final</span> Scheduler&lt;AbstractExecutable&gt; scheduler = (Scheduler&lt;AbstractExecutable&gt;) SchedulerFactory</span><br><span class="line">    .scheduler(kylinConfig.getSchedulerType());</span><br><span class="line">  <span class="comment">//这里不在主方法执行而要使用一个线程类执行初始化操作，是因为这个初始化操作可能耗时很久，而这个操作并不是启动kylin服务必须的，所以可以异步执行</span></span><br><span class="line">  <span class="keyword">new</span> <span class="title class_">Thread</span>(<span class="keyword">new</span> <span class="title class_">Runnable</span>() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">//初始化调度器,这里会传入一个zk分布式锁，如果kylin配置了zk连接，则使用，否则使用hbase的zk连接，zk初始化操作在ZookeeperDistributedLock.getZKConnectString中</span></span><br><span class="line">        scheduler.init(<span class="keyword">new</span> <span class="title class_">JobEngineConfig</span>(kylinConfig), <span class="keyword">new</span> <span class="title class_">ZookeeperJobLock</span>());</span><br><span class="line">        <span class="keyword">if</span> (!scheduler.hasStarted()) &#123;</span><br><span class="line">          logger.info(<span class="string">&quot;scheduler has not been started&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(e);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;).start();</span><br><span class="line">  <span class="comment">//一个钩子，在系统停止的时候关闭调度器</span></span><br><span class="line">  Runtime.getRuntime().addShutdownHook(<span class="keyword">new</span> <span class="title class_">Thread</span>(<span class="keyword">new</span> <span class="title class_">Runnable</span>() &#123;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">run</span><span class="params">()</span> &#123;</span><br><span class="line">      <span class="keyword">try</span> &#123;</span><br><span class="line">        scheduler.shutdown();</span><br><span class="line">      &#125; <span class="keyword">catch</span> (SchedulerException e) &#123;</span><br><span class="line">        logger.error(<span class="string">&quot;error occurred to shutdown scheduler&quot;</span>, e);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="调度执行"><a href="#调度执行" class="headerlink" title="调度执行"></a>调度执行</h3><p><img src="https://static.lovedata.net/20-06-16-f1cb7f888499c99b988cdf3c38d76254.png-wm" alt="image"></p>
+<h3 id="CubingJob分析"><a href="#CubingJob分析" class="headerlink" title="CubingJob分析"></a>CubingJob分析</h3><p>​	先从上往下介绍，Executable是一个接口，主要方法是 ExecuteResult execute(ExecutableContext executableContext),子类实现这个方法，会在调度的时候传入上下文，返回执行结果。</p>
+<p>​	AbstractExecutable是一个抽象类，实现了execute这个方法，主要实现了一些公共的逻辑，比如执行前的预处理、执行后的修改状态、错误重试、邮件通知等公共操作。 在execute方法中使用了 do…while循环执行retry次子类实现的doWork方法。</p>
+<p>​	CubingJob主要类图如下，该类是一个链式可执行类，所谓链式,就是有一系列的子任务组成的一个大任务，链式执行的实现在DefaultChainedExecutable类中，在它执行方法doWork中，循环实现job的tasks列表，而这些tasks列表中的task，也是Executable的子类，理论上也可以是链式任务。</p>
+<p><img src="https://static.lovedata.net/20-06-16-239662ed95d7db8d36664b154db3bb7c.png-wm" alt="image"></p>
+<p>下面是链式任务的doWork方法，可以看到，会根据子任务的状态做相应的逻辑判断，如果正在执行，说明当前的job已经有子任务在执行了，不必要启动一个新的subtask,如果是STOPPED，说明已经停止，无须再次执行，如果是可执行的，则执行这个子任务，并且把结果返回。 <strong>请注意</strong>这里直接返回了，没有继续循环，也就是说，链式任务，一次只会执行一个子任务，执行完成就返回，并且等待下一次调度继续执行子任务。   如果没有子任务了，则直接返回成功，整个链式任务执行成功。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> ExecuteResult <span class="title function_">doWork</span><span class="params">(ExecutableContext context)</span> <span class="keyword">throws</span> ExecuteException &#123;</span><br><span class="line">     List&lt;? <span class="keyword">extends</span> <span class="title class_">Executable</span>&gt; executables = getTasks();</span><br><span class="line">     <span class="keyword">final</span> <span class="type">int</span> <span class="variable">size</span> <span class="operator">=</span> executables.size();</span><br><span class="line">     <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; size; ++i) &#123;</span><br><span class="line">         <span class="type">Executable</span> <span class="variable">subTask</span> <span class="operator">=</span> executables.get(i);</span><br><span class="line">         <span class="type">ExecutableState</span> <span class="variable">state</span> <span class="operator">=</span> subTask.getStatus();</span><br><span class="line">         <span class="keyword">if</span> (state == ExecutableState.RUNNING) &#123;</span><br><span class="line">             <span class="comment">// there is already running subtask, no need to start a new subtask</span></span><br><span class="line">             <span class="keyword">break</span>;</span><br><span class="line">         &#125; <span class="keyword">else</span> <span class="keyword">if</span> (state == ExecutableState.STOPPED) &#123;</span><br><span class="line">             <span class="comment">// the job is paused</span></span><br><span class="line">             <span class="keyword">break</span>;</span><br><span class="line">         &#125; <span class="keyword">else</span> <span class="keyword">if</span> (state == ExecutableState.ERROR) &#123;</span><br><span class="line">             <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalStateException</span>(</span><br><span class="line">                     <span class="string">&quot;invalid subtask state, subtask:&quot;</span> + subTask.getName() + <span class="string">&quot;, state:&quot;</span> + subTask.getStatus());</span><br><span class="line">         &#125;</span><br><span class="line">         <span class="keyword">if</span> (subTask.isRunnable()) &#123;</span><br><span class="line">             <span class="keyword">return</span> subTask.execute(context);</span><br><span class="line">         &#125;</span><br><span class="line">     &#125;</span><br><span class="line">     <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">ExecuteResult</span>(ExecuteResult.State.SUCCEED);</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看看都有哪些类实现了Executable，比如建Hbase表、建Hive宽表、以及提交MR程序的MapreduceExecutable、清理HDFS临时文件等等，在后面的章节中会详细介绍这些是如何实现的。</p>
+<p><img src="https://static.lovedata.net/20-06-16-effcb10bd0e42c00d1ff96a1959994f4.png-wm" alt="image"></p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>基于上面的描述，我们了解了一般工作中的kylin的构建方法，以及构建的详细流程，其中关键方法是submitJobInternal，会调用EnginFacotry获取Builder，然后构建任务，并且会加入到hbase中。</p>
+<p>后面还详细介绍了kylin的三种执行器，DefaultScheduler、DistributeSchedule以及NooopScheduler，以及介绍了默认调度器的初始化流程和任务从产生到开始运行的详细过程。</p>
+<p>下一章将会详细介绍任务构建过程。</p>
+<hr>
+<h3 id="Kylin源码解析系列目录"><a href="#Kylin源码解析系列目录" class="headerlink" title="Kylin源码解析系列目录"></a>Kylin源码解析系列目录</h3><h4 id="构建引擎系列"><a href="#构建引擎系列" class="headerlink" title="构建引擎系列"></a>构建引擎系列</h4><p>1、<a href="https://blog.lovedata.net/1166eeb4.html">Kylin源码解析-kylin构建任务生成与调度执行 | 编程狂想</a></p>
+<p>2、<a href="https://blog.lovedata.net/b6c1ac95.html">Kylin源码解析-kylin构建流程总览 | 编程狂想</a></p>
+<p>3、<a href="https://blog.lovedata.net/afece5b5.html">Kylin源码解析-构建引擎实现原理 | 编程狂想</a></p>
+<p>4、<a href="https://blog.lovedata.net/92eee585.html">Kylin源码解析-生成Hive宽表及其他操作 | 编程狂想</a></p>
+<p>5、<a href="https://blog.lovedata.net/b97d4c62.html">Kylin源码解析-提取事实表唯一列 | 编程狂想</a></p>
+<p>6、<a href="https://blog.lovedata.net/37750c96.html">Kylin源码解析-构建层级分析 | 编程狂想</a></p>
+<p>7、Kylin源码解析-构建数据字典和生成Cuboid统计数据</p>
+<p>8、Kylin源码解析-生成Hbase表</p>
+<p>9、Kylin源码解析-构建Cuboid</p>
+<p>10、Kylin源码解析-转换HDFS为Hfile</p>
+<p>11、Kylin源码解析-加载Hfile到Hbase中</p>
+<p>12、Kylin源码解析-修改元数据以及其他清理工作</p>
+<h4 id="查询引擎系列"><a href="#查询引擎系列" class="headerlink" title="查询引擎系列"></a>查询引擎系列</h4>
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">相关文章</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/afece5b5.html" rel="bookmark">Kylin源码解析-构建引擎实现原理</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/b6c1ac95.html" rel="bookmark">Kylin源码解析-kylin构建流程总览</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/37750c96.html" rel="bookmark">Kylin源码解析-构建层级分析</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/kylin/" rel="tag"># kylin</a>
+              <a href="/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" rel="tag"># 源码分析</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/b6c1ac95.html" rel="prev" title="Kylin源码解析-kylin构建流程总览">
+      <i class="fa fa-chevron-left"></i> Kylin源码解析-kylin构建流程总览
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/afece5b5.html" rel="next" title="Kylin源码解析-构建引擎实现原理">
+      Kylin源码解析-构建引擎实现原理 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Kylin%E4%BB%BB%E5%8A%A1%E6%9E%84%E5%BB%BA%E6%96%B9%E6%B3%95"><span class="nav-number">1.</span> <span class="nav-text">Kylin任务构建方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA%E4%BB%BB%E5%8A%A1%E7%94%9F%E6%88%90"><span class="nav-number">2.</span> <span class="nav-text">构建任务生成</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA%E6%8E%A5%E5%8F%A3Rest-API"><span class="nav-number">2.1.</span> <span class="nav-text">构建接口Rest API</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Path-Variable"><span class="nav-number">2.1.1.</span> <span class="nav-text">Path Variable</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Request-Body"><span class="nav-number">2.1.2.</span> <span class="nav-text">Request Body</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Curl-Example"><span class="nav-number">2.1.3.</span> <span class="nav-text">Curl Example</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Response-Sample"><span class="nav-number">2.1.4.</span> <span class="nav-text">Response Sample</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%BB%E5%8A%A1%E7%94%9F%E6%88%90%E6%B5%81%E7%A8%8B"><span class="nav-number">2.2.</span> <span class="nav-text">任务生成流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#build"><span class="nav-number">2.2.1.</span> <span class="nav-text">build</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#rebuild"><span class="nav-number">2.2.2.</span> <span class="nav-text">rebuild</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#buildInternal"><span class="nav-number">2.2.3.</span> <span class="nav-text">buildInternal</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#submitJob"><span class="nav-number">2.2.4.</span> <span class="nav-text">submitJob</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#submitJobInternal-%E6%A0%B8%E5%BF%83%E6%96%B9%E6%B3%95"><span class="nav-number">2.2.5.</span> <span class="nav-text">submitJobInternal(核心方法)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#EnginFactory-createBatchCubingJob"><span class="nav-number">2.2.6.</span> <span class="nav-text">EnginFactory.createBatchCubingJob</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MRBatchCubingEngine2-createBatchCubingJob"><span class="nav-number">2.2.7.</span> <span class="nav-text">MRBatchCubingEngine2.createBatchCubingJob</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#addJob"><span class="nav-number">2.2.8.</span> <span class="nav-text">addJob</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6%E4%B8%8E%E6%89%A7%E8%A1%8C"><span class="nav-number">3.</span> <span class="nav-text">任务调度与执行</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kylin%E8%B0%83%E5%BA%A6%E5%99%A8"><span class="nav-number">3.1.</span> <span class="nav-text">Kylin调度器</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#DefaultScheduler"><span class="nav-number">3.1.1.</span> <span class="nav-text">DefaultScheduler</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#DistributedScheduler"><span class="nav-number">3.1.2.</span> <span class="nav-text">DistributedScheduler</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#NoopScheduler"><span class="nav-number">3.1.3.</span> <span class="nav-text">NoopScheduler</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E5%BA%A6%E5%99%A8%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-number">3.2.</span> <span class="nav-text">调度器初始化</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B0%83%E5%BA%A6%E6%89%A7%E8%A1%8C"><span class="nav-number">3.3.</span> <span class="nav-text">调度执行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CubingJob%E5%88%86%E6%9E%90"><span class="nav-number">3.4.</span> <span class="nav-text">CubingJob分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Kylin%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90%E7%B3%BB%E5%88%97%E7%9B%AE%E5%BD%95"><span class="nav-number">4.1.</span> <span class="nav-text">Kylin源码解析系列目录</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9E%84%E5%BB%BA%E5%BC%95%E6%93%8E%E7%B3%BB%E5%88%97"><span class="nav-number">4.1.1.</span> <span class="nav-text">构建引擎系列</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E8%AF%A2%E5%BC%95%E6%93%8E%E7%B3%BB%E5%88%97"><span class="nav-number">4.1.2.</span> <span class="nav-text">查询引擎系列</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">奔跑的蜗牛</p>
+  <div class="site-description" itemprop="description">大数据技术文章、技术研究与交流</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/pengshuangbao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;pengshuangbao" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">奔跑的蜗牛</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : '7eDspFpe1gjdIyKDr2c51BjD-gzGzoHsz',
+      appKey     : 'Rvd22QedGjPX4cuLgdPWLw83',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

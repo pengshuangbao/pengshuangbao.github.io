@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.lovedata.net","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="背景环境HDP : 2.6.5.0-292 Hbase : 1.1.2">
+<meta property="og:type" content="article">
+<meta property="og:title" content="记一次生产环境hbase的regionserver进程频繁消失的问题">
+<meta property="og:url" content="http://blog.lovedata.net/13cb1a02.html">
+<meta property="og:site_name" content="编程狂想">
+<meta property="og:description" content="背景环境HDP : 2.6.5.0-292 Hbase : 1.1.2">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://static.lovedata.net/20-05-08-ae7e46eba7951b88b150cff7306359d6.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/20-05-08-256b786ec707715c2bbf4e4f5ae256d7.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/20-05-08-2304b75d4eeb19282e2c3f93994d81f9.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/20-05-08-80d99e41690ce933d1f4cacbf8f7dcb2.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/20-05-08-9adfe62bfb9358cdd69901656d6b3a2a.png-wm">
+<meta property="article:published_time" content="2020-05-08T10:57:38.000Z">
+<meta property="article:modified_time" content="2022-03-10T04:02:49.459Z">
+<meta property="article:author" content="奔跑的蜗牛">
+<meta property="article:tag" content="大数据">
+<meta property="article:tag" content="Hbase">
+<meta property="article:tag" content="运维">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://static.lovedata.net/20-05-08-ae7e46eba7951b88b150cff7306359d6.png-wm">
+
+<link rel="canonical" href="http://blog.lovedata.net/13cb1a02.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>记一次生产环境hbase的regionserver进程频繁消失的问题 | 编程狂想</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?111de68d01ad3c3504848c187c4bae5c";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="编程狂想" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta custom-logo">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">编程狂想</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">让数据飞一会儿</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lovedata.net/13cb1a02.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="奔跑的蜗牛">
+      <meta itemprop="description" content="大数据技术文章、技术研究与交流">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="编程狂想">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          记一次生产环境hbase的regionserver进程频繁消失的问题
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-05-08 18:57:38" itemprop="dateCreated datePublished" datetime="2020-05-08T18:57:38+08:00">2020-05-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-10 12:02:49" itemprop="dateModified" datetime="2022-03-10T12:02:49+08:00">2022-03-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Hbase/" itemprop="url" rel="index"><span itemprop="name">Hbase</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/13cb1a02.html" class="post-meta-item leancloud_visitors" data-flag-title="记一次生产环境hbase的regionserver进程频繁消失的问题" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/13cb1a02.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/13cb1a02.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><h3 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h3><p>HDP : 2.6.5.0-292</p>
+<p>Hbase : 1.1.2</p>
+<span id="more"></span>
+<h3 id="机器"><a href="#机器" class="headerlink" title="机器"></a>机器</h3><p>linux 16Core 32G内存 5台</p>
+<h3 id="Hbase设置"><a href="#Hbase设置" class="headerlink" title="Hbase设置"></a>Hbase设置</h3><p>最大内存 ： 12.5G</p>
+<p><img src="https://static.lovedata.net/20-05-08-ae7e46eba7951b88b150cff7306359d6.png-wm" alt="内存大小"></p>
+<p><img src="https://static.lovedata.net/20-05-08-256b786ec707715c2bbf4e4f5ae256d7.png-wm" alt="内存使用"></p>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p><img src="https://static.lovedata.net/20-05-08-2304b75d4eeb19282e2c3f93994d81f9.png-wm" alt="问题"></p>
+<p>由上图可以看出，每隔一段时间，一个Regionserver就会挂掉，并且过一会又会自动重启</p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><h3 id="是否由于内存不足导致内存溢出？"><a href="#是否由于内存不足导致内存溢出？" class="headerlink" title="是否由于内存不足导致内存溢出？"></a>是否由于内存不足导致内存溢出？</h3><p>由上面的那种内存使用图可以看出，MaxMemM 为12.5G，CommitMemM 为12.5G，而平均使用内存大概为 5G左右，发现内存使用情况还好，并没有频繁的GC，通过查看regionserver的日志目录，也没发现因为内存溢出而导致进程退出。</p>
+<p><img src="https://static.lovedata.net/20-05-08-80d99e41690ce933d1f4cacbf8f7dcb2.png-wm" alt="内存情况"></p>
+<h3 id="是否由于Hbase本身的错误而导致进程退出？"><a href="#是否由于Hbase本身的错误而导致进程退出？" class="headerlink" title="是否由于Hbase本身的错误而导致进程退出？"></a>是否由于Hbase本身的错误而导致进程退出？</h3><p>也有可能因为hbase本身的程序错误而导致进程退出，但是通过查看regionserver.log，并没有发现异常问题，看到的只是几行关于zookeeper 和 metrics 停止的日志，如下, 输入 &#x2F;unlimited 并键入 n 键翻页 搜索启动的日志，找到最后一次重启之前的那一段时间的日志，发现并没有ERROR报错，</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">less hbase-hbase-regionserver-xxx.log</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://static.lovedata.net/20-05-08-9adfe62bfb9358cdd69901656d6b3a2a.png-wm" alt="image"></p>
+<h3 id="是否是因为系统内存不足将hbase进程杀掉？"><a href="#是否是因为系统内存不足将hbase进程杀掉？" class="headerlink" title="是否是因为系统内存不足将hbase进程杀掉？"></a>是否是因为系统内存不足将hbase进程杀掉？</h3><p>查看当前目录下的 regionserver.out 日志，果然发现了异常，显示 hbase被系统kill掉了</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/hdp/current/hbase-regionserver/bin/hbase-daemon.sh: line 214: 13386 Killed                  <span class="built_in">nice</span> -n <span class="variable">$HBASE_NICENESS</span> <span class="string">&quot;<span class="variable">$HBASE_HOME</span>&quot;</span>/bin/hbase --config <span class="string">&quot;<span class="variable">$&#123;HBASE_CONF_DIR&#125;</span>&quot;</span> <span class="variable">$command</span> <span class="string">&quot;<span class="variable">$@</span>&quot;</span> start &gt;&gt; <span class="variable">$&#123;HBASE_LOGOUT&#125;</span> 2&gt;&amp;1</span><br></pre></td></tr></table></figure>
+
+
+
+<p>下面就需要找一找原因，为什么会被kill掉，键入命令,并且键入 SHIFT+G，看到，确实是有kill掉进程，pid也对的上</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dmesg -T | less </span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[Fri May  8 19:14:39 2020] Out of memory: Kill process 13551 (java) score 164 or sacrifice child</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="原因分析"><a href="#原因分析" class="headerlink" title="原因分析"></a>原因分析</h2><p>因为这regionserver机器也有nodemanager进程和kylin服务，在任务构建的时候，yarn的内存需求量非常大，判断为系统在内存不够的时候，自动选取了内存消耗较大的进程kill掉，所以regionserver就无辜被杀死了。</p>
+<h2 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h2><ol>
+<li>根据上图内存消耗情况，发现hbase其实内存需求量不多，所以调整hbase regionserver 最大内存为 8G</li>
+<li>调小nodemanager内存</li>
+<li>调小kylin的内存</li>
+<li>迁移这个机器上非必须的服务到其他节点</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">相关文章</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/a13ac350.html" rel="bookmark">Kylin项目源码结构信息</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/f5dccb04.html" rel="bookmark">Kylin基础概念-维度与度量</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/5a9a3875.html" rel="bookmark">Kylin构建流程分析-加载HFile到Hbase中(Load HFile to HBase Table)</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/97fa7954.html" rel="bookmark">kylin架构分析-广播变量BroadCaster分析</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/677d25fa.html" rel="bookmark">基于HDP搭建的的Hbase调优实践-CMS GC调优</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%A4%A7%E6%95%B0%E6%8D%AE/" rel="tag"># 大数据</a>
+              <a href="/tags/Hbase/" rel="tag"># Hbase</a>
+              <a href="/tags/%E8%BF%90%E7%BB%B4/" rel="tag"># 运维</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/106c955e.html" rel="prev" title="Flink剖析系列之Flink底层RPC通信机制">
+      <i class="fa fa-chevron-left"></i> Flink剖析系列之Flink底层RPC通信机制
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/be4c4827.html" rel="next" title="Jenkins匿名用户禁止浏览">
+      Jenkins匿名用户禁止浏览 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%83%8C%E6%99%AF"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%8E%AF%E5%A2%83"><span class="nav-number">1.1.</span> <span class="nav-text">环境</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%BA%E5%99%A8"><span class="nav-number">1.2.</span> <span class="nav-text">机器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Hbase%E8%AE%BE%E7%BD%AE"><span class="nav-number">1.3.</span> <span class="nav-text">Hbase设置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%97%AE%E9%A2%98"><span class="nav-number">2.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E6%9E%90"><span class="nav-number">3.</span> <span class="nav-text">分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%AF%E5%90%A6%E7%94%B1%E4%BA%8E%E5%86%85%E5%AD%98%E4%B8%8D%E8%B6%B3%E5%AF%BC%E8%87%B4%E5%86%85%E5%AD%98%E6%BA%A2%E5%87%BA%EF%BC%9F"><span class="nav-number">3.1.</span> <span class="nav-text">是否由于内存不足导致内存溢出？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%AF%E5%90%A6%E7%94%B1%E4%BA%8EHbase%E6%9C%AC%E8%BA%AB%E7%9A%84%E9%94%99%E8%AF%AF%E8%80%8C%E5%AF%BC%E8%87%B4%E8%BF%9B%E7%A8%8B%E9%80%80%E5%87%BA%EF%BC%9F"><span class="nav-number">3.2.</span> <span class="nav-text">是否由于Hbase本身的错误而导致进程退出？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%98%AF%E5%90%A6%E6%98%AF%E5%9B%A0%E4%B8%BA%E7%B3%BB%E7%BB%9F%E5%86%85%E5%AD%98%E4%B8%8D%E8%B6%B3%E5%B0%86hbase%E8%BF%9B%E7%A8%8B%E6%9D%80%E6%8E%89%EF%BC%9F"><span class="nav-number">3.3.</span> <span class="nav-text">是否是因为系统内存不足将hbase进程杀掉？</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%9F%E5%9B%A0%E5%88%86%E6%9E%90"><span class="nav-number">4.</span> <span class="nav-text">原因分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="nav-number">5.</span> <span class="nav-text">解决方案</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">奔跑的蜗牛</p>
+  <div class="site-description" itemprop="description">大数据技术文章、技术研究与交流</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/pengshuangbao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;pengshuangbao" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">奔跑的蜗牛</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : '7eDspFpe1gjdIyKDr2c51BjD-gzGzoHsz',
+      appKey     : 'Rvd22QedGjPX4cuLgdPWLw83',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

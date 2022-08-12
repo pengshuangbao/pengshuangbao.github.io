@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.lovedata.net","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="大数据技术文章、技术研究与交流">
+<meta property="og:type" content="website">
+<meta property="og:title" content="编程狂想">
+<meta property="og:url" content="http://blog.lovedata.net/page/2/index.html">
+<meta property="og:site_name" content="编程狂想">
+<meta property="og:description" content="大数据技术文章、技术研究与交流">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:author" content="奔跑的蜗牛">
+<meta property="article:tag" content="网络、数据、大数据、hadoop、kylin">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://blog.lovedata.net/page/2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : true,
+    isPost : false,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>编程狂想</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?111de68d01ad3c3504848c187c4bae5c";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="编程狂想" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta custom-logo">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">编程狂想</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">让数据飞一会儿</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content index posts-expand">
+            
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lovedata.net/71a0e226.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="奔跑的蜗牛">
+      <meta itemprop="description" content="大数据技术文章、技术研究与交流">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="编程狂想">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/71a0e226.html" class="post-title-link" itemprop="url">一个本应三十秒解决掉的Flink函数名冲突问题</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-05-29 09:46:57" itemprop="dateCreated datePublished" datetime="2020-05-29T09:46:57+08:00">2020-05-29</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-10 12:02:49" itemprop="dateModified" datetime="2022-03-10T12:02:49+08:00">2022-03-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/71a0e226.html" class="post-meta-item leancloud_visitors" data-flag-title="一个本应三十秒解决掉的Flink函数名冲突问题" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/71a0e226.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/71a0e226.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>今天在跑一个Flink Table Api 实现的从Hive到Kafka的数据迁移的ETL任务的时候，产生了莫名其妙的错误。</p>
+<p>有一个表假设表名为 table1,存放的是日志数据，表中有一个字段 localtime,是代表日志上报的时间戳，是number类型的。sql为 ” select localtime from table1 “,然后再用localtime去做一些转换操作，然后就报了错， java.lang.NumberFormatException,转换异常。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/71a0e226.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lovedata.net/677d25fa.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="奔跑的蜗牛">
+      <meta itemprop="description" content="大数据技术文章、技术研究与交流">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="编程狂想">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/677d25fa.html" class="post-title-link" itemprop="url">基于HDP搭建的的Hbase调优实践-CMS GC调优</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-05-27 10:47:13" itemprop="dateCreated datePublished" datetime="2020-05-27T10:47:13+08:00">2020-05-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-10 12:02:49" itemprop="dateModified" datetime="2022-03-10T12:02:49+08:00">2022-03-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Hbase/" itemprop="url" rel="index"><span itemprop="name">Hbase</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/677d25fa.html" class="post-meta-item leancloud_visitors" data-flag-title="基于HDP搭建的的Hbase调优实践-CMS GC调优" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/677d25fa.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/677d25fa.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><h3 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h3><p>HDP : 2.6.5.0-292</p>
+<p>Hbase : 1.1.2</p>
+<p>Kylin : 2.6.2</p>
+<p>Kylin使用hbase作为存储，每小时的第五分钟开始构建，有十几个Cube，平均构建时间十五分钟。采用构建集群和存储集群分离。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/677d25fa.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lovedata.net/be4c4827.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="奔跑的蜗牛">
+      <meta itemprop="description" content="大数据技术文章、技术研究与交流">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="编程狂想">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/be4c4827.html" class="post-title-link" itemprop="url">Jenkins匿名用户禁止浏览</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-05-25 19:46:50" itemprop="dateCreated datePublished" datetime="2020-05-25T19:46:50+08:00">2020-05-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-10 12:02:49" itemprop="dateModified" datetime="2022-03-10T12:02:49+08:00">2022-03-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/be4c4827.html" class="post-meta-item leancloud_visitors" data-flag-title="Jenkins匿名用户禁止浏览" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/be4c4827.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/be4c4827.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="面临的问题"><a href="#面临的问题" class="headerlink" title="面临的问题"></a>面临的问题</h2><p>​	在Jenkins使用默认的配置的时候，匿名用户(直接访问jenkins地址并且未登录)是可以浏览到jenkins的一些project和构建详情以及日志的，如下图所示。如果jenkins暴露在互联网环境下，会造成一些信息泄露和其他的不安全因素，因此可以通过设置禁止jenkins匿名用户浏览来解决的。</p>
+<p><img src="https://static.lovedata.net/20-05-25-a5bb6bf2f634c4778d088f08f3df70c0.png-wm" alt="image"></p>
+<h2 id="设置方法"><a href="#设置方法" class="headerlink" title="设置方法"></a>设置方法</h2><p>进入jenkins首页，点击 Manage Jenkins-&gt;Configure Global Security,勾选下面的选择框，取消选中 “Allow anonymous read access”</p>
+<p><img src="https://static.lovedata.net/20-05-25-685440e7d30c117478cc6b4d9f653376.png-wm" alt="image"></p>
+<p>然后匿名用户再次访问的时候，就会直接进入登录页面了。</p>
+<p><img src="https://static.lovedata.net/20-05-25-a30a86fe72dc22297aa23d783feb0b9d.png-wm" alt="image"></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lovedata.net/13cb1a02.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="奔跑的蜗牛">
+      <meta itemprop="description" content="大数据技术文章、技术研究与交流">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="编程狂想">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/13cb1a02.html" class="post-title-link" itemprop="url">记一次生产环境hbase的regionserver进程频繁消失的问题</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-05-08 18:57:38" itemprop="dateCreated datePublished" datetime="2020-05-08T18:57:38+08:00">2020-05-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-10 12:02:49" itemprop="dateModified" datetime="2022-03-10T12:02:49+08:00">2022-03-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Hbase/" itemprop="url" rel="index"><span itemprop="name">Hbase</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/13cb1a02.html" class="post-meta-item leancloud_visitors" data-flag-title="记一次生产环境hbase的regionserver进程频繁消失的问题" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/13cb1a02.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/13cb1a02.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><h3 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h3><p>HDP : 2.6.5.0-292</p>
+<p>Hbase : 1.1.2</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/13cb1a02.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lovedata.net/106c955e.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="奔跑的蜗牛">
+      <meta itemprop="description" content="大数据技术文章、技术研究与交流">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="编程狂想">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/106c955e.html" class="post-title-link" itemprop="url">Flink剖析系列之Flink底层RPC通信机制</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-12-20 10:32:07" itemprop="dateCreated datePublished" datetime="2019-12-20T10:32:07+08:00">2019-12-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-10 12:02:49" itemprop="dateModified" datetime="2022-03-10T12:02:49+08:00">2022-03-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/106c955e.html" class="post-meta-item leancloud_visitors" data-flag-title="Flink剖析系列之Flink底层RPC通信机制" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/106c955e.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/106c955e.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>对于分布式系统，内部组件众多，而组件之间的联系就需要一套非常高效的通信机制，Flink底层的RPC框架是基于Akka实现。  本文着重通过一些例子来分析flink底层的通信机制</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/106c955e.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lovedata.net/761a39dc.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="奔跑的蜗牛">
+      <meta itemprop="description" content="大数据技术文章、技术研究与交流">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="编程狂想">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/761a39dc.html" class="post-title-link" itemprop="url">Flink剖析系列之Yarn Session Cluster 和 Yarn Per Job 模式作业提交流程分析</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-12-13 10:32:07" itemprop="dateCreated datePublished" datetime="2019-12-13T10:32:07+08:00">2019-12-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-10 12:02:49" itemprop="dateModified" datetime="2022-03-10T12:02:49+08:00">2022-03-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/761a39dc.html" class="post-meta-item leancloud_visitors" data-flag-title="Flink剖析系列之Yarn Session Cluster 和 Yarn Per Job 模式作业提交流程分析" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/761a39dc.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/761a39dc.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>由于在开发中使用Flink大多数使用的是Flink Yarn cluster 模式运行，认识的一些同学的公司也是基于这种模式，所以今天就深入探讨一下这种模式的启动流程。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/761a39dc.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lovedata.net/70f3ed36.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="奔跑的蜗牛">
+      <meta itemprop="description" content="大数据技术文章、技术研究与交流">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="编程狂想">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/70f3ed36.html" class="post-title-link" itemprop="url">Flink剖析系列之开篇</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-12-12 10:32:07" itemprop="dateCreated datePublished" datetime="2019-12-12T10:32:07+08:00">2019-12-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-10 12:02:49" itemprop="dateModified" datetime="2022-03-10T12:02:49+08:00">2022-03-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/70f3ed36.html" class="post-meta-item leancloud_visitors" data-flag-title="Flink剖析系列之开篇" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/70f3ed36.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/70f3ed36.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>话不多说，目录如下：</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/70f3ed36.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lovedata.net/8156c1e1.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="奔跑的蜗牛">
+      <meta itemprop="description" content="大数据技术文章、技术研究与交流">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="编程狂想">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/8156c1e1.html" class="post-title-link" itemprop="url">使用普罗米修斯和Grafana监控Flink运行状态</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-11-12 16:07:17" itemprop="dateCreated datePublished" datetime="2019-11-12T16:07:17+08:00">2019-11-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-10 12:02:49" itemprop="dateModified" datetime="2022-03-10T12:02:49+08:00">2022-03-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/8156c1e1.html" class="post-meta-item leancloud_visitors" data-flag-title="使用普罗米修斯和Grafana监控Flink运行状态" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/8156c1e1.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/8156c1e1.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="Pushgateway"><a href="#Pushgateway" class="headerlink" title="Pushgateway"></a>Pushgateway</h1><p>pushgateway 是一个Prometheus 生态中重要工具，因为Prometheus采用Pull模式，可能由于一些原因，Prometheus无法直接拉取各个target的数据，需要有个地方统一先收集起来</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/8156c1e1.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lovedata.net/7277eab0.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="奔跑的蜗牛">
+      <meta itemprop="description" content="大数据技术文章、技术研究与交流">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="编程狂想">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/7277eab0.html" class="post-title-link" itemprop="url">Kibana格式化单位为毫秒的字段为秒</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-05-20 16:07:17" itemprop="dateCreated datePublished" datetime="2019-05-20T16:07:17+08:00">2019-05-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-10 12:02:49" itemprop="dateModified" datetime="2022-03-10T12:02:49+08:00">2022-03-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ELK/" itemprop="url" rel="index"><span itemprop="name">ELK</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/7277eab0.html" class="post-meta-item leancloud_visitors" data-flag-title="Kibana格式化单位为毫秒的字段为秒" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/7277eab0.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/7277eab0.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="优化原因"><a href="#优化原因" class="headerlink" title="优化原因"></a>优化原因</h2><p>在收集日志的时候，单位为毫秒，而毫秒在Kibana做查询的时候，可读性肯定会差一些哈, 所以需要转换为秒为单位。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/7277eab0.html#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lovedata.net/905b7823.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="奔跑的蜗牛">
+      <meta itemprop="description" content="大数据技术文章、技术研究与交流">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="编程狂想">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/905b7823.html" class="post-title-link" itemprop="url">ElasticSearch监控利器ElastAlert的使用指南</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-05-18 14:19:50" itemprop="dateCreated datePublished" datetime="2019-05-18T14:19:50+08:00">2019-05-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-10 12:02:49" itemprop="dateModified" datetime="2022-03-10T12:02:49+08:00">2022-03-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%BF%90%E7%BB%B4/" itemprop="url" rel="index"><span itemprop="name">运维</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/905b7823.html" class="post-meta-item leancloud_visitors" data-flag-title="ElasticSearch监控利器ElastAlert的使用指南" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/905b7823.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/905b7823.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="ElastAlert介绍"><a href="#ElastAlert介绍" class="headerlink" title="ElastAlert介绍"></a>ElastAlert介绍</h2><blockquote>
+<p>ElastAlert is a simple framework for alerting on anomalies, spikes, or other patterns of interest from data in Elasticsearch.</p>
+</blockquote>
+<p>简而言之，就是一款可以用于监控告警的框架，依据的是不断轮训ES，查询出数据，在满足了自己配置的一些规则之后进行响应的后续操作，比如发邮件等。</p>
+<p>有以下特点：</p>
+<ul>
+<li>简单</li>
+<li>文档齐全</li>
+<li>社区活跃</li>
+</ul>
+<p>支持的告警类型有：</p>
+<ul>
+<li>命令行</li>
+<li>右键</li>
+<li>JIRA</li>
+<li>SNS</li>
+<li>等等</li>
+</ul>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><h3 id="环境"><a href="#环境" class="headerlink" title="环境"></a>环境</h3><ul>
+<li>Linux CentOS</li>
+<li>ElasticSearch 5.4.0</li>
+<li>Kibana 5.4.0</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pip install elastalert</span><br><span class="line"> pip install &quot;elasticsearch=5.4.0&quot;</span><br></pre></td></tr></table></figure>
+
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><h3 id="初始化ElastAlert-index"><a href="#初始化ElastAlert-index" class="headerlink" title="初始化ElastAlert index"></a>初始化ElastAlert index</h3><p>输入elastalert-create-index，填写ES host和port，后面的可直接回车。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">elastalert-create-index</span><br><span class="line">Enter Elasticsearch host: xxx</span><br><span class="line">Enter Elasticsearch port: 9200</span><br><span class="line">Use SSL? t/f: f</span><br><span class="line">Enter optional basic-auth username (or leave blank):</span><br><span class="line">Enter optional basic-auth password (or leave blank):</span><br><span class="line">Enter optional Elasticsearch URL prefix (prepends a </span><br><span class="line">string to the URL of every request):</span><br><span class="line">New index name? (Default elastalert_status)</span><br><span class="line">Name of existing index to copy? (Default None)</span><br><span class="line">Elastic Version:5</span><br><span class="line">Mapping used for string:&#123;&#x27;index&#x27;: &#x27;not_analyzed&#x27;, &#x27;type&#x27;: &#x27;string&#x27;&#125;</span><br><span class="line">Index elastalert_status already exists. Skipping index creation.</span><br></pre></td></tr></table></figure>
+
+<h3 id="修改config-yaml"><a href="#修改config-yaml" class="headerlink" title="修改config.yaml"></a>修改config.yaml</h3><ul>
+<li>下载</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">通过pip安装，需要自行前往git上下载示例配置文件</span></span><br><span class="line">wget https://raw.githubusercontent.com/Yelp/elastalert/master/config.yaml.example</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">改名字为 config.yaml</span></span><br><span class="line">mv config.yaml.example config.yaml</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>修改配置</li>
+</ul>
+<p>修改 es_host 和 es_port 属性，其他保持默认即可</p>
+<p><img src="https://static.lovedata.net/19-05-18-793ff9be58c9a1fe6971106bd068c36a.png-wm" alt="image"></p>
+<h2 id="配置规则"><a href="#配置规则" class="headerlink" title="配置规则"></a>配置规则</h2><p>规则类型</p>
+<ul>
+<li><strong>any</strong>: 只要有匹配就报警；</li>
+<li><strong>blacklist</strong>: compare_key 字段的内容匹配上 blacklist 数组里任意内容；</li>
+<li><strong>whitelist</strong>: compare_key 字段的内容一个都没能匹配上 whitelist 数组里内容；</li>
+<li><strong>change</strong>: 在相同 query_key 条件下，compare_key 字段的内容，在 timeframe 范围内发送变化；</li>
+<li><strong>frequency</strong>: 在相同 query_key 条件下，timeframe 范围内有 num_events 个被过滤出来的异常；</li>
+<li><strong>spike</strong>: 在相同 query_key 条件下，前后两个 timeframe 范围内数据量相差比例超过 spike_height。其中可以通过 spike_type 设置具体涨跌方向是up, down, both。还可以通过threshold_ref 设置要求上一个周期数据量的下限，threshold_cur 设置要求当前周期数据量的下限，如果数据量不到下限，也不触发；</li>
+<li><strong>flatline</strong>: timeframe 范围内，数据量小于 threshold 阈值；</li>
+<li><strong>new_term</strong>: fields 字段新出现之前 terms_window_size(默认 30 天) 范围内最多的 terms_size(默认 50) 个结果以外的数据；</li>
+<li><strong>cardinality</strong>: 在相同 query_key 条件下，timeframe 范围内 cardinality_field 的值超过 max_cardinality 或者低于 min_cardinality。</li>
+</ul>
+<blockquote>
+<p>在这里举一个大数据项目中经常用的一个例子，数据服务查询超时限次预警，即在指定的时间内，查询超时的次数高于一定值后报警</p>
+</blockquote>
+<p>新建 example_rules 目录，新建一个query_timeout_frequency.yaml,具体配置如下</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Alert when the rate of events exceeds a threshold</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (Optional)</span></span><br><span class="line"><span class="comment"># Elasticsearch host</span></span><br><span class="line"><span class="attr">es_host:</span> <span class="string">xxx</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (Optional)</span></span><br><span class="line"><span class="comment"># Elasticsearch port</span></span><br><span class="line"><span class="attr">es_port:</span> <span class="number">9200</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (OptionaL) Connect with SSL to Elasticsearch</span></span><br><span class="line"><span class="comment">#use_ssl: True</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (Optional) basic-auth username and password for Elasticsearch</span></span><br><span class="line"><span class="comment">#es_username: someusername</span></span><br><span class="line"><span class="comment">#es_password: somepassword</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (Required)</span></span><br><span class="line"><span class="comment"># Rule name, must be unique</span></span><br><span class="line"><span class="attr">name:</span> <span class="string">query</span> <span class="string">timeout</span></span><br><span class="line"></span><br><span class="line"> <span class="attr">query_key:</span></span><br><span class="line">     <span class="bullet">-</span> <span class="string">name</span></span><br><span class="line"></span><br><span class="line"><span class="attr">realert:</span></span><br><span class="line">  <span class="attr">minutes:</span> <span class="number">5</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (Required)</span></span><br><span class="line"><span class="comment"># Type of alert.</span></span><br><span class="line"><span class="comment"># the frequency rule type alerts when num_events events occur with timeframe time</span></span><br><span class="line"><span class="attr">type:</span> <span class="string">frequency</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (Required)</span></span><br><span class="line"><span class="comment"># Index to search, wildcard supported</span></span><br><span class="line"><span class="attr">index:</span> <span class="string">dataservice-custom-api-log*</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (Required, frequency specific)</span></span><br><span class="line"><span class="comment"># Alert when this many documents matching the query occur within a timeframe</span></span><br><span class="line"><span class="attr">num_events:</span> <span class="number">10</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (Required, frequency specific)</span></span><br><span class="line"><span class="comment"># num_events must occur within this amount of time to trigger an alert</span></span><br><span class="line"><span class="attr">timeframe:</span></span><br><span class="line">  <span class="comment">#hours: 4</span></span><br><span class="line">  <span class="attr">minutes:</span> <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (Required)</span></span><br><span class="line"><span class="comment"># A list of Elasticsearch filters used for find events</span></span><br><span class="line"><span class="comment"># These filters are joined with AND and nested in a filtered query</span></span><br><span class="line"><span class="comment"># For more info: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl.html</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#filter:</span></span><br><span class="line"><span class="comment">#- term:</span></span><br><span class="line"><span class="comment">#    some_field: &quot;some_value&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">filter:</span></span><br><span class="line"><span class="bullet">-</span> <span class="attr">query_string:</span></span><br><span class="line">        <span class="attr">query:</span> <span class="string">&quot;logtextJson.totalUsed:&gt;5000</span></span><br><span class="line"><span class="string">                AND -host:(zhike1 OR zhike2 OR zhike3)&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">smtp_host:</span> <span class="string">smtp.exmail.qq.com</span></span><br><span class="line"><span class="attr">smtp_port:</span> <span class="number">465</span></span><br><span class="line"><span class="attr">smtp_ssl:</span> <span class="literal">true</span></span><br><span class="line"></span><br><span class="line"><span class="attr">smtp_auth_file:</span> <span class="string">/data2/elastalert/config/smtp_auth_file.yaml</span></span><br><span class="line"><span class="comment">#回复给那个邮箱</span></span><br><span class="line"><span class="attr">email_reply_to:</span> <span class="string">xxx@xxx.com</span></span><br><span class="line"><span class="comment">#从哪个邮箱发送</span></span><br><span class="line"><span class="attr">from_addr:</span> <span class="string">xxx@xxx.com</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># (Required)</span></span><br><span class="line"><span class="comment"># The alert is use when a match is found</span></span><br><span class="line"><span class="attr">alert:</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">&quot;email&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># (required, email specific)</span></span><br><span class="line"><span class="comment"># a list of email addresses to send alerts to</span></span><br><span class="line"><span class="attr">email:</span></span><br><span class="line"><span class="bullet">-</span> <span class="string">&quot;xxx@xxx.com&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="attr">alert_subject:</span> <span class="string">&quot;大数据集群查询超时次数超限，匹配到了&#123;&#125;条日志，匹配&#123;&#125;次&quot;</span></span><br><span class="line"><span class="attr">alert_subject_args:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">num_hits</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">num_matches</span></span><br><span class="line"></span><br><span class="line"><span class="attr">alert_text_type:</span> <span class="string">alert_text_only</span></span><br><span class="line"></span><br><span class="line"><span class="attr">alert_text:</span> <span class="string">|</span></span><br><span class="line"><span class="string">  您好，大数据主集群查询超时次数超限，请检查服务器状态！</span></span><br><span class="line"><span class="string">  &gt; 截止发邮件前匹配到的请求数：&#123;&#125;</span></span><br><span class="line"><span class="string">  &gt; 截止发邮件前匹配到的次数：&#123;&#125;</span></span><br><span class="line"><span class="string">  &gt; 发生时间: &#123;&#125;</span></span><br><span class="line"><span class="string">  &gt; timestamp:&#123;&#125;</span></span><br><span class="line"><span class="string">  &gt; remoteip: &#123;&#125;</span></span><br><span class="line"><span class="string">  &gt; request: &#123;&#125;</span></span><br><span class="line"><span class="string">  &gt; loglevel:&#123;&#125;</span></span><br><span class="line"><span class="string">  &gt; 日志来源：&#123;&#125;</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="attr">alert_text_args:</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">num_hits</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">num_matches</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">logtextJson.out</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">&quot;@timestamp&quot;</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">logtextJson.requestIp</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">logtextJson.requestURI</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">loglevel</span></span><br><span class="line">  <span class="bullet">-</span> <span class="string">source</span></span><br></pre></td></tr></table></figure>
+
+<p>smtp_auth_file.yaml</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">user:</span> <span class="string">xxx@xxx.com</span></span><br><span class="line"><span class="attr">password:</span> <span class="string">xxx</span></span><br></pre></td></tr></table></figure>
+
+<p>重要配置解释</p>
+<ul>
+<li>alert_text  邮件html内容</li>
+<li>alert_text_args 传入的参数，</li>
+</ul>
+<p>参考配置<br><a target="_blank" rel="noopener" href="https://elastalert.readthedocs.io/en/latest/ruletypes.html?highlight=email">Rule Types and Configuration Options — ElastAlert 0.0.1 documentation</a></p>
+<h2 id="测试规则"><a href="#测试规则" class="headerlink" title="测试规则"></a>测试规则</h2><p><img src="https://static.lovedata.net/19-05-18-5af20a523bd95bfebfaa8ecfcc650e90.png-wm" alt="image"></p>
+<h2 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nohup elastalert --config config.yaml --rule rules/query_timeout_frequency.yaml  &gt;nohup.out 2&gt;&amp;1 &amp;</span><br></pre></td></tr></table></figure>
+
+<h2 id="遇到的问题"><a href="#遇到的问题" class="headerlink" title="遇到的问题"></a>遇到的问题</h2><h3 id="打印的时间时区不对，比北京时区晚八个小时"><a href="#打印的时间时区不对，比北京时区晚八个小时" class="headerlink" title="打印的时间时区不对，比北京时区晚八个小时"></a>打印的时间时区不对，比北京时区晚八个小时</h3><p>这个需要修改logstash 的 date filter的timezone为 北京时区</p>
+<h3 id="报错"><a href="#报错" class="headerlink" title="报错"></a>报错</h3><figure class="highlight console"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Traceback (most recent call last):</span><br><span class="line">  File &quot;/usr/local/anaconda2/bin/elastalert&quot;, line 11, in &lt;module&gt;</span><br><span class="line">    sys.exit(main())</span><br><span class="line">  File &quot;/usr/local/anaconda2/lib/python2.7/site-packages/elastalert/elastalert.py&quot;, line 1925, in main</span><br><span class="line">    client.start()</span><br><span class="line">  File &quot;/usr/local/anaconda2/lib/python2.7/site-packages/elastalert/elastalert.py&quot;, line 1106, in start</span><br><span class="line">    self.run_all_rules()</span><br><span class="line">  File &quot;/usr/local/anaconda2/lib/python2.7/site-packages/elastalert/elastalert.py&quot;, line 1158, in run_all_rules</span><br><span class="line">    self.send_pending_alerts()</span><br><span class="line">  File &quot;/usr/local/anaconda2/lib/python2.7/site-packages/elastalert/elastalert.py&quot;, line 1534, in send_pending_alerts</span><br><span class="line">    pending_alerts = self.find_recent_pending_alerts(self.alert_time_limit)</span><br><span class="line">  File &quot;/usr/local/anaconda2/lib/python2.7/site-packages/elastalert/elastalert.py&quot;, line 1526, in find_recent_pending_alerts</span><br><span class="line">    size=1000)</span><br><span class="line">  File &quot;/usr/local/anaconda2/lib/python2.7/site-packages/elasticsearch/client/utils.py&quot;, line 84, in _wrapped</span><br><span class="line">    return func(*args, params=params, **kwargs)</span><br><span class="line">TypeError: search() got an unexpected keyword argument &#x27;doc_type&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>版本不匹配</p>
+<p>查看版本</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">pip freeze | grep elas</span><br><span class="line">You are using pip version 9.0.1, however version 19.1.1 is available.</span><br><span class="line">You should consider upgrading via the &#x27;pip install --upgrade pip&#x27; command.</span><br><span class="line">elastalert==0.1.39</span><br><span class="line">elasticsearch==7.0.1</span><br></pre></td></tr></table></figure>
+
+<p>发现版本为7+,而我们es集群的版本为5.4.0，所以卸载重装</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pip uninstall elasticsearch</span><br><span class="line">pip install elasticsearch==5.4.0</span><br></pre></td></tr></table></figure>
+
+<h3 id="发送邮件报错"><a href="#发送邮件报错" class="headerlink" title="发送邮件报错"></a>发送邮件报错</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ERROR:root:Error while running alert email: Error connecting to SMTP host: Connection unexpectedly closed</span><br></pre></td></tr></table></figure>
+
+<p>因为我们的事启用了ssl加密传输的，所以需要加以下配置</p>
+<figure class="highlight sh"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">smtp_ssl: <span class="literal">true</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注意：文中xxx需要修改为您的环境的配置。</p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+  </nav>
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">奔跑的蜗牛</p>
+  <div class="site-description" itemprop="description">大数据技术文章、技术研究与交流</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/pengshuangbao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;pengshuangbao" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">奔跑的蜗牛</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : '7eDspFpe1gjdIyKDr2c51BjD-gzGzoHsz',
+      appKey     : 'Rvd22QedGjPX4cuLgdPWLw83',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

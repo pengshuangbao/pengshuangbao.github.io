@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.lovedata.net","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="前言对于分布式系统，内部组件众多，而组件之间的联系就需要一套非常高效的通信机制，Flink底层的RPC框架是基于Akka实现。  本文着重通过一些例子来分析flink底层的通信机制">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Flink剖析系列之Flink底层RPC通信机制">
+<meta property="og:url" content="http://blog.lovedata.net/106c955e.html">
+<meta property="og:site_name" content="编程狂想">
+<meta property="og:description" content="前言对于分布式系统，内部组件众多，而组件之间的联系就需要一套非常高效的通信机制，Flink底层的RPC框架是基于Akka实现。  本文着重通过一些例子来分析flink底层的通信机制">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://static.lovedata.net/19-12-20-6e18bb4101fddacd911f5e0dde088e26.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/19-12-20-168b2f52d3939562d93eb3e3c4dc8d78.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/19-12-20-15484a94902cff06c1279125d5dcaf43.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/19-12-20-49f8526699d5b5afa93d4c9971aacbc4.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/19-12-20-f7b6abd4226ca668a36965a7ba12130b.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/19-12-20-e9ee359b4ea05b5791b33d815cd8d465.png-wm">
+<meta property="article:published_time" content="2019-12-20T02:32:07.000Z">
+<meta property="article:modified_time" content="2022-03-10T04:02:49.458Z">
+<meta property="article:author" content="奔跑的蜗牛">
+<meta property="article:tag" content="Flink">
+<meta property="article:tag" content="Flink剖析系列">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://static.lovedata.net/19-12-20-6e18bb4101fddacd911f5e0dde088e26.png-wm">
+
+<link rel="canonical" href="http://blog.lovedata.net/106c955e.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Flink剖析系列之Flink底层RPC通信机制 | 编程狂想</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?111de68d01ad3c3504848c187c4bae5c";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="编程狂想" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta custom-logo">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">编程狂想</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">让数据飞一会儿</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lovedata.net/106c955e.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="奔跑的蜗牛">
+      <meta itemprop="description" content="大数据技术文章、技术研究与交流">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="编程狂想">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Flink剖析系列之Flink底层RPC通信机制
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-12-20 10:32:07" itemprop="dateCreated datePublished" datetime="2019-12-20T10:32:07+08:00">2019-12-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-10 12:02:49" itemprop="dateModified" datetime="2022-03-10T12:02:49+08:00">2022-03-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Flink/" itemprop="url" rel="index"><span itemprop="name">Flink</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/106c955e.html" class="post-meta-item leancloud_visitors" data-flag-title="Flink剖析系列之Flink底层RPC通信机制" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/106c955e.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/106c955e.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>对于分布式系统，内部组件众多，而组件之间的联系就需要一套非常高效的通信机制，Flink底层的RPC框架是基于Akka实现。  本文着重通过一些例子来分析flink底层的通信机制</p>
+<span id="more"></span>
+<h3 id="文章结构"><a href="#文章结构" class="headerlink" title="文章结构"></a>文章结构</h3><p>文章结构如下：</p>
+<ol>
+<li>Akka介绍与简单例子</li>
+<li>Flink RPC实例以及Rpc通信底层源码分析</li>
+<li>调用远程的RPC流程</li>
+<li>总结</li>
+</ol>
+<h2 id="Akka介绍与简单例子"><a href="#Akka介绍与简单例子" class="headerlink" title="Akka介绍与简单例子"></a>Akka介绍与简单例子</h2><h3 id="Akka-是什么"><a href="#Akka-是什么" class="headerlink" title="Akka 是什么"></a>Akka 是什么</h3><ol>
+<li>一个开发并发、容错、可伸缩应用的框架</li>
+<li>构建在JVM至上，基于Actor模型</li>
+<li>定义一组规则，规定一组系统中每个模块之间如何交互，如何回应。</li>
+</ol>
+<h3 id="Actor-解决什么问题"><a href="#Actor-解决什么问题" class="headerlink" title="Actor 解决什么问题"></a>Actor 解决什么问题</h3><p>开发高效率的并发程序，充分利用CPU资源。解决传统多线程方法的维护困难和容易发生错误的问题。对并发模型有一个更好的抽象。异步非阻塞。</p>
+<h3 id="Akka模型组成原理"><a href="#Akka模型组成原理" class="headerlink" title="Akka模型组成原理"></a>Akka模型组成原理</h3><p>下面是一张来自官网的图片，形象的介绍了Actor的内部模型。<br><img src="https://static.lovedata.net/19-12-20-6e18bb4101fddacd911f5e0dde088e26.png-wm" alt="image"></p>
+<p>Actor是最小的单元模块，系统有n个Actor组成，每个Actor有由mailbox和自身状态组成。</p>
+<p>Actor和Actor是通过信件进行通信，每个Actor是串行处理每一条消息的。并且信件是不可变的。</p>
+<h3 id="例子"><a href="#例子" class="headerlink" title="例子"></a>例子</h3><p>Akka的创建和执行流程</p>
+<ul>
+<li>构建ActorSystem  </li>
+<li>创建Actor<ul>
+<li>不能直接New一个Actor，而是你用通过actorSystem的actorOf方法创建，并且返回的是Actor的引用ActorRef，通过引用操作Actor</li>
+</ul>
+</li>
+<li>发送消息</li>
+<li>回应消息</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">AkkaTest</span>  &#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="type">ActorSystem</span> <span class="variable">actorSystem</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">	<span class="keyword">private</span> <span class="type">ActorRef</span> <span class="variable">helloActor</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">	<span class="keyword">private</span> <span class="type">ActorRef</span> <span class="variable">hiActor</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">	<span class="meta">@BeforeClass</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">setup</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="comment">//构建ActorSystem</span></span><br><span class="line">		actorSystem = AkkaUtils.createDefaultActorSystem();</span><br><span class="line"></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="meta">@Before</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">init</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="comment">//构建Actor,获取该Actor的引用，即ActorRef</span></span><br><span class="line">		helloActor = actorSystem.actorOf(Props.create(HellowActor.class), <span class="string">&quot;helloActor&quot;</span>);</span><br><span class="line">		hiActor = actorSystem.actorOf(Props.create(HiActor.class), <span class="string">&quot;hiActor&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="meta">@AfterClass</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">teardown</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">		<span class="comment">//关闭系统</span></span><br><span class="line">		actorSystem.terminate();</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="meta">@Test</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testSay</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="comment">//通过hiActor给helloActor发送消息</span></span><br><span class="line">		helloActor.tell(<span class="string">&quot;jack&quot;</span>, hiActor);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@author</span> 奔跑的蜗牛</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">HellowActor</span> <span class="keyword">extends</span> <span class="title class_">AbstractActor</span> &#123;</span><br><span class="line"></span><br><span class="line">		<span class="meta">@Override</span></span><br><span class="line">		<span class="keyword">public</span> Receive <span class="title function_">createReceive</span><span class="params">()</span> &#123;</span><br><span class="line">			<span class="comment">//根据消息类型路由处理方法</span></span><br><span class="line">			<span class="keyword">return</span> ReceiveBuilder.create()</span><br><span class="line">				.matchAny(<span class="built_in">this</span>::handleMessage)</span><br><span class="line">				.build();</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">handleMessage</span><span class="params">(Object message)</span> &#123;</span><br><span class="line">			<span class="comment">//处理方法</span></span><br><span class="line">			System.out.println(<span class="string">&quot;hello!&quot;</span> + message);</span><br><span class="line">			<span class="comment">//给发送者回信</span></span><br><span class="line">			getSender().tell(<span class="string">&quot;mary&quot;</span>, <span class="built_in">this</span>.getSelf());</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * <span class="doctag">@author</span> 奔跑的蜗牛</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">HiActor</span> <span class="keyword">extends</span> <span class="title class_">AbstractActor</span> &#123;</span><br><span class="line"></span><br><span class="line">		<span class="meta">@Override</span></span><br><span class="line">		<span class="keyword">public</span> Receive <span class="title function_">createReceive</span><span class="params">()</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> ReceiveBuilder.create()</span><br><span class="line">				.matchAny(<span class="built_in">this</span>::handleMessage)</span><br><span class="line">				.build();</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">handleMessage</span><span class="params">(Object message)</span> &#123;</span><br><span class="line">			System.out.println(<span class="string">&quot;hi! &quot;</span> + message);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>运行结果</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">hello!jack</span><br><span class="line">hi! mary</span><br></pre></td></tr></table></figure>
+
+<h2 id="Flink-RPC实例分析"><a href="#Flink-RPC实例分析" class="headerlink" title="Flink RPC实例分析"></a>Flink RPC实例分析</h2><p>话不多说，直接上代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">RpcEndpointTest</span> <span class="keyword">extends</span> <span class="title class_">TestLogger</span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Time</span> <span class="variable">TIMEOUT</span> <span class="operator">=</span> Time.seconds(<span class="number">10L</span>);</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="type">ActorSystem</span> <span class="variable">actorSystem</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">static</span> <span class="type">RpcService</span> <span class="variable">rpcService</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@BeforeClass</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">setup</span><span class="params">()</span> &#123;</span><br><span class="line">		<span class="comment">//在这里会创建爱你一个actorSystem</span></span><br><span class="line">		actorSystem = AkkaUtils.createDefaultActorSystem();</span><br><span class="line">		<span class="comment">//实例化一个AkkaRpcService，核心方法有startServer，stopServer和根据地质连接到一个Actor，并且返回RpcGateway</span></span><br><span class="line">		rpcService = <span class="keyword">new</span> <span class="title class_">AkkaRpcService</span>(actorSystem, AkkaRpcServiceConfiguration.defaultConfiguration());</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="meta">@AfterClass</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">teardown</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">		<span class="keyword">final</span> CompletableFuture&lt;Void&gt; rpcTerminationFuture = rpcService.stopService();</span><br><span class="line">		<span class="keyword">final</span> CompletableFuture&lt;Terminated&gt; actorSystemTerminationFuture = FutureUtils.toJava(actorSystem.terminate());</span><br><span class="line">		FutureUtils</span><br><span class="line">			.waitForAll(Arrays.asList(rpcTerminationFuture, actorSystemTerminationFuture))</span><br><span class="line">			.get(TIMEOUT.toMilliseconds(), TimeUnit.MILLISECONDS);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * Tests that we can obtain the self gateway from a RpcEndpoint and can interact with</span></span><br><span class="line"><span class="comment">	 * it via the self gateway.</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="meta">@Test</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">testSelfGateway</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">		<span class="type">int</span> <span class="variable">expectedValue</span> <span class="operator">=</span> <span class="number">1337</span>;</span><br><span class="line">		<span class="type">BaseEndpoint</span> <span class="variable">baseEndpoint</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BaseEndpoint</span>(rpcService, expectedValue);</span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			<span class="comment">//启动端点，这里面会启动actor</span></span><br><span class="line">			baseEndpoint.start();</span><br><span class="line">			<span class="comment">//获取自身，这里是本地调用</span></span><br><span class="line">			<span class="type">BaseGateway</span> <span class="variable">baseGateway</span> <span class="operator">=</span> baseEndpoint.getSelfGateway(BaseGateway.class);</span><br><span class="line">			CompletableFuture&lt;Integer&gt; foobar = baseGateway.foobar();</span><br><span class="line">			assertEquals(Integer.valueOf(expectedValue), foobar.get());</span><br><span class="line">		&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">			RpcUtils.terminateRpcEndpoint(baseEndpoint, TIMEOUT);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">//一个端点，实现了RpcEndpoint,并且实现了BaseGateway</span></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">BaseEndpoint</span> <span class="keyword">extends</span> <span class="title class_">RpcEndpoint</span> <span class="keyword">implements</span> <span class="title class_">BaseGateway</span> &#123;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">private</span> <span class="keyword">final</span> <span class="type">int</span> foobarValue;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">protected</span> <span class="title function_">BaseEndpoint</span><span class="params">(RpcService rpcService, <span class="type">int</span> foobarValue)</span> &#123;</span><br><span class="line">			<span class="built_in">super</span>(rpcService);</span><br><span class="line"></span><br><span class="line">			<span class="built_in">this</span>.foobarValue = foobarValue;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">//实现BaseGateway接口的方法，在接受远程调用的时候，返回的则是这个BaseGateway,可以调用这个方法</span></span><br><span class="line">		<span class="meta">@Override</span></span><br><span class="line">		<span class="keyword">public</span> CompletableFuture&lt;Integer&gt; <span class="title function_">foobar</span><span class="params">()</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> CompletableFuture.completedFuture(foobarValue);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">   <span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">BaseGateway</span> <span class="keyword">extends</span> <span class="title class_">RpcGateway</span> &#123;</span><br><span class="line">		CompletableFuture&lt;Integer&gt; <span class="title function_">foobar</span><span class="params">()</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>上面出现了几个比较重要的类或者接口，具体类图如下，下面一个个来介绍</p>
+<p><img src="https://static.lovedata.net/19-12-20-168b2f52d3939562d93eb3e3c4dc8d78.png-wm" alt="image"></p>
+<h3 id="RpcGateway"><a href="#RpcGateway" class="headerlink" title="RpcGateway"></a>RpcGateway</h3><p>  有两个方法，getAddress和getHostname，首先想想，RPC，全程为远程过程调用，要想调用另外一个进程的过程，则需要知道这个过程的地址和端口，这个相当于是一个代理，或者说是一个网关，一个端点或者说进程想要被远程调用，则必须实现这个方法，并且一般由一个接口来继承RpcGateway，并且在这个接口中定义一些方法，然后在实现类中实现这些方法给远程调用。 而在RPC的客户端，则返回的是这个gateway。 基本所有的组件都继承了这个RpcGateway或者他的子接口。</p>
+<h3 id="RpcServer-和-AkkaInvocationHandler"><a href="#RpcServer-和-AkkaInvocationHandler" class="headerlink" title="RpcServer 和 AkkaInvocationHandler"></a>RpcServer 和 AkkaInvocationHandler</h3><p>  比较难理解的就是这两个类，第一个接口，可以把它理解成一个和远端交互的能力，这个接口也实现了RpcGateway。 </p>
+<p>  AkkaInvocationHandler是RpcServer的一个Akka实现，同时实现了InvocationHandler，表明也是一个代理调用处理器，他是由RpcService在一个endpoint启动的时候创建。</p>
+<h3 id="RpcEndpoint"><a href="#RpcEndpoint" class="headerlink" title="RpcEndpoint"></a>RpcEndpoint</h3><p>  这个类是和Actor绑定的，每个RpcEndpoint都有一个Actor对应，并且实现了RpcGateway接口<br>在RpcEndpoint中还定义了一些方法如runAsync(Runnable)、callAsync(Callable, Time)方法来执行Rpc调用，<strong>对于同一个Endpoint，所有的调用都运行在主线程，因此不会有并发问题</strong>，当启动RpcEndpoint&#x2F;进行Rpc调用时，其会委托RcpServer进行处理。</p>
+<h3 id="RpcService"><a href="#RpcService" class="headerlink" title="RpcService"></a>RpcService</h3><p>  这个类相当于一个服务工具类，主要起到根据Endpoint来启动 RpcServer(Actor),连接到某一个RpcServer，并且返回一个RpcGateway,停止服务等</p>
+<h3 id="AkkaRpcService"><a href="#AkkaRpcService" class="headerlink" title="AkkaRpcService"></a>AkkaRpcService</h3><p>  RpcService的实现类，也就是Akka的实现。封装了ActorSystem，RPC服务启动一个Akka参与者来接收来自RpcGateway}的RPC调用</p>
+<p>  请看下图和其中的解释。<br>  <img src="https://static.lovedata.net/19-12-20-15484a94902cff06c1279125d5dcaf43.png-wm" alt="image"></p>
+<p>  在这个类中有一个Map 声明如下，他保存了每一个ActorRef和RpcEndpoint的映射关系,作用是在停止服务的时候停止actor</p>
+  <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> Map&lt;ActorRef, RpcEndpoint&gt; actors = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;(<span class="number">4</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="RPCEndPoint初始化过程"><a href="#RPCEndPoint初始化过程" class="headerlink" title="RPCEndPoint初始化过程"></a>RPCEndPoint初始化过程</h3><p> 下面来看看具体一个RpcEndpoint实例化的源码解析</p>
+<p> <img src="https://static.lovedata.net/19-12-20-49f8526699d5b5afa93d4c9971aacbc4.png-wm" alt="image"></p>
+<p> 在实例化RpcEndpoint的时候，进入到构造函数中,传入了上面实例化的RpcService还有endpointId，每个endpoint都有一个唯一的endpointid，在构造函数中做了两件事：</p>
+  <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="title function_">RpcEndpoint</span><span class="params">(<span class="keyword">final</span> RpcService rpcService, <span class="keyword">final</span> String endpointId)</span> &#123;</span><br><span class="line">	<span class="built_in">this</span>.rpcService = checkNotNull(rpcService, <span class="string">&quot;rpcService&quot;</span>);</span><br><span class="line">	<span class="built_in">this</span>.endpointId = checkNotNull(endpointId, <span class="string">&quot;endpointId&quot;</span>);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">this</span>.rpcServer = rpcService.startServer(<span class="built_in">this</span>);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">this</span>.mainThreadExecutor = <span class="keyword">new</span> <span class="title class_">MainThreadExecutor</span>(rpcServer, <span class="built_in">this</span>::validateRunsInMainThread);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>启动rpcSerer,并且将返回的rpcServer赋值到类变量rpcServer上，注意，这里返回的rpcServer，是一个代理类，在调用rpcServer的时候，会被invoke方法拦截。</li>
+<li>设置 this.mainThreadExecutor &#x3D;MainThreadExecutor(rpcServer, this::validateRunsInMainThread),首先这个类的构造函数有一个参数为MainThreadExecutable gateway,RpcServer继承了此接口，而AkkaInvocationHandler实现了RpcServer,则也实现了这个接口，MainThreadExecutable接口中有 runAsync、callAsync、scheduleRunAsync等方法，标识在底层RPC端点的主线程中执行runnable。<br><img src="https://static.lovedata.net/19-12-20-f7b6abd4226ca668a36965a7ba12130b.png-wm" alt="image"><br> 而这个 MainThreadExecutor 又是一个Executor，所以在子类中调用类似下图的的方法，最终执行的还是这个RpcEndopoint所在的线程，可以共享上下文，并且不会有并发问题。</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">	 * Executor which executes runnables in the main thread context.</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="keyword">protected</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">MainThreadExecutor</span></span><br><span class="line">	 <span class="keyword">implements</span> <span class="title class_">ComponentMainThreadExecutor</span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> MainThreadExecutable gateway;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> Runnable mainThreadCheck;</span><br><span class="line"></span><br><span class="line">	MainThreadExecutor(MainThreadExecutable gateway, Runnable mainThreadCheck) &#123;</span><br><span class="line">		<span class="comment">//这个gateway还是这个RpcEndpoint的rpcServer</span></span><br><span class="line">		<span class="built_in">this</span>.gateway = Preconditions.checkNotNull(gateway);</span><br><span class="line">		<span class="built_in">this</span>.mainThreadCheck = Preconditions.checkNotNull(mainThreadCheck);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">runAsync</span><span class="params">(Runnable runnable)</span> &#123;</span><br><span class="line">		<span class="comment">//在比如函数回调中，还是同一个线程政治性的，即rpcServer</span></span><br><span class="line">		gateway.runAsync(runnable);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">scheduleRunAsync</span><span class="params">(Runnable runnable, <span class="type">long</span> delayMillis)</span> &#123;</span><br><span class="line">		gateway.scheduleRunAsync(runnable, delayMillis);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">execute</span><span class="params">(<span class="meta">@Nonnull</span> Runnable command)</span> &#123;</span><br><span class="line">		runAsync(command);</span><br><span class="line">	&#125;</span><br><span class="line">	...</span><br></pre></td></tr></table></figure>
+
+<h3 id="RpcEndpoint通信过程"><a href="#RpcEndpoint通信过程" class="headerlink" title="RpcEndpoint通信过程"></a>RpcEndpoint通信过程</h3><p>当初始化完成之后，就可以发送消息，请看图。<br><img src="https://static.lovedata.net/19-12-20-e9ee359b4ea05b5791b33d815cd8d465.png-wm" alt="image"></p>
+<h4 id="start流程"><a href="#start流程" class="headerlink" title="start流程"></a>start流程</h4><p>上面实例化RpcEndpoint后，当中的rpcServer的状态Stop的，需要调用start方法</p>
+<ul>
+<li>调用RpcEndpoint#start</li>
+<li>转发给本身的RpcServer#start</li>
+<li>因为这个rpcServer是一个代理类，所以转发到了AkkaInvocationHandler中去了，被拦截了<ul>
+<li>这里首先是获取这个方法的定义方法，如果是在AkkaBasedEndpoint、Object、RpcGateway、StartStoppable、MainThreadExecutable、RpcServer中调用的呢，代表是本地调用，或者说是初始化调用，肯定是不涉及到远程的，则直接调用响应方法就可以了</li>
+<li>这里传入的对象是自己本身。</li>
+</ul>
+</li>
+<li>调用AkkaInvocationHandler#start；</li>
+<li>通过ActorRef#tell给对应的Actor发送消息rpcEndpoint.tell(ControlMessages.START, ActorRef.noSender());；</li>
+<li>调用AkkaRpcActor#handleControlMessage处理控制类型消息；</li>
+<li>在主线程中将自身状态变更为Started状态；</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> Object <span class="title function_">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span> <span class="keyword">throws</span> Throwable &#123;</span><br><span class="line">	Class&lt;?&gt; declaringClass = method.getDeclaringClass();</span><br><span class="line">	Object result;</span><br><span class="line">	<span class="keyword">if</span> (declaringClass.equals(AkkaBasedEndpoint.class) ||</span><br><span class="line">		declaringClass.equals(Object.class) ||</span><br><span class="line">		declaringClass.equals(RpcGateway.class) ||</span><br><span class="line">		declaringClass.equals(StartStoppable.class) ||</span><br><span class="line">		declaringClass.equals(MainThreadExecutable.class) ||</span><br><span class="line">		declaringClass.equals(RpcServer.class)) &#123;</span><br><span class="line">		result = method.invoke(<span class="built_in">this</span>, args);</span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> (declaringClass.equals(FencedRpcGateway.class)) &#123;</span><br><span class="line">		...</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		result = invokeRpc(method, args);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="调用远程的RPC流程"><a href="#调用远程的RPC流程" class="headerlink" title="调用远程的RPC流程"></a>调用远程的RPC流程</h2><p> 要实现远程调用，主要通过 AkkaRpcService的connect方法实现，连个参数，一个address,一个clazz，这个clazz是这个方法要返回的代理类的接口类型，比如DispatcherGateway ,他定义了很多方法。 </p>
+<p>AkkaRpcService.java#connect</p>
+ <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> &lt;C <span class="keyword">extends</span> <span class="title class_">RpcGateway</span>&gt; CompletableFuture&lt;C&gt; <span class="title function_">connect</span><span class="params">(</span></span><br><span class="line"><span class="params">		<span class="keyword">final</span> String address,</span></span><br><span class="line"><span class="params">		<span class="keyword">final</span> Class&lt;C&gt; clazz)</span> &#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> connectInternal(</span><br><span class="line">		address,</span><br><span class="line">		clazz,</span><br><span class="line">		(ActorRef actorRef) -&gt; &#123;</span><br><span class="line">			<span class="comment">//这里定义了一个Function，在下面ask远程endpoint之后，</span></span><br><span class="line">			<span class="comment">//返回了ActorRef,还有address和host，</span></span><br><span class="line">			<span class="comment">//则根据这个创建一个Akka执行处理器，调用远程就像调用本地的方法一样，爽</span></span><br><span class="line">			Tuple2&lt;String, String&gt; addressHostname = extractAddressHostname(actorRef);</span><br><span class="line"></span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">AkkaInvocationHandler</span>(</span><br><span class="line">				addressHostname.f0,</span><br><span class="line">				addressHostname.f1,</span><br><span class="line">				actorRef,</span><br><span class="line">				configuration.getTimeout(),</span><br><span class="line">				configuration.getMaximumFramesize(),</span><br><span class="line">				<span class="literal">null</span>);</span><br><span class="line">		&#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后继续往下走，定义了connectInternal方法，，请看注释</p>
+<p>AkkaRpcService.java#connectInternal</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">private</span> &lt;C <span class="keyword">extends</span> <span class="title class_">RpcGateway</span>&gt; CompletableFuture&lt;C&gt; <span class="title function_">connectInternal</span><span class="params">(</span></span><br><span class="line"><span class="params">		<span class="keyword">final</span> String address,</span></span><br><span class="line"><span class="params">		<span class="keyword">final</span> Class&lt;C&gt; clazz,</span></span><br><span class="line"><span class="params">		Function&lt;ActorRef, InvocationHandler&gt; invocationHandlerFactory)</span> &#123;</span><br><span class="line">	checkState(!stopped, <span class="string">&quot;RpcService is stopped&quot;</span>);</span><br><span class="line"></span><br><span class="line">	LOG.debug(<span class="string">&quot;Try to connect to remote RPC endpoint with address &#123;&#125;. Returning a &#123;&#125; gateway.&quot;</span>,</span><br><span class="line">		address, clazz.getName());</span><br><span class="line">	<span class="comment">//使用actorSystem来选择actor</span></span><br><span class="line">	<span class="keyword">final</span> <span class="type">ActorSelection</span> <span class="variable">actorSel</span> <span class="operator">=</span> actorSystem.actorSelection(address);</span><br><span class="line">	<span class="comment">//得到一个唯一actor定义</span></span><br><span class="line">	<span class="keyword">final</span> Future&lt;ActorIdentity&gt; identify = Patterns</span><br><span class="line">		.ask(actorSel, <span class="keyword">new</span> <span class="title class_">Identify</span>(<span class="number">42</span>), configuration.getTimeout().toMilliseconds())</span><br><span class="line">		.&lt;ActorIdentity&gt;mapTo(ClassTag$.MODULE$.&lt;ActorIdentity&gt;apply(ActorIdentity.class));</span><br><span class="line">	<span class="keyword">final</span> CompletableFuture&lt;ActorIdentity&gt; identifyFuture = FutureUtils.toJava(identify);</span><br><span class="line">	<span class="keyword">final</span> CompletableFuture&lt;ActorRef&gt; actorRefFuture = identifyFuture.thenApply(</span><br><span class="line">		<span class="comment">//异步调用，在拿到结果之后返回这个ActorRef</span></span><br><span class="line">		(ActorIdentity actorIdentity) -&gt; &#123;</span><br><span class="line">			<span class="keyword">if</span> (actorIdentity.getRef() == <span class="literal">null</span>) &#123;</span><br><span class="line">				<span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">CompletionException</span>(<span class="keyword">new</span> <span class="title class_">RpcConnectionException</span>(<span class="string">&quot;Could not connect to rpc endpoint under address &quot;</span> + address + <span class="string">&#x27;.&#x27;</span>));</span><br><span class="line">			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">				<span class="keyword">return</span> actorIdentity.getRef();</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">final</span> CompletableFuture&lt;HandshakeSuccessMessage&gt; handshakeFuture = </span><br><span class="line">	actorRefFuture.thenCompose(</span><br><span class="line">		(ActorRef actorRef) -&gt; FutureUtils.toJava(</span><br><span class="line">			<span class="comment">//调用远程，在远程Actor中会处理RemoteHandshakeMessage类型的消息，主要判断远程的Endpoint是否是实现了传入的gateway接口并且判断版本</span></span><br><span class="line">			Patterns</span><br><span class="line">				.ask(actorRef, <span class="keyword">new</span> <span class="title class_">RemoteHandshakeMessage</span>(clazz, getVersion()), configuration.getTimeout().toMilliseconds())</span><br><span class="line">				.&lt;HandshakeSuccessMessage&gt;mapTo(ClassTag$.MODULE$.&lt;HandshakeSuccessMessage&gt;apply(HandshakeSuccessMessage.class))));</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> actorRefFuture.thenCombineAsync(</span><br><span class="line">		handshakeFuture,</span><br><span class="line">		(ActorRef actorRef, HandshakeSuccessMessage ignored) -&gt; &#123;</span><br><span class="line">			<span class="comment">//搞定之后拿到上面创建的执行处理器</span></span><br><span class="line">			<span class="type">InvocationHandler</span> <span class="variable">invocationHandler</span> <span class="operator">=</span> invocationHandlerFactory.apply(actorRef);</span><br><span class="line"></span><br><span class="line">			<span class="comment">// Rather than using the System ClassLoader directly, we derive the ClassLoader</span></span><br><span class="line">			<span class="comment">// from this class . That works better in cases where Flink runs embedded and all Flink</span></span><br><span class="line">			<span class="comment">// code is loaded dynamically (for example from an OSGI bundle) through a custom ClassLoader</span></span><br><span class="line">			<span class="type">ClassLoader</span> <span class="variable">classLoader</span> <span class="operator">=</span> getClass().getClassLoader();</span><br><span class="line">			<span class="comment">//构造一个代理对象，然后后面就可以调用RpcGateway跟调用本地一样，非常愉快的</span></span><br><span class="line">			<span class="meta">@SuppressWarnings(&quot;unchecked&quot;)</span></span><br><span class="line">			<span class="type">C</span> <span class="variable">proxy</span> <span class="operator">=</span> (C) Proxy.newProxyInstance(</span><br><span class="line">				classLoader,</span><br><span class="line">				<span class="keyword">new</span> <span class="title class_">Class</span>&lt;?&gt;[]&#123;clazz&#125;,</span><br><span class="line">				invocationHandler);</span><br><span class="line"></span><br><span class="line">			<span class="keyword">return</span> proxy;</span><br><span class="line">		&#125;,</span><br><span class="line">		actorSystem.dispatcher());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>AkkaRpcActor.java  </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">handleHandshakeMessage</span><span class="params">(RemoteHandshakeMessage handshakeMessage)</span> &#123;</span><br><span class="line">	<span class="keyword">if</span> (!isCompatibleVersion(handshakeMessage.getVersion())) &#123;</span><br><span class="line">		sendErrorIfSender(<span class="keyword">new</span> <span class="title class_">AkkaHandshakeException</span>(</span><br><span class="line">			String.format(</span><br><span class="line">				<span class="string">&quot;Version mismatch between source (%s) and target (%s) rpc component. Please verify that all components have the same version.&quot;</span>,</span><br><span class="line">				handshakeMessage.getVersion(),</span><br><span class="line">				getVersion())));</span><br><span class="line">	&#125; <span class="keyword">else</span> <span class="keyword">if</span> (!isGatewaySupported(handshakeMessage.getRpcGateway())) &#123;</span><br><span class="line">		sendErrorIfSender(<span class="keyword">new</span> <span class="title class_">AkkaHandshakeException</span>(</span><br><span class="line">			String.format(</span><br><span class="line">				<span class="string">&quot;The rpc endpoint does not support the gateway %s.&quot;</span>,</span><br><span class="line">				handshakeMessage.getRpcGateway().getSimpleName())));</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		getSender().tell(<span class="keyword">new</span> <span class="title class_">Status</span>.Success(HandshakeSuccessMessage.INSTANCE), getSelf());</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>主要介绍了rpc通信的核心类，以及Actor初始化流程和远程调用的流程。</p>
+<p>好类，总算讲了个大概，flink源码博大精深，有很多地方值得我们学习的，鄙人才疏学浅，可能有疏漏之处，也可能有些地方讲的不对，请多指教。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">相关文章</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/761a39dc.html" rel="bookmark">Flink剖析系列之Yarn Session Cluster 和 Yarn Per Job 模式作业提交流程分析</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/70f3ed36.html" rel="bookmark">Flink剖析系列之开篇</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/71a0e226.html" rel="bookmark">一个本应三十秒解决掉的Flink函数名冲突问题</a></div>
+    </li>
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/8156c1e1.html" rel="bookmark">使用普罗米修斯和Grafana监控Flink运行状态</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Flink/" rel="tag"># Flink</a>
+              <a href="/tags/Flink%E5%89%96%E6%9E%90%E7%B3%BB%E5%88%97/" rel="tag"># Flink剖析系列</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/761a39dc.html" rel="prev" title="Flink剖析系列之Yarn Session Cluster 和 Yarn Per Job 模式作业提交流程分析">
+      <i class="fa fa-chevron-left"></i> Flink剖析系列之Yarn Session Cluster 和 Yarn Per Job 模式作业提交流程分析
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/13cb1a02.html" rel="next" title="记一次生产环境hbase的regionserver进程频繁消失的问题">
+      记一次生产环境hbase的regionserver进程频繁消失的问题 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%96%87%E7%AB%A0%E7%BB%93%E6%9E%84"><span class="nav-number">1.1.</span> <span class="nav-text">文章结构</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Akka%E4%BB%8B%E7%BB%8D%E4%B8%8E%E7%AE%80%E5%8D%95%E4%BE%8B%E5%AD%90"><span class="nav-number">2.</span> <span class="nav-text">Akka介绍与简单例子</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Akka-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="nav-number">2.1.</span> <span class="nav-text">Akka 是什么</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Actor-%E8%A7%A3%E5%86%B3%E4%BB%80%E4%B9%88%E9%97%AE%E9%A2%98"><span class="nav-number">2.2.</span> <span class="nav-text">Actor 解决什么问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Akka%E6%A8%A1%E5%9E%8B%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86"><span class="nav-number">2.3.</span> <span class="nav-text">Akka模型组成原理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BE%8B%E5%AD%90"><span class="nav-number">2.4.</span> <span class="nav-text">例子</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Flink-RPC%E5%AE%9E%E4%BE%8B%E5%88%86%E6%9E%90"><span class="nav-number">3.</span> <span class="nav-text">Flink RPC实例分析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#RpcGateway"><span class="nav-number">3.1.</span> <span class="nav-text">RpcGateway</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RpcServer-%E5%92%8C-AkkaInvocationHandler"><span class="nav-number">3.2.</span> <span class="nav-text">RpcServer 和 AkkaInvocationHandler</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RpcEndpoint"><span class="nav-number">3.3.</span> <span class="nav-text">RpcEndpoint</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RpcService"><span class="nav-number">3.4.</span> <span class="nav-text">RpcService</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#AkkaRpcService"><span class="nav-number">3.5.</span> <span class="nav-text">AkkaRpcService</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RPCEndPoint%E5%88%9D%E5%A7%8B%E5%8C%96%E8%BF%87%E7%A8%8B"><span class="nav-number">3.6.</span> <span class="nav-text">RPCEndPoint初始化过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RpcEndpoint%E9%80%9A%E4%BF%A1%E8%BF%87%E7%A8%8B"><span class="nav-number">3.7.</span> <span class="nav-text">RpcEndpoint通信过程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#start%E6%B5%81%E7%A8%8B"><span class="nav-number">3.7.1.</span> <span class="nav-text">start流程</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%B0%83%E7%94%A8%E8%BF%9C%E7%A8%8B%E7%9A%84RPC%E6%B5%81%E7%A8%8B"><span class="nav-number">4.</span> <span class="nav-text">调用远程的RPC流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">奔跑的蜗牛</p>
+  <div class="site-description" itemprop="description">大数据技术文章、技术研究与交流</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/pengshuangbao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;pengshuangbao" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">奔跑的蜗牛</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : '7eDspFpe1gjdIyKDr2c51BjD-gzGzoHsz',
+      appKey     : 'Rvd22QedGjPX4cuLgdPWLw83',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

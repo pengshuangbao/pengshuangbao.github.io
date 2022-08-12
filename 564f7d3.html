@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"blog.lovedata.net","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="[toc]  翻译自 https:&#x2F;&#x2F;blog.clairvoyantsoft.com&#x2F;guide-to-using-apache-kudu-and-performance-comparison-with-hdfs-453c4b26554f  Apache Kudu是一个开源的列式存储引擎。它保证了低延迟的随机访问和分析查询的有效执行。kudu存储引擎支持通过Cloudera Impala，Spa">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Guide to Using Apache Kudu and Performance Comparison with HDFS">
+<meta property="og:url" content="http://blog.lovedata.net/564f7d3.html">
+<meta property="og:site_name" content="编程狂想">
+<meta property="og:description" content="[toc]  翻译自 https:&#x2F;&#x2F;blog.clairvoyantsoft.com&#x2F;guide-to-using-apache-kudu-and-performance-comparison-with-hdfs-453c4b26554f  Apache Kudu是一个开源的列式存储引擎。它保证了低延迟的随机访问和分析查询的有效执行。kudu存储引擎支持通过Cloudera Impala，Spa">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://miro.medium.com/max/60/1*HAmM9P04FwmipJAO1pHCrg.png?q=20">
+<meta property="og:image" content="https://miro.medium.com/max/836/1*HAmM9P04FwmipJAO1pHCrg.png">
+<meta property="og:image" content="https://miro.medium.com/max/60/1*hXR3BTQhCsAeQQQcDIT4AA.png?q=20">
+<meta property="og:image" content="https://miro.medium.com/max/1826/1*hXR3BTQhCsAeQQQcDIT4AA.png">
+<meta property="og:image" content="https://miro.medium.com/max/60/1*T7v7R4TUaKB6kJ0JDdDrKg.png?q=20">
+<meta property="og:image" content="https://miro.medium.com/max/1834/1*T7v7R4TUaKB6kJ0JDdDrKg.png">
+<meta property="og:image" content="https://miro.medium.com/max/60/1*Y5gMHx4RBYYP05EQeIEZwg.png?q=20">
+<meta property="og:image" content="https://miro.medium.com/max/1226/1*Y5gMHx4RBYYP05EQeIEZwg.png">
+<meta property="og:image" content="https://miro.medium.com/max/60/1*_jZ6Z_JE0nfdFSZbldzDsQ.png?q=20">
+<meta property="og:image" content="https://miro.medium.com/max/1094/1*_jZ6Z_JE0nfdFSZbldzDsQ.png">
+<meta property="article:published_time" content="2021-05-20T11:12:37.000Z">
+<meta property="article:modified_time" content="2022-03-10T04:02:49.460Z">
+<meta property="article:author" content="奔跑的蜗牛">
+<meta property="article:tag" content="kudu">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://miro.medium.com/max/60/1*HAmM9P04FwmipJAO1pHCrg.png?q=20">
+
+<link rel="canonical" href="http://blog.lovedata.net/564f7d3.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Guide to Using Apache Kudu and Performance Comparison with HDFS | 编程狂想</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?111de68d01ad3c3504848c187c4bae5c";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="编程狂想" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta custom-logo">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">编程狂想</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">让数据飞一会儿</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="sitemap fa-fw"></i>站点地图</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://blog.lovedata.net/564f7d3.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="奔跑的蜗牛">
+      <meta itemprop="description" content="大数据技术文章、技术研究与交流">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="编程狂想">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Guide to Using Apache Kudu and Performance Comparison with HDFS
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-05-20 19:12:37" itemprop="dateCreated datePublished" datetime="2021-05-20T19:12:37+08:00">2021-05-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-03-10 12:02:49" itemprop="dateModified" datetime="2022-03-10T12:02:49+08:00">2022-03-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Kudu/" itemprop="url" rel="index"><span itemprop="name">Kudu</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/564f7d3.html" class="post-meta-item leancloud_visitors" data-flag-title="Guide to Using Apache Kudu and Performance Comparison with HDFS" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/564f7d3.html#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/564f7d3.html" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>[toc]</p>
+<blockquote>
+<p>翻译自 <a target="_blank" rel="noopener" href="https://blog.clairvoyantsoft.com/guide-to-using-apache-kudu-and-performance-comparison-with-hdfs-453c4b26554f">https://blog.clairvoyantsoft.com/guide-to-using-apache-kudu-and-performance-comparison-with-hdfs-453c4b26554f</a></p>
+</blockquote>
+<p><a target="_blank" rel="noopener" href="https://kudu.apache.org/">Apache Kudu</a>是一个开源的列式存储引擎。它保证了低延迟的随机访问和分析查询的有效执行。kudu存储引擎支持通过Cloudera Impala，Spark以及Java，C ++和Python API进行访问。</p>
+<p>本文的目的是记录我在探索Apache Kudu方面的经验，了解它的局限性，并进行一些实验以比较Apache Kudu存储与HDFS存储的性能。</p>
+<span id="more"></span>
+<h2 id="使用Cloudera-Manager安装Apache-Kudu"><a href="#使用Cloudera-Manager安装Apache-Kudu" class="headerlink" title="使用Cloudera Manager安装Apache Kudu"></a>使用Cloudera Manager安装Apache Kudu</h2><p>以下是Cloudera Manager Apache Kudu文档的链接，可用于在Cloudera Manager管理的集群上安装Apache Service。</p>
+<p><a target="_blank" rel="noopener" href="https://www.cloudera.com/documentation/enterprise/latest/topics/kudu.html">Apache Kudu指南| 5.14.x | Cloudera文档Cloudera Manager，Cloudera Navigator和CDH 5的配置要求www.cloudera.com</a></p>
+<h2 id="访问Apache必须通过Impala"><a href="#访问Apache必须通过Impala" class="headerlink" title="访问Apache必须通过Impala"></a>访问Apache必须通过Impala</h2><p>可以使用Impala在kudu存储表中创建，更新，删除和插入。可以在这里找到良好的文档<a target="_blank" rel="noopener" href="https://www.cloudera.com/documentation/kudu/5-10-x/topics/kudu_impala.html%E3%80%82">https://www.cloudera.com/documentation/kudu/5-10-x/topics/kudu_impala.html。</a></p>
+<p>创建一个新表：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> new_kudu_table(id <span class="type">BIGINT</span>, name STRING, <span class="keyword">PRIMARY</span> KEY(id))<span class="keyword">PARTITION</span> <span class="keyword">BY</span> HASH PARTITIONS <span class="number">16</span>STORED <span class="keyword">AS</span> KUDU;</span><br></pre></td></tr></table></figure>
+
+<p>对数据执行插入，更新和删除：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">--insert into that table</span></span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> new_kudu_table <span class="keyword">VALUES</span>(<span class="number">1</span>, &quot;Mary&quot;);</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> new_kudu_table <span class="keyword">VALUES</span>(<span class="number">2</span>, &quot;Tim&quot;);</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> new_kudu_table <span class="keyword">VALUES</span>(<span class="number">3</span>, &quot;Tyna&quot;);</span><br><span class="line"><span class="comment">--Upsert when insert is meant to override existing row</span></span><br><span class="line">UPSERT <span class="keyword">INTO</span> new_kudu_table <span class="keyword">VALUES</span> (<span class="number">3</span>, &quot;Tina&quot;);</span><br><span class="line"><span class="comment">--Update a Row</span></span><br><span class="line"><span class="keyword">UPDATE</span> new_kudu_table <span class="keyword">SET</span> name<span class="operator">=</span>&quot;Tina&quot; <span class="keyword">where</span> id <span class="operator">=</span> <span class="number">3</span>;</span><br><span class="line"><span class="comment">--Update in Bulk</span></span><br><span class="line"><span class="keyword">UPDATE</span> new_kudu_table <span class="keyword">SET</span> name<span class="operator">=</span>&quot;Tina&quot; <span class="keyword">where</span> id<span class="operator">&lt;</span><span class="number">3</span>;</span><br><span class="line"><span class="comment">--Delete</span></span><br><span class="line"><span class="keyword">DELETE</span> <span class="keyword">FROM</span> new_kudu_table <span class="keyword">WHERE</span> id <span class="operator">=</span> <span class="number">3</span>;</span><br></pre></td></tr></table></figure>
+
+<p>也可以使用CREATE TABLE DDL从现有的Hive表中创建kudu表。在下面的示例脚本中，如果已经存在表 movies，则可以按以下方式创建Kudu支持的表：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> movies_kudu</span><br><span class="line"><span class="keyword">PRIMARY</span> KEY (`movieid`)</span><br><span class="line"><span class="keyword">PARTITION</span> <span class="keyword">BY</span> HASH(`movieid`) PARTITIONS <span class="number">8</span></span><br><span class="line">STORED <span class="keyword">AS</span> KUDU</span><br><span class="line"><span class="keyword">AS</span> <span class="keyword">SELECT</span> movieId, title, genres <span class="keyword">FROM</span> movies;</span><br></pre></td></tr></table></figure>
+
+<p>创建Kudu表时的限制：</p>
+<p><strong>不支持的数据类型：</strong>如果表具有VARCHAR（），DECIMAL（），DATE和复杂数据类型（MAP，ARRAY，STRUCT，UNION），则从现有的配置单元表创建表时，则在kudu中不支持这些数据类型。任何选择这些列并创建kudu表的尝试都将导致错误。如果使用**SELECT ***创建Kudu表，那么不兼容的非主键列将被删除到最终表中。</p>
+<p><strong>主键：</strong>必须先在表模式中指定主键。从另一个主键列不在第一位的现有表中创建Kudu表时，请在create table语句中的select语句中对列进行重新排序。另外，主键列不能为空。</p>
+<h2 id="Access-Kudu-via-Spark"><a href="#Access-Kudu-via-Spark" class="headerlink" title="Access Kudu via Spark"></a><strong>Access Kudu via Spark</strong></h2><p>在您的spark项目中添加<a target="_blank" rel="noopener" href="https://mvnrepository.com/artifact/org.apache.kudu/kudu-spark">kudu_spark</a>允许您创建一个kuduContext，可用于创建Kudu表并将数据加载到其中。请注意，这只会在Kudu中创建表，并且如果您要通过Impala查询此表，则必须创建一个外部表，并按名称引用此Kudu表。</p>
+<p>以下是使用Kudu spark通过spark在Kudu中创建表的简单演练。让我们从添加依赖关系开始，</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">properties</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">jdk.version</span>&gt;</span> 1.7 <span class="tag">&lt;/<span class="name">jdk.version</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">spark.version</span>&gt;</span> 1.6.0 <span class="tag">&lt;/<span class="name">spark.version</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">scala.version</span>&gt;</span> 2.10.5 <span class="tag">&lt;/<span class="name">scala.version</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">kudu.version</span>&gt;</span> 1.4。 0 <span class="tag">&lt;/<span class="name">kudu.version</span>&gt;</span>&lt;/ properties&gt;<span class="tag">&lt;<span class="name">dependency</span>&gt;</span> </span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span> org.apache.kudu &lt;/ groupId&gt; </span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span> kudu-spark_2.10 &lt;/ artifactId&gt; </span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span> $ &#123;kudu.version&#125; &lt;/ version&gt; </span><br><span class="line">&lt;/ dependency&gt;</span><br></pre></td></tr></table></figure>
+
+<p>接下来，创建一个KuduContext，如下所示。由于SparkKudu的库是用Scala编写的，因此我们必须应用适当的转换，例如将JavaSparkContext转换为与Scala兼容的</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.kudu.spark.kudu.KuduContext;</span><br><span class="line"><span class="type">JavaSparkContext</span> <span class="variable">sc</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">JavaSparkContext</span>(<span class="keyword">new</span> <span class="title class_">SparkConf</span>());</span><br><span class="line"><span class="type">KuduContext</span> <span class="variable">kc</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">KuduContext</span>(<span class="string">&quot;&lt;master_url&gt;:7051&quot;</span>,</span><br><span class="line">JavaSparkContext.toSparkContext(sc));</span><br></pre></td></tr></table></figure>
+
+<p>如果我们有一个要存储到Kudu的数据框，则可以执行以下操作：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> org.apache.kudu.client.CreateTableOptions;</span><br><span class="line">df = … <span class="comment">// data frame to load to kudu</span></span><br><span class="line">primaryKeyList = .. <span class="comment">//Java List of table&#x27;s primary keys</span></span><br><span class="line"><span class="type">CreateTableOptions</span> <span class="variable">kuduTableOptions</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CreateTableOptions</span>();</span><br><span class="line">kuduTableOptions.addHashPartitions( &lt;primaryKeyList&gt;, &lt;numBuckets&gt;);</span><br><span class="line"><span class="comment">// create a scala Seq of table&#x27;s primary keys</span></span><br><span class="line">Seq&lt;String&gt; primary_key_seq = JavaConversions.asScalaBuffer(primaryKeyList).toSeq();</span><br><span class="line"><span class="comment">//create a table with same schema as data frame</span></span><br><span class="line">kc.createTable(&lt;kuduTableName&gt;, df.schema(), primary_key_seq, kuduTableOptions);</span><br><span class="line"><span class="comment">//load dataframe to kudu table</span></span><br><span class="line">kc.insertRows(df, &lt;tableName&gt;);</span><br></pre></td></tr></table></figure>
+
+<p>通过Spark使用Kudu时的局限性：</p>
+<p><strong>不支持的数据类型：</strong> Kudu不支持某些复杂的数据类型，并且通过Spark加载时会通过异常使用它们创建表。 Spark确实设法将VARCHAR（）转换为弹簧类型，但是其他类型（ARRAY，DATE，MAP，UNION和DECIMAL）将不起作用。</p>
+<p><strong>如果要通过Impala访问，则需要创建外部表：</strong>使用上述示例在Kudu中创建的表仅驻留在Kudu存储中，并且不反映为Impala表。要通过Impala查询该表，我们必须创建一个指向Kudu表的外部表。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">EXTERNAL</span> <span class="keyword">TABLE</span> IF <span class="keyword">NOT</span> <span class="keyword">EXISTS</span> <span class="operator">&lt;</span>impala_table_name<span class="operator">&gt;</span> </span><br><span class="line">STORED <span class="keyword">AS</span> KUDU TBLPROPERTIES(<span class="string">&#x27;kudu.table_name&#x27;</span><span class="operator">=</span><span class="string">&#x27;&lt;kudu_table_name&gt;&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<h2 id="Apache-Kudu和HDFS性能比较"><a href="#Apache-Kudu和HDFS性能比较" class="headerlink" title="Apache Kudu和HDFS性能比较"></a>Apache Kudu和HDFS性能比较</h2><p><strong>实验目的</strong></p>
+<p>该实验的目的是在加载数据和运行复杂的分析查询方面比较Apache Kudu和HDFS。</p>
+<p><strong>实验设置</strong></p>
+<ol>
+<li><strong>使用的数据集：</strong><a target="_blank" rel="noopener" href="http://www.tpc.org/tpch/default.asp">TPC Benchmark™H（TPC-H</a>）是决策支持基准，它模拟典型的业务数据集和一组复杂的分析查询。可以在<a target="_blank" rel="noopener" href="https://github.com/hortonworks/hive-testbench%E4%B8%8A%E6%89%BE%E5%88%B0%E7%94%9F%E6%88%90%E6%AD%A4%E6%95%B0%E6%8D%AE%E9%9B%86%E5%B9%B6%E5%B0%86%E5%85%B6%E5%8A%A0%E8%BD%BD%E5%88%B0%E9%85%8D%E7%BD%AE%E5%8D%95%E5%85%83%E7%9A%84%E5%A5%BD%E8%B5%84%E6%BA%90%E3%80%82%E8%AF%A5%E6%95%B0%E6%8D%AE%E9%9B%86%E6%9C%898%E4%B8%AA%E8%A1%A8%EF%BC%8C%E5%B9%B6%E4%B8%94%E5%8F%AF%E4%BB%A5%E4%BB%8E2">https://github.com/hortonworks/hive-testbench上找到生成此数据集并将其加载到配置单元的好资源。该数据集有8个表，并且可以从2</a> Gb开始以不同的比例生成。为了该测试的目的，生成了20Gb的总数据。</li>
+<li><strong>群集设置：</strong>群集具有4个Amazon EC2实例，其中1个主实例（m4.xlarge）和3个数据节点（m4.large）。每个群集具有1个大小为150 Gb的磁盘。集群通过Cloudera Manager进行管理。</li>
+</ol>
+<h2 id="数据加载性能："><a href="#数据加载性能：" class="headerlink" title="数据加载性能："></a><strong>数据加载性能：</strong></h2><p>表1.显示了使用Apache Spark加载到Kudu与Hdfs之间的时间（以秒为单位）。Kudu表使用主键进行哈希分区。</p>
+<p><img src="https://miro.medium.com/max/60/1*HAmM9P04FwmipJAO1pHCrg.png?q=20" alt="img"></p>
+<p><img src="https://miro.medium.com/max/836/1*HAmM9P04FwmipJAO1pHCrg.png" alt="img"></p>
+<p>表1.基准数据集中表的加载时间</p>
+<p>观察结果：从上表中可以看到，小型Kudu表的加载速度几乎与Hdfs表一样快。但是，随着大小的增加，我们确实看到加载时间变成了Hdfs的两倍，最大的表格行项目占用的加载时间是加载时间的4倍。</p>
+<h2 id="分析查询效果："><a href="#分析查询效果：" class="headerlink" title="分析查询效果："></a><strong>分析查询效果：</strong></h2><p>TPC-H Suite包含一些基准分析查询。使用Impala针对HDFS Parquet存储表，Hdfs逗号分隔存储和Kudu（主键上的16和32 Bucket Hash分区）运行查询。记录了每个查询的运行时，下面的图表以秒为单位显示了这些运行时间的比较。</p>
+<p><strong>比较Kudu和HDFS Parquet：</strong></p>
+<p><img src="https://miro.medium.com/max/60/1*hXR3BTQhCsAeQQQcDIT4AA.png?q=20" alt="img"></p>
+<p><img src="https://miro.medium.com/max/1826/1*hXR3BTQhCsAeQQQcDIT4AA.png" alt="img"></p>
+<p>图1.在Kudu和HDFS Parquet上运行分析查询</p>
+<p>观察结果：图1比较了在Kudu和HDFS Parquet存储的表上运行基准查询的运行时。我们可以看到，Kudu存储表的性能几乎与HDFS Parquet存储表一样好，除了某些查询（Q4，Q13，Q18）外，与后者相比，它们花费的时间要长得多。</p>
+<p><strong>比较Kudu与HDFS逗号分隔的存储文件：</strong></p>
+<p><img src="https://miro.medium.com/max/60/1*T7v7R4TUaKB6kJ0JDdDrKg.png?q=20" alt="img"></p>
+<p><img src="https://miro.medium.com/max/1834/1*T7v7R4TUaKB6kJ0JDdDrKg.png" alt="img"></p>
+<p>图2.在Kudu和HDFS逗号分隔文件上运行分析查询</p>
+<p>观察结果：图2将kudu运行时（与图1相同）与HDFS逗号分隔存储进行了比较。在这里我们可以看到，与Kudu相比，查询在HDFS逗号分隔存储上运行所需的时间要长得多，Kudu（16个存储桶存储）的运行时间平均快5倍，而Kudu（32个存储桶存储）的运行速度要好7倍。平均。</p>
+<h2 id="随机访问性能："><a href="#随机访问性能：" class="headerlink" title="随机访问性能："></a><strong>随机访问性能：</strong></h2><p>Kudu自夸访问随机行时的延迟要低得多。为了对此进行测试，我使用了相同TPC-H基准测试的客户表，并在一个循环中按ID进行了1000次随机访问。这些时间是针对Kudu 4、16和32桶分区数据以及HDFS Parquet存储的数据进行测量的。下图显示了以秒为单位的运行时间。1000随机访问证明了Kudu在随机访问选择方面确实是赢家。</p>
+<p><img src="https://miro.medium.com/max/60/1*Y5gMHx4RBYYP05EQeIEZwg.png?q=20" alt="img"></p>
+<p><img src="https://miro.medium.com/max/1226/1*Y5gMHx4RBYYP05EQeIEZwg.png" alt="img"></p>
+<p>图3.比较随机选择的时间</p>
+<h2 id="Kudu更新，插入和删除性能"><a href="#Kudu更新，插入和删除性能" class="headerlink" title="Kudu更新，插入和删除性能"></a>Kudu更新，插入和删除性能</h2><p>由于Kudu支持这些附加操作，因此本节将比较这些运行时。该测试的设置类似于上面的随机访问，其中循环运行了1000个操作，并测量了运行时间，可以在下面的表2中看到：</p>
+<p><img src="https://miro.medium.com/max/60/1*_jZ6Z_JE0nfdFSZbldzDsQ.png?q=20" alt="img"></p>
+<p><img src="https://miro.medium.com/max/1094/1*_jZ6Z_JE0nfdFSZbldzDsQ.png" alt="img"></p>
+<p>表2.测量各种操作的运行时</p>
+<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>只是根据我的探索和实验，写下我对Apache Kudu的想法。</p>
+<p>就可访问性而言，我认为有很多选择。可以通过Impala访问该文件，该文件允许创建kudu表并对其进行查询。SparkKudu可在Scala或Java中用于将数据加载到Kudu或从Kudu读取数据作为Data Frame。此外，还提供Java，Python和C ++形式的Kudu客户端API（本博客未涵盖）。</p>
+<p>Kudu支持的数据类型有一些限制，如果用例需要为列（例如Array，Map等）使用复杂类型，那么Kudu并不是一个好的选择。</p>
+<p>本博客中的实验是用来衡量Kudu在性能方面如何与HDFS相抗衡的测试。</p>
+<p>从测试中，我可以看到，尽管与HDFS相比，将数据初始加载到Kudu所需的时间更长，但是在运行分析查询时，它的性能几乎相等，并且对于随机访问数据的性能更好。</p>
+<p>总的来说，我可以得出结论，如果对存储的要求与对HDFS的分析查询一样好，并且具有更快的随机访问和RDBMS功能（如更新&#x2F;删除&#x2F;插入）的额外灵活性，那么Kudu可以被视为潜在的候选清单。</p>
+
+    </div>
+
+    
+    
+    
+      
+  <div class="popular-posts-header">相关文章</div>
+  <ul class="popular-posts">
+    <li class="popular-posts-item">
+      <div class="popular-posts-title"><a href="/92ed2661.html" rel="bookmark">Kudu三种FlushMode对比分析</a></div>
+    </li>
+  </ul>
+
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/kudu/" rel="tag"># kudu</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/92ed2661.html" rel="prev" title="Kudu三种FlushMode对比分析">
+      <i class="fa fa-chevron-left"></i> Kudu三种FlushMode对比分析
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/18c51a1a.html" rel="next" title="Hexo和Next升级">
+      Hexo和Next升级 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8Cloudera-Manager%E5%AE%89%E8%A3%85Apache-Kudu"><span class="nav-number">1.</span> <span class="nav-text">使用Cloudera Manager安装Apache Kudu</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BF%E9%97%AEApache%E5%BF%85%E9%A1%BB%E9%80%9A%E8%BF%87Impala"><span class="nav-number">2.</span> <span class="nav-text">访问Apache必须通过Impala</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Access-Kudu-via-Spark"><span class="nav-number">3.</span> <span class="nav-text">Access Kudu via Spark</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Apache-Kudu%E5%92%8CHDFS%E6%80%A7%E8%83%BD%E6%AF%94%E8%BE%83"><span class="nav-number">4.</span> <span class="nav-text">Apache Kudu和HDFS性能比较</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%8A%A0%E8%BD%BD%E6%80%A7%E8%83%BD%EF%BC%9A"><span class="nav-number">5.</span> <span class="nav-text">数据加载性能：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%86%E6%9E%90%E6%9F%A5%E8%AF%A2%E6%95%88%E6%9E%9C%EF%BC%9A"><span class="nav-number">6.</span> <span class="nav-text">分析查询效果：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9A%8F%E6%9C%BA%E8%AE%BF%E9%97%AE%E6%80%A7%E8%83%BD%EF%BC%9A"><span class="nav-number">7.</span> <span class="nav-text">随机访问性能：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Kudu%E6%9B%B4%E6%96%B0%EF%BC%8C%E6%8F%92%E5%85%A5%E5%92%8C%E5%88%A0%E9%99%A4%E6%80%A7%E8%83%BD"><span class="nav-number">8.</span> <span class="nav-text">Kudu更新，插入和删除性能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%93%E8%AE%BA"><span class="nav-number">9.</span> <span class="nav-text">结论</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">奔跑的蜗牛</p>
+  <div class="site-description" itemprop="description">大数据技术文章、技术研究与交流</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">32</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">12</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">37</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/pengshuangbao" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;pengshuangbao" rel="noopener" target="_blank"><i class="github fa-fw"></i>GitHub</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2022</span>
+  <span class="with-love">
+    <i class="user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">奔跑的蜗牛</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : '7eDspFpe1gjdIyKDr2c51BjD-gzGzoHsz',
+      appKey     : 'Rvd22QedGjPX4cuLgdPWLw83',
+      placeholder: "Just go go",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : '' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>
