@@ -27,17 +27,17 @@
 <meta property="og:site_name" content="编程狂想">
 <meta property="og:description" content="方法介绍​	这一步是Kylin运行MR任务来提取使用字典编码(rowkey配置也的编码类型为dict)的维度列的唯一值。 123456789101112131415161718&#x2F;&#x2F;构建方法 public MapReduceExecutable createFactDistinctColumnsStep(String jobId) &amp;#123;        MapReduceExecutable">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png-wm">
-<meta property="og:image" content="https://static.lovedata.net/20-06-18-0e4ad6bdc12b49b3b91e74eed46390ca.png-wm">
-<meta property="og:image" content="https://static.lovedata.net/20-06-18-28c45bd4f85b0e3b2ec28557e3859aa0.png-wm">
-<meta property="og:image" content="https://static.lovedata.net/20-06-18-e746df3418fff25d5dbaaa21f94a003c.png-wm">
-<meta property="og:image" content="https://static.lovedata.net/20-06-19-4adbd30926606ff11ae6f92fa1db9a3b.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png">
+<meta property="og:image" content="https://static.lovedata.net/20-06-18-0e4ad6bdc12b49b3b91e74eed46390ca.png">
+<meta property="og:image" content="https://static.lovedata.net/20-06-18-28c45bd4f85b0e3b2ec28557e3859aa0.png">
+<meta property="og:image" content="https://static.lovedata.net/20-06-18-e746df3418fff25d5dbaaa21f94a003c.png">
+<meta property="og:image" content="https://static.lovedata.net/20-06-19-4adbd30926606ff11ae6f92fa1db9a3b.png">
 <meta property="article:published_time" content="2020-06-18T08:14:42.000Z">
-<meta property="article:modified_time" content="2022-03-10T04:02:49.461Z">
+<meta property="article:modified_time" content="2023-04-14T09:12:30.413Z">
 <meta property="article:author" content="奔跑的蜗牛">
 <meta property="article:tag" content="网络、数据、大数据、hadoop、kylin">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png-wm">
+<meta name="twitter:image" content="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png">
 
 <link rel="canonical" href="http://blog.lovedata.net/b97d4c62.html">
 
@@ -218,7 +218,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-10 12:02:49" itemprop="dateModified" datetime="2022-03-10T12:02:49+08:00">2022-03-10</time>
+                <time title="修改时间：2023-04-14 17:12:30" itemprop="dateModified" datetime="2023-04-14T17:12:30+08:00">2023-04-14</time>
               </span>
 
           
@@ -253,7 +253,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p><img src="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png-wm" alt="麒麟出没，必有祥瑞"></p>
+        <p><img src="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png" alt="麒麟出没，必有祥瑞"></p>
 <h2 id="方法介绍"><a href="#方法介绍" class="headerlink" title="方法介绍"></a>方法介绍</h2><p>​	这一步是Kylin运行MR任务来提取使用字典编码(rowkey配置也的编码类型为dict)的维度列的唯一值。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//构建方法 </span></span><br><span class="line"><span class="keyword">public</span> MapReduceExecutable <span class="title function_">createFactDistinctColumnsStep</span><span class="params">(String jobId)</span> &#123;</span><br><span class="line">        <span class="type">MapReduceExecutable</span> <span class="variable">result</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MapReduceExecutable</span>();</span><br><span class="line">        result.setName(ExecutableConstants.STEP_NAME_FACT_DISTINCT_COLUMNS);</span><br><span class="line">        result.setMapReduceJobClass(FactDistinctColumnsJob.class);</span><br><span class="line">        <span class="type">StringBuilder</span> <span class="variable">cmd</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringBuilder</span>();</span><br><span class="line">        appendMapReduceParameters(cmd);</span><br><span class="line">        appendExecCmdParameters(cmd, BatchConstants.ARG_CUBE_NAME, seg.getRealization().getName());</span><br><span class="line">        appendExecCmdParameters(cmd, BatchConstants.ARG_OUTPUT, getFactDistinctColumnsPath(jobId));</span><br><span class="line">        appendExecCmdParameters(cmd, BatchConstants.ARG_SEGMENT_ID, seg.getUuid());</span><br><span class="line">        appendExecCmdParameters(cmd, BatchConstants.ARG_STATS_OUTPUT, getStatisticsPath(jobId));</span><br><span class="line">        appendExecCmdParameters(cmd, BatchConstants.ARG_STATS_SAMPLING_PERCENT, String.valueOf(config.getConfig().getCubingInMemSamplingPercent()));</span><br><span class="line">        appendExecCmdParameters(cmd, BatchConstants.ARG_JOB_NAME, <span class="string">&quot;Kylin_Fact_Distinct_Columns_&quot;</span> + seg.getRealization().getName() + <span class="string">&quot;_Step&quot;</span>);</span><br><span class="line">        appendExecCmdParameters(cmd, BatchConstants.ARG_CUBING_JOB_ID, jobId);</span><br><span class="line">        result.setMapReduceParams(cmd.toString());</span><br><span class="line">        result.setCounterSaveAs(CubingJob.SOURCE_RECORD_COUNT + <span class="string">&quot;,&quot;</span> + CubingJob.SOURCE_SIZE_BYTES);</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
 
@@ -261,11 +261,11 @@
 
 <p>​	上面这一步就是提取事实表唯一列的链式子任务的<strong>构建方法</strong>，返回的是一个MapReduceExecutable,它是AbstractExecutable的子类，在doWork方法中，会调用一个AbstractHadoopJob的<strong>子类</strong>的run方法，在run方法中，会将该任务提交到Yarn上面执行。也就是说，这是MR任务的提交入口。</p>
 <p>​	FactDistinctColumnsJob就是AbstractHadoopJob的一个子类，这些类型初始化的时候都会设置好 mapper、combinaer、partitioner、reducer等类，下面就是FactDistinctColumnsJob的相关类图。核心方法就是实现类的 run 方法，会设置输入和输出，classpath等，然后提交调用父类AbstractHadoopJob的waitForCompletion提交到Yarn集群。抽象类AbstractHadoopJob提供了一些公用的方法，比如获取classpath。</p>
-<p><img src="https://static.lovedata.net/20-06-18-0e4ad6bdc12b49b3b91e74eed46390ca.png-wm" alt="image"></p>
+<p><img src="https://static.lovedata.net/20-06-18-0e4ad6bdc12b49b3b91e74eed46390ca.png" alt="image"></p>
 <h2 id="输入解析"><a href="#输入解析" class="headerlink" title="输入解析"></a>输入解析</h2><p>​	这里要介绍这一步的输入，这一步是读取第二步中生中的成的Hive宽表。在Kylin中，有多重不同的MR任务，有的任务输入是Hive表，有的则是存储在HDFS中的中间数据，所以kylin提供了IMRTableInputFormat接口，是一个工具类，用于配置mapper去读取hive table。如果是HDFS，则是调用另外一个IMROutput2接口下面的子接口IMROutputFormat的configureJobInput方法，为什么要这么设计了？我想大概是因为这些中间数据最后都为经过处理写入hbase吧。</p>
-<p><img src="https://static.lovedata.net/20-06-18-28c45bd4f85b0e3b2ec28557e3859aa0.png-wm" alt="image"></p>
+<p><img src="https://static.lovedata.net/20-06-18-28c45bd4f85b0e3b2ec28557e3859aa0.png" alt="image"></p>
 <h2 id="数据流向举例"><a href="#数据流向举例" class="headerlink" title="数据流向举例"></a>数据流向举例</h2><p> 下面是一个简单任务的数据流向示意图，假设一个表有两个字段 name 和 city，示例数据如下表</p>
-<p>​	<img src="https://static.lovedata.net/20-06-18-e746df3418fff25d5dbaaa21f94a003c.png-wm" alt="image"></p>
+<p>​	<img src="https://static.lovedata.net/20-06-18-e746df3418fff25d5dbaaa21f94a003c.png" alt="image"></p>
 <table>
 <thead>
 <tr>
@@ -300,7 +300,7 @@
 </ul>
 </li>
 </ul>
-<h3 id="doMap阶段"><a href="#doMap阶段" class="headerlink" title="doMap阶段"></a>doMap阶段</h3><p><img src="https://static.lovedata.net/20-06-19-4adbd30926606ff11ae6f92fa1db9a3b.png-wm" alt="image"></p>
+<h3 id="doMap阶段"><a href="#doMap阶段" class="headerlink" title="doMap阶段"></a>doMap阶段</h3><p><img src="https://static.lovedata.net/20-06-19-4adbd30926606ff11ae6f92fa1db9a3b.png" alt="image"></p>
 <h3 id="cleanUp阶段"><a href="#cleanUp阶段" class="headerlink" title="cleanUp阶段"></a>cleanUp阶段</h3><ul>
 <li>停止CuboidStatCalculator线程</li>
 <li>遍历CuboidStatCalculator数组，输出每一列的hll统计值，这里的key的第一位占位符是MARK_FOR_HLL_COUNTER，是专门用于计算hll的，默认是最后一个reducer。value是hll计算的count值</li>
@@ -504,7 +504,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2022</span>
+  <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="user"></i>
   </span>

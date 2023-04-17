@@ -210,7 +210,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-10 12:02:49" itemprop="dateModified" datetime="2022-03-10T12:02:49+08:00">2022-03-10</time>
+                <time title="修改时间：2023-04-14 17:12:30" itemprop="dateModified" datetime="2023-04-14T17:12:30+08:00">2023-04-14</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -304,10 +304,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2022-03-10 10:25:01 / 修改时间：12:02:49" itemprop="dateCreated datePublished" datetime="2022-03-10T10:25:01+08:00">2022-03-10</time>
+              <time title="创建时间：2022-03-10 10:25:01" itemprop="dateCreated datePublished" datetime="2022-03-10T10:25:01+08:00">2022-03-10</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-08-12 12:07:22" itemprop="dateModified" datetime="2022-08-12T12:07:22+08:00">2022-08-12</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -517,7 +523,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-10 12:02:49" itemprop="dateModified" datetime="2022-03-10T12:02:49+08:00">2022-03-10</time>
+                <time title="修改时间：2023-04-14 17:12:30" itemprop="dateModified" datetime="2023-04-14T17:12:30+08:00">2023-04-14</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -563,7 +569,7 @@
       
           <h2 id="一、FlushMode分类"><a href="#一、FlushMode分类" class="headerlink" title="一、FlushMode分类"></a>一、FlushMode分类</h2><h3 id="1-1-AUTO-FLUSH-SYNC"><a href="#1-1-AUTO-FLUSH-SYNC" class="headerlink" title="1.1  AUTO_FLUSH_SYNC"></a>1.1  AUTO_FLUSH_SYNC</h3><p>​	每个 KuduSession方法的apply调用只会在被自动刷新到服务器后返回。不会出现批处理。在这种模式下，flush方法调用不会产生任何影响，因为每个kudusession apply() 返回之前已经刷新了缓冲区，数据已经发往tablet。</p>
 <p>​	这种刷新模式，也就是阻塞式写入，每个调用都要等到tablet返回后才会完成。特点是<strong>及时性较好，但是吞吐量不高</strong>。</p>
-<p><img src="https://static.lovedata.net/20-07-21-9465bceceaa4002769e15d04a64a3e6e.png-wm" alt="image"></p>
+<p><img src="https://static.lovedata.net/20-07-21-9465bceceaa4002769e15d04a64a3e6e.png" alt="image"></p>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/92ed2661.html#more" rel="contents">
@@ -621,7 +627,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-10 12:02:49" itemprop="dateModified" datetime="2022-03-10T12:02:49+08:00">2022-03-10</time>
+                <time title="修改时间：2023-04-14 17:12:30" itemprop="dateModified" datetime="2023-04-14T17:12:30+08:00">2023-04-14</time>
               </span>
 
           
@@ -656,7 +662,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p><img src="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png-wm" alt="麒麟出没，必有祥瑞"></p>
+          <p><img src="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png" alt="麒麟出没，必有祥瑞"></p>
 <h2 id="方法介绍"><a href="#方法介绍" class="headerlink" title="方法介绍"></a>方法介绍</h2><p>​	这一步是Kylin运行MR任务来提取使用字典编码(rowkey配置也的编码类型为dict)的维度列的唯一值。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//构建方法 </span></span><br><span class="line"><span class="keyword">public</span> MapReduceExecutable <span class="title function_">createFactDistinctColumnsStep</span><span class="params">(String jobId)</span> &#123;</span><br><span class="line">        <span class="type">MapReduceExecutable</span> <span class="variable">result</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">MapReduceExecutable</span>();</span><br><span class="line">        result.setName(ExecutableConstants.STEP_NAME_FACT_DISTINCT_COLUMNS);</span><br><span class="line">        result.setMapReduceJobClass(FactDistinctColumnsJob.class);</span><br><span class="line">        <span class="type">StringBuilder</span> <span class="variable">cmd</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">StringBuilder</span>();</span><br><span class="line">        appendMapReduceParameters(cmd);</span><br><span class="line">        appendExecCmdParameters(cmd, BatchConstants.ARG_CUBE_NAME, seg.getRealization().getName());</span><br><span class="line">        appendExecCmdParameters(cmd, BatchConstants.ARG_OUTPUT, getFactDistinctColumnsPath(jobId));</span><br><span class="line">        appendExecCmdParameters(cmd, BatchConstants.ARG_SEGMENT_ID, seg.getUuid());</span><br><span class="line">        appendExecCmdParameters(cmd, BatchConstants.ARG_STATS_OUTPUT, getStatisticsPath(jobId));</span><br><span class="line">        appendExecCmdParameters(cmd, BatchConstants.ARG_STATS_SAMPLING_PERCENT, String.valueOf(config.getConfig().getCubingInMemSamplingPercent()));</span><br><span class="line">        appendExecCmdParameters(cmd, BatchConstants.ARG_JOB_NAME, <span class="string">&quot;Kylin_Fact_Distinct_Columns_&quot;</span> + seg.getRealization().getName() + <span class="string">&quot;_Step&quot;</span>);</span><br><span class="line">        appendExecCmdParameters(cmd, BatchConstants.ARG_CUBING_JOB_ID, jobId);</span><br><span class="line">        result.setMapReduceParams(cmd.toString());</span><br><span class="line">        result.setCounterSaveAs(CubingJob.SOURCE_RECORD_COUNT + <span class="string">&quot;,&quot;</span> + CubingJob.SOURCE_SIZE_BYTES);</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
           <!--noindex-->
@@ -716,7 +722,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-10 12:02:49" itemprop="dateModified" datetime="2022-03-10T12:02:49+08:00">2022-03-10</time>
+                <time title="修改时间：2023-04-14 17:12:30" itemprop="dateModified" datetime="2023-04-14T17:12:30+08:00">2023-04-14</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -760,7 +766,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p><img src="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png-wm" alt="麒麟出没，必有祥瑞"></p>
+          <p><img src="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png" alt="麒麟出没，必有祥瑞"></p>
 <p>​	前一章介绍了构建引擎相关的原理，本章介绍其中的Hive输入的相关操作。</p>
 <p>​	Hive相关主要分为以下几步：</p>
 <ul>
@@ -825,7 +831,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-10 12:02:49" itemprop="dateModified" datetime="2022-03-10T12:02:49+08:00">2022-03-10</time>
+                <time title="修改时间：2023-04-14 17:12:30" itemprop="dateModified" datetime="2023-04-14T17:12:30+08:00">2023-04-14</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -869,14 +875,14 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p><img src="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png-wm" alt="麒麟出没，必有祥瑞"></p>
+          <p><img src="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png" alt="麒麟出没，必有祥瑞"></p>
 <p>​	从本章节开始，开始深入探讨BatchCubingJobBuilder2的build方法。</p>
 <p>​	在开始之前，先上一个类图。在途中，核心就是BatchCubingJobBuilder2类，这个类的实例的创建，在前面的文章(<a href="https://blog.lovedata.net/1166eeb4.html">Kylin源码解析-kylin构建任务生成与调度执行 | 编程狂想</a>)中有详细介绍，这里不再赘述。</p>
-<p><img src="https://static.lovedata.net/20-06-17-2c45a74363c28a4127df03418a6c496e.png-wm" alt="image"></p>
+<p><img src="https://static.lovedata.net/20-06-17-2c45a74363c28a4127df03418a6c496e.png" alt="image"></p>
 <p>​	如下图，这个BatchCubingJobBuilder2就是这个引擎，它串起了数据源(输入)和存储(输出)，而它本身，就类似一个加工程序，按照指定的操作流程对数据源进行加工，然后将加工好的数据存入到存储介质当中。</p>
 <p>​	这里可以打个不太恰当的比喻，把这个引擎比喻成一个面条机，输入则是面粉，面粉的则有分为很多种类，然后经过引擎加工，输出到不同的容器当中，比如盆子或者包装袋中。</p>
 <p>​	它的输入和输出是一个可插拔的，输入的面粉种类可以随意换，输出的容器也可以随意换，但是里面加工步骤是不变的，都是先加水，后搅拌，然后在挤压…最后生成面条。</p>
-<p><img src="https://static.lovedata.net/20-06-17-a9d7f7e0d9dd309b2608f9652f324e43.png-wm" alt="image"></p>
+<p><img src="https://static.lovedata.net/20-06-17-a9d7f7e0d9dd309b2608f9652f324e43.png" alt="image"></p>
 <p>​	</p>
           <!--noindex-->
             <div class="post-button">
@@ -935,7 +941,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-10 12:02:49" itemprop="dateModified" datetime="2022-03-10T12:02:49+08:00">2022-03-10</time>
+                <time title="修改时间：2023-04-14 17:12:30" itemprop="dateModified" datetime="2023-04-14T17:12:30+08:00">2023-04-14</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -979,7 +985,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p><img src="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png-wm" alt="麒麟出没，必有祥瑞"></p>
+          <p><img src="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png" alt="麒麟出没，必有祥瑞"></p>
 <p>​	本文介绍kylin的构建任务的生成流程，包括前端如何请求的kylin服务端，服务端内部怎么调用生成任务并返回给前端以及内部如何调度的。</p>
           <!--noindex-->
             <div class="post-button">
@@ -1038,7 +1044,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-10 12:02:49" itemprop="dateModified" datetime="2022-03-10T12:02:49+08:00">2022-03-10</time>
+                <time title="修改时间：2023-04-14 17:12:30" itemprop="dateModified" datetime="2023-04-14T17:12:30+08:00">2023-04-14</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -1082,7 +1088,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p><img src="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png-wm" alt="麒麟出没，必有祥瑞"></p>
+          <p><img src="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png" alt="麒麟出没，必有祥瑞"></p>
 <p>​	在上文<a href="https://blog.lovedata.net/1166eeb4.html">Kylin源码解析-kylin构建任务生成与调度执行 | 编程狂想</a> 中详细介绍了Kylin构建任务的生成和调度，其中讲到，会调用BatchCubingJobBuilder2的build方法，生成一个CubingJob实例，本文就介绍下这个build方法大致流程，并描述整个构建过程。	如下图所示，分为四个阶段和十四步。 </p>
           <!--noindex-->
             <div class="post-button">
@@ -1141,7 +1147,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-10 12:02:49" itemprop="dateModified" datetime="2022-03-10T12:02:49+08:00">2022-03-10</time>
+                <time title="修改时间：2023-04-14 17:12:30" itemprop="dateModified" datetime="2023-04-14T17:12:30+08:00">2023-04-14</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -1185,7 +1191,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p><img src="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png-wm" alt="麒麟出没，必有祥瑞"></p>
+          <p><img src="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png" alt="麒麟出没，必有祥瑞"></p>
 <p>本文主要分析，在Kylin层级构建的时候，这个层级的获取流程</p>
           <!--noindex-->
             <div class="post-button">
@@ -1323,7 +1329,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2022</span>
+  <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="user"></i>
   </span>

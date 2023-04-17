@@ -27,16 +27,16 @@
 <meta property="og:site_name" content="编程狂想">
 <meta property="og:description" content="&amp;nbsp; BroadCaster类是kylin的节点之间进行通信的基础类，用于在所有的kylin服务器之间广播元数据的更新。本文通过源码解读+方法解析的方式介绍了BroadCaster类。 主要功能">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png-wm">
-<meta property="og:image" content="https://static.lovedata.net/19-08-02-a8970d5e4c2bd2ef1fac5007f230a465.png-wm">
+<meta property="og:image" content="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png">
+<meta property="og:image" content="https://static.lovedata.net/19-08-02-a8970d5e4c2bd2ef1fac5007f230a465.png">
 <meta property="article:published_time" content="2018-04-18T07:14:47.000Z">
-<meta property="article:modified_time" content="2022-03-10T04:02:49.462Z">
+<meta property="article:modified_time" content="2023-04-14T09:12:30.413Z">
 <meta property="article:author" content="奔跑的蜗牛">
 <meta property="article:tag" content="大数据">
 <meta property="article:tag" content="Java">
 <meta property="article:tag" content="奔跑的蜗牛">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png-wm">
+<meta name="twitter:image" content="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png">
 
 <link rel="canonical" href="http://blog.lovedata.net/97fa7954.html">
 
@@ -217,7 +217,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2022-03-10 12:02:49" itemprop="dateModified" datetime="2022-03-10T12:02:49+08:00">2022-03-10</time>
+                <time title="修改时间：2023-04-14 17:12:30" itemprop="dateModified" datetime="2023-04-14T17:12:30+08:00">2023-04-14</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -261,7 +261,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p><img src="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png-wm" alt="麒麟出没，必有祥瑞"></p>
+        <p><img src="https://static.lovedata.net/19-08-02-7b758d3d85e12331b32d266e602dac2f.png" alt="麒麟出没，必有祥瑞"></p>
 <p>&amp;nbsp; <em>BroadCaster类是kylin的节点之间进行通信的基础类，用于在所有的kylin服务器之间广播元数据的更新。本文通过源码解读+方法解析的方式介绍了BroadCaster类。</em></p>
 <h2 id="主要功能"><a href="#主要功能" class="headerlink" title="主要功能"></a>主要功能</h2><span id="more"></span>
 
@@ -271,7 +271,7 @@
 <li>通过 CacheController的announceWipeCache 方法来宣布一个事件并调用queue方法插入这个broadcastEvents（主要用于给前端清除所有节点缓存用）。</li>
 <li>创建只有一个单独的线程的线程池来执行任务（如果这个线程挂掉，则会重新启动一个线程）。这个线程会一直循环拉取消息队列里的时间，如果没有消息，将会阻塞等待。如果收到消息，会通过循环所有的节点调用RestClient来发送 wipecache 请求，这里就会调用 CacheController的 wipeCache方法，而这个方法，最终会调用上面的 notifyListener方法来达到通知监听的目的。</li>
 </ol>
-<p>主要的功能模块图如下所示<br><img src="https://static.lovedata.net/19-08-02-a8970d5e4c2bd2ef1fac5007f230a465.png-wm" alt="BroadCaster介绍"></p>
+<p>主要的功能模块图如下所示<br><img src="https://static.lovedata.net/19-08-02-a8970d5e4c2bd2ef1fac5007f230a465.png" alt="BroadCaster介绍"></p>
 <h2 id="代码解析"><a href="#代码解析" class="headerlink" title="代码解析"></a>代码解析</h2><ol>
 <li>getInstance：   静态方法 入口，获取示例 一个config对应一个示例</li>
 </ol>
@@ -462,7 +462,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2022</span>
+  <span itemprop="copyrightYear">2023</span>
   <span class="with-love">
     <i class="user"></i>
   </span>
